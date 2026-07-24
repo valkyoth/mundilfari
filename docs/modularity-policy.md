@@ -30,11 +30,14 @@ Rules:
   observation layer preserves the exact inputs/outputs/operation/rounding/
   model/condition/origin needed by the later engine verifier.
 - Core owns `BorrowedHardBoundClaim`, fallible alloc-enabled
-  `OwnedHardBoundClaim`, bounded frozen owners, canonical promotion, and the
+  `OwnedHardBoundClaim`, bounded `OwnedHardBoundClaimSet`, frozen owners,
+  canonical single/multi-root promotion, bounded new-owner compaction, and the
   common lease-scoped claim view. Promotion adds no authority. Engine alone
-  converts verified material into lifetime-independent
+  converts verified material into source-arena-independent
   `VerifiedBoundDerivation`/`PolicyAcceptedHardBound` state; facade/async/FFI
   layers only own or borrow these contracts and cannot extend arena lifetimes.
+  no_std engine-backed forms expose their exact engine-storage lifetime,
+  brand, and nonwrapping generation rather than hiding a caller pointer.
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.

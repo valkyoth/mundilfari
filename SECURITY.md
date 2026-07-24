@@ -84,9 +84,16 @@ the release branch between review and tagging.
   Borrowed claims cannot escape the arena brand. alloc callers may fallibly
   promote a complete canonical DAG into a bounded frozen
   `OwnedHardBoundClaim`; promotion reinterns structurally and cannot copy a
-  handle, extend a lifetime, leak storage, or grant authority. Engine-verified
-  proofs and accepted tokens are lifetime-independent from that unverified
-  source arena and retain all invalidating generation dependencies.
+  handle, extend a lifetime, leak storage, or grant authority.
+  Multi-root promotion uses one bounded frozen `OwnedHardBoundClaimSet`,
+  preserves canonical sharing, reports per-root/unique totals, fails atomically,
+  retains storage after a root view is released only within declared owner
+  limits, and compacts only into a new bounded owner.
+  Engine-verified proofs and accepted tokens are source-arena-independent and
+  retain all invalidating generation dependencies. Hosted forms own bounded
+  engine state;
+  no_std forms are inline or expose a checked engine-store lifetime/brand/
+  generation, never an undocumented pointer into caller storage.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,

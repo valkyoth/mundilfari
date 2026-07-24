@@ -337,20 +337,23 @@ and conversion work are fixed and bounded. No attacker selects an unbounded
 numerator, denominator, allocation, or GCD workload.
 
 Immediately after `AtomicInstant`, one stable source-neutral interval kernel
-defines bounded instant/duration intervals and non-interchangeable
-`HardBoundClaim<T>` versus non-guaranteed `StatisticalRange<T>` classes.
-Included, excluded, and algebraically unbounded endpoints represent open,
-closed, and half-open sets exactly; no code simulates exclusion by adding or
-subtracting a domain quantum. Trusted estimates use only finite intervals.
-`HardBoundClaim` describes mathematical containment under named assumptions,
-not source honesty or authority. Its bounded immutable canonical condition
-uses atom, `All`, `Any`, threshold, maximum-fault, and reviewed derived-rule
-nodes under a content-addressed identity and semantic/rule-registry generation;
-callers cannot choose aliases. Intersection uses `All`, union/hull uses `Any`,
-conversion adds model/rounding through `All`, and consensus emits the reviewed
-`n`/`f` threshold/fault predicate rather than conjuncting every source.
-Simplification is sound-rule-only and all expression/evaluation work is
-bounded.
+defines bounded instant/duration intervals,
+`BorrowedHardBoundClaim<'arena, T>`, `OwnedHardBoundClaim<T>`, their
+lease-scoped `HardBoundClaimView<'view, T>`, and the non-guaranteed
+`StatisticalRange<T>` class. In prose only, “hard-bound claim” is the conceptual
+umbrella for those three exact claim representations; there is deliberately no
+third public `HardBoundClaim` type. Included, excluded, and algebraically
+unbounded endpoints represent open, closed, and half-open sets exactly; no code
+simulates exclusion by adding or subtracting a domain quantum. Trusted
+estimates use only finite intervals. A hard-bound claim describes mathematical
+containment under named assumptions, not source honesty or authority. Its
+bounded immutable canonical condition uses atom, `All`, `Any`, threshold,
+maximum-fault, and reviewed derived-rule nodes under a content-addressed
+identity and semantic/rule-registry generation; callers cannot choose aliases.
+Intersection uses `All`, union/hull uses `Any`, conversion adds model/rounding
+through `All`, and consensus emits the reviewed `n`/`f` threshold/fault
+predicate rather than conjuncting every source. Simplification is sound-rule-
+only and all expression/evaluation work is bounded.
 
 Before claims exist, a `v0.6.1` allocation-free canonical identity kernel
 domain-separates claim, recipe, condition, model, and origin preimages and binds
@@ -371,16 +374,17 @@ condition, and rewrites under independent depth/node/fan-out/storage/work
 limits. It is verification material, never proof or authority, and cannot be
 silently detached from a hard claim.
 
-That attachment is enforced structurally: `HardBoundClaim<'arena, T>` contains
-a private `DerivationHandle<'arena, T>` tied to a fresh invariant generative
-lifetime brand, never an address, caller label, or wrapping counter. no_std
-callers supply fixed slots/buffers; alloc users select fallible bounded arenas.
-Checked store/node generations fault on exhaustion, so destruction or
-same-address reconstruction cannot revive an old handle. Canonically interned
-heterogeneous DAG nodes share inputs and tag every domain. Mutable arenas
-require exclusive writes; traversal uses an immutable read lease or frozen
-pinned snapshot that excludes eviction/reinterning. `Send`/`Sync` follows the
-arena state, backing storage, and selected concurrency profile.
+That attachment is enforced structurally:
+`BorrowedHardBoundClaim<'arena, T>` contains a private
+`DerivationHandle<'arena, T>` tied to a fresh invariant generative lifetime
+brand, never an address, caller label, or wrapping counter. no_std callers
+supply fixed slots/buffers; alloc users select fallible bounded arenas. Checked
+store/node generations fault on exhaustion, so destruction or same-address
+reconstruction cannot revive an old handle. Canonically interned heterogeneous
+DAG nodes share inputs and tag every domain. Mutable arenas require exclusive
+writes; traversal uses an immutable read lease or frozen pinned snapshot that
+excludes eviction/reinterning. `Send`/`Sync` follows the arena state, backing
+storage, and selected concurrency profile.
 
 Comparison is explicit: `same_geometry()` compares endpoints,
 `same_conditional_claim()` compares the canonical claim fields carried by the
@@ -397,10 +401,15 @@ may fallibly promote into `OwnedHardBoundClaim<T>` backed by a bounded frozen
 unique or capability-qualified Arc-style owner. Promotion canonically exports
 and atomically reinterns the whole DAG with structural collision checks; it
 never copies a handle, extends a lifetime, leaks storage, or grants authority.
-Both forms project a lease-scoped `HardBoundClaimView`. Hosted clocks and
-`'static` tasks own promoted state; no_std clocks expose caller-storage
-lifetimes, and foreign-language contexts own the storage behind their opaque
-children.
+Bounded `try_promote_set()` interns several roots into one
+`OwnedHardBoundClaimSet<T>` and preserves cross-root DAG sharing. The frozen
+set retains unreachable nodes until its last owner drops; root removal/space
+reclamation creates a new bounded compacted set atomically. Per-root and unique
+total accounting plus root/node/byte/work limits prevent untrusted retention.
+Both individual and set forms project lease-scoped `HardBoundClaimView` values.
+Hosted clocks and `'static` tasks own promoted state; no_std clocks expose
+caller-storage lifetimes, and foreign-language contexts own the storage behind
+their opaque children.
 
 External decoding yields only unresolved references/conditions. Exact digest
 algorithm, namespace, canonical content, schema/rule/registry generation,
@@ -435,12 +444,17 @@ and output digest. The engine recomputes or verifies this bounded proof rather
 than accepting a plausible caller interval. It first traverses under an
 immutable arena read lease/frozen snapshot, materializes bounded verification
 input, then releases every arena lock/lease before external callbacks.
-Successful verification promotes that material into lifetime-independent
-engine-owned proof/token identities and generation dependencies, with no
-source-arena borrow/brand/handle. The source owner may drop afterward without
-revoking the result solely because of storage loss; evidence, model, policy,
-lifecycle, assessment, and deadline changes still invalidate it. Failure or
-interruption creates neither proof nor token.
+Successful verification promotes that material into source-arena-independent
+engine proof/token identities and generation dependencies, with no source-
+arena borrow/brand/handle. Here source-arena-independent does not mean
+unqualified `'static`: hosted forms own their bounded engine state, while
+no_std forms either store it inline or expose a checked
+`EngineProofHandle<'engine, T>` and engine-storage lifetime/nonwrapping
+generation. No undocumented pointer into caller storage is permitted. The
+source owner may drop afterward without revoking the result solely because of
+storage loss; evidence, model, policy, lifecycle, assessment, and deadline
+changes still invalidate it. Failure or interruption creates neither proof nor
+token.
 Assessment captures one complete provider/assessor/rule/evidence/policy/arena
 generation vector, evaluates callbacks without locks, and atomically rechecks
 the vector before minting the assessment and any accepted token at one
@@ -453,11 +467,12 @@ through caller return.
 
 Only a verified derivation and current snapshot-consistent supported assessment
 accepted by policy can produce an opaque `PolicyAcceptedHardBound`; the
-conditional `HardBoundClaim` remains available for diagnostics. Derivation or
-assessment loss invalidates consensus, leap admission, servo/estimator/holdover
-state, discipline proposals, synchronized clock publication, and facade status
-through the generic withdrawal/generation machinery. No trusted boolean erases
-the condition, support basis, reasons, assurance, non-claims, or deadline.
+conditional borrowed/owned `HardBoundClaimView` remains available for
+diagnostics. Derivation or assessment loss invalidates consensus, leap
+admission, servo/estimator/holdover state, discipline proposals, synchronized
+clock publication, and facade status through the generic withdrawal/generation
+machinery. No trusted boolean erases the condition, support basis, reasons,
+assurance, non-claims, or deadline.
 
 Era resolution, fractional residuals, and EOP all reuse the kernel. The later
 uncertainty phase adds asymmetric budgets, covariance, confidence/model
@@ -1122,7 +1137,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Canonical structural identity, lifetime-branded nonwrapping arena handles, borrowed/owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, lifetime-independent verified claim derivation, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers `v0.133.0`–`v0.144.0` |
+| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with explicit engine storage, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers `v0.133.0`–`v0.144.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |

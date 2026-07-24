@@ -90,7 +90,7 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   and concurrent-read wording.
 - Latest contract review made interval endpoints exact across open, closed,
   half-open, and algebraically unbounded forms while requiring finite trusted
-  estimates and honest `HardBoundClaim` naming; expanded the `v0.75` hierarchy
+  estimates and honest hard-bound-claim naming; expanded the `v0.75` hierarchy
   to separate service/ticket authorization from fresh connection/exporter/NTS
   association generations; fixed engine ownership of admitted conversion-data
   constructors; and moved identified EOP withdrawal into the generic lifecycle.
@@ -133,9 +133,10 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   sample after evaluator work and compare conservative monotonic upper edges
   including resolution, latency, and rate uncertainty.
 - `v0.6.1` now defines one domain-separated canonical identity profile before
-  claims exist. `HardBoundClaim` carries a mandatory typed handle into bounded
-  caller-owned or fallible derivation arenas, with canonical shared DAGs and
-  complete-record serialization rather than detachable tuples or local handles.
+  claims exist. `BorrowedHardBoundClaim` carries a mandatory typed handle into
+  bounded caller-owned or fallible derivation arenas, with canonical shared
+  DAGs and complete-record serialization rather than detachable tuples or local
+  handles.
 - Those handles now use invariant generative lifetime brands and nonwrapping
   generations, while traversal uses read leases/frozen snapshots and releases
   all arena access before callbacks. Geometry, conditional-claim, and fallible
@@ -144,10 +145,11 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   before protocols consume them.
 - New `v0.7.4` separates zero-allocation borrowed claims from fallible bounded
   frozen owned claims. Promotion canonically reinterns the complete DAG;
-  verified proofs/tokens then become independent of the unverified source-arena
-  lifetime while preserving revocation generations. Returned clocks, `'static`
-  tasks, and C/JNI/Swift contexts receive explicit non-self-referential
-  ownership and destruction tests.
+  multi-root promotion preserves sharing with bounded retention/compaction.
+  Verified proofs/tokens become source-arena-independent while no_std engine
+  storage remains explicit and checked. Returned clocks, `'static` tasks, and
+  C/JNI/Swift contexts receive explicit non-self-referential ownership and
+  destruction tests.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

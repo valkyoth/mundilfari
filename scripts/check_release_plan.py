@@ -286,7 +286,7 @@ REVIEW_COVERAGE = {
         "frozen helper-policy/discipline-audit semantics",
         "ServiceCredentialContextId",
         "bounded `ResumptionCredentialGeneration`",
-        "HardBoundClaim",
+        "BorrowedHardBoundClaim",
         "BoundAssumptionsId",
         "unresolved-to-resolved external condition type-state",
         "RetrievalClaim",

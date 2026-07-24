@@ -614,8 +614,8 @@ Deliverables:
   bounded `UnverifiedBoundDerivationRecord`;
   no deserializer may directly create `AssumptionId`, admitted
   `BoundAssumptionsId`,
-  `ResolvedBoundCondition`, a `HardBoundClaim`, or any engine-verified
-  derivation;
+  `ResolvedBoundCondition`, `BorrowedHardBoundClaim`,
+  `OwnedHardBoundClaim`, or any engine-verified derivation;
 - explicit resolution checks digest algorithm, namespace, semantic-schema and
   proof-rule-registry generations, canonical content, identifier/content
   equality, collision handling, rule availability, expression canonicality,
@@ -683,6 +683,10 @@ referential ownership boundary.
 
 Deliverables:
 
+- “hard-bound claim” is documentation-only shorthand for
+  `BorrowedHardBoundClaim<'arena, T>`, `OwnedHardBoundClaim<T>`, or
+  `HardBoundClaimView<'view, T>`; no third public `HardBoundClaim` type, alias,
+  trait, or enum is introduced;
 - `BorrowedHardBoundClaim<'arena, T>` remains the zero-allocation no_std form
   and cannot outlive its invariant generative arena brand; compile-time
   lifetimes, not runtime checks or leaked storage, enforce this boundary;
@@ -698,6 +702,22 @@ Deliverables:
   collision checks and heterogeneous-edge validation, and returns failure
   without a partial owner. It never copies, trusts, transmutes, or lifetime-
   extends a process-local handle/brand;
+- bounded `try_promote_set(roots, capacity)` canonically interns multiple
+  borrowed roots into one `OwnedHardBoundClaimSet<T>` and one frozen owner,
+  preserving common condition/model/recipe nodes across roots. Root count,
+  input bytes, unique nodes/edges/canonical bytes, depth, and total work are
+  bounded before/through admission, and allocation/collision/capacity failure
+  is atomic with no partially promoted root;
+- the owned set exposes stable per-root claim views/identities, per-root
+  reachable-resource reports, and one deduplicated total-owner resource report.
+  Duplicate roots alias the same canonical root entry without duplicating DAG
+  storage, and dropping a root view cannot invalidate another root;
+- frozen sets expose no in-place root removal or compaction. Dropping or no
+  longer retaining one root view leaves the owner and its nodes unchanged until
+  the last owner is destroyed; producing a subset and reclaiming space requires
+  fallible bounded `try_compact_roots(retained_roots, capacity)` into a new
+  canonical frozen owner with atomic rollback. Batch root/node/byte/work limits
+  prevent one untrusted window/queue from forcing unbounded retention;
 - both forms expose a lease-scoped `HardBoundClaimView<'view, T>` for common
   core algorithms; owned-to-view borrowing does not manufacture a new arena
   identity, and promotion does not add evidence, verification, authority,
@@ -707,10 +727,15 @@ Deliverables:
   observes mutable backing content. Clone/share, drop, and last-owner
   destruction semantics are explicit and preserve bounded resource reports;
 - the ownership contract reserves engine promotion: at `v0.60.1`, successful
-  verification produces lifetime-independent engine-owned
+  verification produces source-arena-independent engine
   `VerifiedBoundDerivation<T>` and `PolicyAcceptedHardBound<T>` values carrying
   the required canonical identities and lifecycle/generation dependencies,
   never a borrow or handle into the unverified source arena;
+- “source-arena-independent” is exact: hosted forms own all bounded engine
+  state; no_std forms either contain it inline or expose a checked
+  `EngineProofHandle<'engine, T>` whose engine-storage lifetime, brand,
+  nonwrapping generation, destruction, and stale-handle rules are public. It
+  never means undocumented `'static` or a hidden pointer into caller storage;
 - dropping a borrowed or owned source arena after successful engine promotion
   does not itself invalidate the engine-owned proof/token; evidence, model,
   policy, source, lifecycle, assessment, and deadline generation changes still
@@ -732,6 +757,11 @@ Verification:
   zero/full capacity, allocation/import exhaustion, rollback atomicity, unique
   versus shared owner targets, cross-thread frozen ownership, clone/drop/last-
   owner destruction, and no_std no-alloc dependency tests;
+- multi-root long shared chains/diamonds, duplicate/permuted roots, individual-
+  versus-batch canonical identity equivalence, cross-root DAG sharing, per-root
+  and deduplicated-total accounting, every root/node/byte/work limit, failure
+  at each root with atomic rollback, root-view drop independence, retained
+  unreachable nodes, bounded compaction, and compaction failure rollback;
 - returned self-contained owned-state builder and `'static` closure/thread
   fixtures, plus placeholder async/ABI ownership fixtures consumed by the later
   facade/async/binding milestones.
@@ -1414,6 +1444,10 @@ Deliverables:
   canonical and does not grant authority, target-dependent unique versus
   Arc-style sharing is honest, and no lifetime extension, handle copying, or
   storage leak bypasses the boundary;
+- multi-root promotion audit proving cross-root canonical sharing, duplicate
+  root coalescing, per-root versus unique-total accounting, immutable retention,
+  bounded new-owner compaction, atomic batch failure, and individual/batch
+  identity equivalence;
 - leap-candidate validation/transaction and evidence-provenance/lifecycle
   boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
   authority/diversity admission remains deferred to `v0.61.1`;
@@ -1434,8 +1468,8 @@ Verification:
   no_std target matrix; SHA-256 KAT/differential corpus, identity-schema golden
   vectors, arena ABA/wraparound/concurrency state machines, equality/collision
   cases, borrowed/owned promotion and source-drop/owner-drop state machines,
-  compile-fail lifetime-escape corpus, and reduced-state proof artifacts are
-  mandatory.
+  compile-fail lifetime-escape corpus, multi-root shared-DAG/retention/
+  compaction state machines, and reduced-state proof artifacts are mandatory.
 
 Exit criteria:
 
@@ -1602,7 +1636,9 @@ Deliverables:
 - bound-condition fields decode only into the `v0.7.3`
   `UnresolvedAssumptionReference`/`UnresolvedBoundCondition` type-state;
   canonical schema decoding cannot directly construct a
-  `BoundAssumptionsId`, `ResolvedBoundCondition`, or `HardBoundClaim`;
+  `BoundAssumptionsId`, `ResolvedBoundCondition`,
+  `BorrowedHardBoundClaim`, `OwnedHardBoundClaim`, or
+  `OwnedHardBoundClaimSet`; ownership arises only through core promotion;
 - derivation fields decode only into bounded
   `UnverifiedBoundDerivationRecord`; canonical schema has no tag or decode
   trait for the opaque engine `VerifiedBoundDerivation`, and recipe resolution
@@ -3183,11 +3219,14 @@ Deliverables:
   conversion operation, exact input and output endpoints, rounding direction
   and policy, conversion-model identity and generation, canonical output
   condition, and output claim digest;
-- successful verification materializes an engine-owned, lifetime-independent
+- successful verification materializes a source-arena-independent
   `VerifiedBoundDerivation<T>` containing the canonical proof/claim identities,
   verified operation/model/rule inputs, and every lifecycle/generation
-  dependency needed for revalidation. It contains no borrow, brand, handle,
-  pointer, or owner reference to the borrowed/owned unverified source arena;
+  dependency needed for revalidation. Hosted forms own the bounded state;
+  no_std forms store it inline or return
+  `VerifiedBoundDerivationRef<'engine, T>` through a checked branded,
+  nonwrapping-generation engine-store handle. Neither form contains an
+  undocumented pointer or owner reference to caller/source-arena storage;
 - engine verification resolves the claim's mandatory typed
   `DerivationHandle<'arena, T>` against the exact admitted arena brand/
   generation. It obtains an immutable read lease or frozen pinned snapshot,
@@ -3200,6 +3239,11 @@ Deliverables:
   foreign/cross-domain handles and geometry-only intervals fail closed. Import
   from persistence/IPC must first atomically reintern the complete unverified
   record into a bounded current arena;
+- one owned multi-root set may supply several verification inputs through
+  independent root views while sharing immutable source DAG storage. Each root
+  is verified and accepted independently with its exact canonical identity;
+  failure/withdrawal of one root cannot partially mint, invalidate, or
+  substitute another root's proof/token, and batch iteration/work is bounded;
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -3237,12 +3281,14 @@ Deliverables:
   identity/generation, policy/membership/source/correlation generations,
   per-atom support basis, assurance/non-claims, evaluation domain, and
   conservative expiry/re-evaluation deadline;
-- `PolicyAcceptedHardBound<T>` is likewise engine-owned and lifetime-
-  independent from the unverified source arena. Completed promotion permits
-  that source arena/owner to drop without revoking the token, while every bound
-  evidence/model/policy/source/lifecycle/assessment/deadline generation remains
-  revalidated and can revoke it; failed or interrupted promotion mints neither
-  verified proof nor accepted token;
+- `PolicyAcceptedHardBound<T>` is likewise source-arena-independent. Hosted
+  forms own their bounded state; no_std forms store bounded state inline or
+  return `PolicyAcceptedHardBoundRef<'engine, T>` through a checked branded,
+  nonwrapping-generation engine-store handle. Completed promotion permits the
+  unverified source arena/owner to drop without revoking the token, while every
+  bound evidence/model/policy/source/lifecycle/assessment/deadline generation
+  remains revalidated and can revoke it; failed or interrupted promotion mints
+  neither verified proof nor accepted token;
 - accepted-token identity/equivalence includes the exact conditional claim,
   verified-derivation identity and generation, condition/assessment identity
   and generation, policy/membership/source/correlation generations, and
@@ -3288,6 +3334,9 @@ Verification:
   promotion, source drop before/during promotion, proof/token inspection after
   source drop, canonical-identity/generation dependency preservation, and
   proof that engine-owned results contain no source brand/handle/owner;
+- shared-set roots verified in permutation, duplicate-root coalescing without
+  token aliasing, one-root failure/withdrawal independence, bounded batch work,
+  and batch-versus-individual proof identity equivalence;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -3310,7 +3359,7 @@ Verification:
 
 Exit criteria:
 
-- no canonical or mathematically conditional `HardBoundClaim` is labeled
+- no canonical or mathematically conditional hard-bound claim view is labeled
   currently trusted without a verified exact derivation and fresh,
   snapshot-consistent engine-issued policy-accepted assessment whose support
   bases remain visible;
@@ -6642,7 +6691,8 @@ Deliverables:
 - `query_once()` acquisition distinct from `TrustedClock::now()` virtual-clock
   reads, plus strict `TrustedClock::system_defaults(...)`;
 - std/alloc builders return a self-contained `TrustedClock` owning engine-
-  promoted/frozen claim state and lifetime-independent verified/accepted state;
+  promoted/frozen claim state and source-arena-independent verified/accepted
+  state;
   the returned clock never borrows a locally created derivation arena or uses a
   self-referential/leaked owner. no_std builders instead expose the exact
   caller-storage lifetime in the clock type;
@@ -6708,13 +6758,18 @@ Deliverables:
   `alloc`; adapters intended for `'static` spawning own every promoted claim,
   engine proof/token, buffer, cancellation, and transport dependency rather
   than extending a borrowed arena lifetime;
+- bounded async windows/queues may use `OwnedHardBoundClaimSet<T>` so common
+  derivation nodes are shared; queue/root count, retained unique bytes/nodes,
+  and work remain explicit, and removal compacts only through the fallible new-
+  owner operation;
 - no Tokio or runtime dependency.
 
 Verification:
 
 - custom executor, embedded-style polling, Tokio adapter example outside the
   graph, `'static` spawn with owned claims, compile-fail borrowed-claim spawn,
-  cancellation/drop races, wake discipline, and feature matrix.
+  multi-root shared queue equivalence/retention/exhaustion, cancellation/drop
+  races, wake discipline, and feature matrix.
 
 Exit criteria:
 
@@ -6740,6 +6795,9 @@ Deliverables:
 - explicit borrowed builder families carry caller arena/engine-storage
   lifetimes, while fallible owned builders accept frozen-arena capacity/share
   policy, atomically promote through `v0.7.4`, and return self-contained owners;
+- multi-root builders expose maximum roots plus unique/per-root node, edge,
+  canonical-byte, and work budgets and report deduplicated storage; individual
+  promotion is the one-root specialization of the same canonical path;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6751,7 +6809,8 @@ Verification:
   recreation, read/write lease and `Send`/`Sync` compile tests, embedded
   targets, examples, and compile-fail overflow cases; allocation/import
   exhaustion, partial-promotion rollback, returned-owner drop order, and
-  compile-fail borrowed-result escape.
+  compile-fail borrowed-result escape; multi-root sharing, duplicate roots,
+  removal retention, bounded re-compaction, and batch/individual equivalence.
 
 Exit criteria:
 
@@ -7087,8 +7146,10 @@ Deliverables:
   `OwnedHardBoundClaim` forms with mandatory typed arena handles, bounded
   shared heterogeneous derivation DAG,
   canonical fallible promotion into frozen ownership, no self-reference/
-  lifetime extension/storage leaking, and lifetime-independent engine proof/
-  token state with complete invalidation generations,
+  lifetime extension/storage leaking, multi-root shared-DAG promotion with
+  bounded retention/compaction, and source-arena-independent engine proof/token
+  state with explicit hosted-owned or no_std inline/checked-engine-store
+  representation and complete invalidation generations,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, bounded core `UnverifiedBoundDerivation` preservation
@@ -7436,6 +7497,9 @@ Deliverables:
 - borrowed-to-owned claim promotion allocation/import/canonicalization limits,
   atomic rollback, unique/shared frozen-owner accounting, clone/drop/last-owner
   behavior, and proof that promotion failure leaks no arena or partial handle;
+- multi-root count/per-root/unique-total budgets, shared-DAG worst cases,
+  retained unreachable-node bounds, new-owner compaction failure, and proof
+  that an untrusted batch cannot pin unbounded memory or work;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -7572,6 +7636,9 @@ Deliverables:
   allocation/import exhaustion and rollback, source drop before/during/after
   engine promotion, `'static` owned-task cancellation/drop, returned-clock
   ownership, and FFI arbitrary/concurrent context-child destruction,
+  multi-root long-chain/diamond/duplicate-root sharing, partial failure,
+  root-removal retention, compaction rollback, accounting, batch-work
+  exhaustion, and batch/individual identity equivalence,
   missing/truncated/over-budget early recipes, narrowed/spliced/substituted
   derivations, serialized-record replay/rollback/cross-engine restore and stale
   input/rule/model/lifecycle reverification, mixed-generation assessment
@@ -7707,7 +7774,8 @@ Deliverables:
   behavior documented without stronger implied claims;
 - interval examples cover open/closed/half-open sets, unbounded algebra,
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
-  `HardBoundClaim` non-authority semantics, bounded logical conditions for
+  hard-bound claim umbrella/non-authority semantics with no third public claim
+  type, bounded logical conditions for
   intersection/union/conversion/consensus, unresolved external-reference
   resolution, canonical identity preimages/algorithm/structural collision
   checks/schema reuse, mandatory typed derivation handles and bounded no_std/
@@ -7715,8 +7783,9 @@ Deliverables:
   fallible canonical promotion/frozen unique-or-shared ownership, no self-
   reference/leak/lifetime-extension boundary, early non-authoritative
   derivation recipes and complete-record export/unverified restore type-state,
-  lifetime-independent verified root/derived claim proofs and accepted tokens
-  with source-drop versus evidence-generation invalidation semantics, runtime
+  source-arena-independent verified root/derived claim proofs and accepted
+  tokens with explicit no_std engine-storage lifetime/generation rules and
+  source-drop versus evidence-generation invalidation semantics, runtime
   assessment
   statuses and issuance linearization, structured independent origin/
   integrity/authority/lineage support axes with transitive configured
@@ -7725,6 +7794,9 @@ Deliverables:
   linearization-time `observed_at`/`valid_until` versus WCET-backed
   through-completion contracts, strict versus conditional facade results,
   incompatibility, and no quantum adjustment;
+- single-root and `OwnedHardBoundClaimSet` multi-root promotion examples cover
+  shared DAGs, per-root/unique-total accounting, duplicate roots, immutable
+  retention, bounded compaction, atomic failure, and untrusted batch limits;
 - `TimeEstimate` and facade documentation expose condition, assessment,
   verified-derivation identity, atom support basis, evidence/policy
   generations, deadline, reasons, assurance, and non-claims; no trusted boolean

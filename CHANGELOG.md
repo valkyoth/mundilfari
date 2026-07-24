@@ -81,7 +81,7 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   credential evidence and conservative monotonic retention horizons; and
   removal of residual early activation/concurrent-reader claims.
 - Refined those contracts with exact open/closed/unbounded interval endpoints,
-  finite trusted estimates, and `HardBoundClaim` non-authority semantics;
+  finite trusted estimates, and hard-bound-claim non-authority semantics;
   split reusable service credential/ticket authorization from fresh TLS
   connection, exporter, and NTS association generations in the `v0.75`
   hierarchy;
@@ -121,8 +121,9 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   `v0.137.x` deadline decisions use conservative monotonic-read upper edges
   including resolution, latency, and rate uncertainty.
 - Added `v0.6.1` for one domain-separated canonical identity profile; made
-  `HardBoundClaim` recipe attachment enforceable through typed generation-bound
-  handles and bounded caller-owned/fallible arenas; assigned interval-producing
+  `BorrowedHardBoundClaim` recipe attachment enforceable through typed
+  generation-bound handles and bounded caller-owned/fallible arenas; assigned
+  interval-producing
   clock contracts to `v0.24.0`, hosted/PHC/counter/embedded/browser adapters;
   and separated default linearization-time `observed_at`/`valid_until` results
   from optional reviewed-WCET through-completion authority.
@@ -133,7 +134,8 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   reduced-state handle and ABA proofs.
 - Added `v0.7.4` for fallible canonical promotion from borrowed hard claims to
   bounded frozen owned claims; made verified proofs and accepted tokens
-  lifetime-independent from unverified source arenas; and carried explicit
+  source-arena-independent with explicit no_std engine storage; and carried
+  multi-root shared-DAG promotion plus explicit
   ownership into returned clocks, `'static` async tasks, builders, schemas, and
   C/JNI/Swift context destruction.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,

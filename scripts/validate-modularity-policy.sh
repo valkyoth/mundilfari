@@ -47,8 +47,12 @@ grep -q 'fallible complete-derivation comparisons' docs/modularity-policy.md
 grep -q 'infallible semantic' docs/modularity-policy.md
 grep -q 'Core owns `BorrowedHardBoundClaim`' docs/modularity-policy.md
 grep -q '`OwnedHardBoundClaim`' docs/modularity-policy.md
+grep -q '`OwnedHardBoundClaimSet`' docs/modularity-policy.md
+grep -q 'single/multi-root promotion' docs/modularity-policy.md
+grep -q 'new-owner compaction' docs/modularity-policy.md
 grep -q 'Promotion adds no authority' docs/modularity-policy.md
-grep -q 'lifetime-independent' docs/modularity-policy.md
+grep -q 'source-arena-independent' docs/modularity-policy.md
+grep -q 'engine-storage lifetime' docs/modularity-policy.md
 grep -q 'cannot extend arena lifetimes' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
 grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md
