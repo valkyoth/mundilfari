@@ -68,6 +68,15 @@ No new feature or protocol scope is introduced after `v0.157.0`.
         )
     )
 
+    release_plan = (ROOT / "docs" / "RELEASE_PLAN.md").read_text(encoding="utf-8")
+    assert checker.validate_review_coverage(release_plan) == []
+    assert any(
+        "v0.7.0" in error
+        for error in checker.validate_review_coverage(
+            release_plan.replace("mathematical floor", "floor convention", 1)
+        )
+    )
+
 
 if __name__ == "__main__":
     main()

@@ -39,6 +39,8 @@ authenticated, traceable, fresh, or safe for clock discipline.
   supply-chain attackers.
 - Callers providing incorrect crypto, entropy, TLS, clock, or transport
   implementations behind a trait.
+- Callers treating compiled Cargo features as proof of runtime permission,
+  device availability, source health, or clock-discipline authority.
 
 ## Trust Boundaries
 
@@ -72,6 +74,7 @@ Additional boundaries:
 - claimed clock quality to measured quality;
 - platform timestamps to correct packet identity;
 - ordinary process to privileged helper;
+- compiled platform code to runtime availability, authorization, and health;
 - third-party dependency to Mundilfari-owned semantics;
 - Navheim timing event to `mundilfari-navheim` observation and invalidation;
 - licensed normative document to independently written implementation.
@@ -85,7 +88,8 @@ Additional boundaries:
 | Off-path injection | unpredictable request state, origin matching, address/port policy, authentication |
 | Replay | nonces, sequence/origin matching, replay windows, monotonic state, used-cookie tracking |
 | Malicious source | diverse sources, interval consensus, Khronos, maximum offset and uncertainty |
-| Delay/asymmetry attack | multi-path comparison, delay history, topology policy, uncertainty growth |
+| Malicious majority or Sybil diversity | explicit `n`/`f` fault assumptions, operator/upstream/path/site correlation, split result, no impossible Byzantine claim |
+| Delay/asymmetry attack | maximum delay/root distance, multi-path comparison, assumption-labeled delay history, topology policy, uncertainty growth |
 | Downgrade | pinned protocol policy; no silent NTS-to-NTP or secure-to-legacy fallback |
 | Amplification | bounded response ratio, validation before response, rate and work limits |
 | Era/rollover confusion | explicit context and ambiguity errors |
@@ -95,9 +99,9 @@ Additional boundaries:
 | Loss of sources | holdover state with growing uncertainty and bounded recovery |
 | GNSS spoofing or bad upstream evidence | preserve Navheim health/authentication/integrity/provenance, honor invalidation, compare independent clock families |
 | Radio spoofing | source fusion, propagation checks, signal quality, independent corroboration |
-| PTP manipulation | topology identity, correction/delay monitoring, redundant grandmasters and paths |
+| PTP manipulation | authenticated mechanism or trusted boundary/corroboration for strict discipline, topology identity, correction/delay monitoring, redundant grandmasters and paths |
 | Timestamp misassociation | packet identity, sequence, error-queue, ancillary bounds, drop detection |
-| Privilege escalation | minimal helper, typed commands, authenticated bounded IPC, least privilege |
+| Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
 | Secret disclosure | redaction, bounded lifetime, controlled exposure, admitted clearing |
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |
@@ -141,6 +145,8 @@ Additional boundaries:
 - Authentication does not prevent malicious endpoints, delay, relay, or
   compromised authorities.
 - Multiple hostnames may share one operator, route, oscillator, or upstream.
+- No consensus algorithm can protect against an indistinguishable malicious
+  majority outside its stated `n`, `f`, diversity, and interval assumptions.
 - `no_std` does not imply determinism, bounded execution, or security.
 - OS and hardware timestamps can be wrong, reordered, transformed, or
   associated with the wrong packet.
@@ -153,6 +159,8 @@ Additional boundaries:
 - External standards and certification suites may be inaccessible or licensed.
 - A dependency-minimal design reduces one risk class but concentrates review
   responsibility in first-party code.
+- Miri, sanitizers, and bounded model checking do not prove unmodeled kernel,
+  driver, DMA, MMIO, network, or physical-clock behavior.
 
 ## `v0.1.0` Non-Claims
 

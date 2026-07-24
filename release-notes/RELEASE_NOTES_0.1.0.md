@@ -29,6 +29,11 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - Dependency-last roadmap ordering: all Navheim-independent protocols,
   engines, servos, and applications precede the final Navheim integration and
   CGGTTS feature phase.
+- Integrated architecture-review gaps into explicit existing versions without
+  reducing the stable-protocol completeness contract, including rational
+  conversion evidence, runtime capability truth, consensus fault assumptions,
+  safe/sys platform isolation, deterministic embedded engines, hardened
+  privilege separation, and signed reproducible release evidence.
 - `no_std`, dependency layering, 500-line, unsafe, standards, supply-chain,
   threat-model, and secret-handling policies.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, pull request, and manual

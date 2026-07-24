@@ -8,8 +8,8 @@ Current first-party crates use:
 
 No unsafe Rust is admitted in `v0.1.0`.
 
-Future unsafe code is permitted only in a dedicated, narrowly scoped platform
-or acceleration module for:
+Future unsafe code is permitted only in dedicated, narrowly scoped
+`mundilfari-platform-*-sys` or acceleration crates for:
 
 - system-call and FFI boundaries;
 - ancillary control-message traversal;
@@ -29,4 +29,15 @@ Every unsafe block requires:
 - registration in this document;
 - changed-scope security review and pentest before release.
 
-The workspace always denies `unsafe_op_in_unsafe_fn`.
+The safe `mundilfari-platform` crate validates sys-crate outputs and continues
+to forbid unsafe. Core, engine, facade, protocol, crypto-state, and IPC-schema
+crates also continue to forbid unsafe. Sys crates do not inherit the workspace
+`unsafe_code = "forbid"` lint; they deny `unsafe_op_in_unsafe_fn`, document
+their exception, and are rejected unless every unsafe block appears in the
+machine-readable unsafe inventory.
+
+Miri covers pure wrapper logic and mock memory where applicable. Sanitizers,
+ABI/layout assertions, fault injection, and hardware tests cover real FFI
+boundaries. MMIO adapters additionally document volatile access, alignment,
+endianness, ownership, memory ordering, and reset behavior. None of this is
+described as proof of the kernel, driver, DMA engine, or device.

@@ -12,6 +12,17 @@ HEADING = re.compile(r"^(?:### |## )(v(?:0\.\d+\.\d+|1\.0\.0(?:-rc\.\d+)?)) -? ?
 NAVHEIM_PHASE = "## Phase 12: Navheim Integration As Final Feature Work"
 HARDENING_PHASE = "## Phase 13: Final Conformance Hardening And Production Admission"
 NAVHEIM_VERSIONS = [f"v0.{minor}.0" for minor in range(149, 158)]
+REVIEW_COVERAGE = {
+    "v0.7.0": ("mathematical floor",),
+    "v0.11.0": ("ConversionContext",),
+    "v0.30.0": ("compiled, available, authorized",),
+    "v0.60.0": ("maximum faulty diversity groups",),
+    "v0.91.0": ("PTPv3",),
+    "v0.114.0": ("fixed-capacity Sans-I/O",),
+    "v0.133.0": ("maximum faulty diversity groups",),
+    "v0.142.0": ("OS peer credentials",),
+    "v0.167.0": ("signed exact-commit attestation",),
+}
 
 
 def milestones(text: str) -> list[tuple[str, str]]:
@@ -52,6 +63,21 @@ def validate(text: str) -> list[str]:
     return errors
 
 
+def validate_review_coverage(text: str) -> list[str]:
+    """Ensure architecture-review requirements stay in their owning versions."""
+    errors: list[str] = []
+    blocks = dict(milestones(text))
+    for version, phrases in REVIEW_COVERAGE.items():
+        block = blocks.get(version)
+        if block is None:
+            errors.append(f"review coverage milestone {version} is missing")
+            continue
+        for phrase in phrases:
+            if phrase not in block:
+                errors.append(f"{version} missing review requirement: {phrase}")
+    return errors
+
+
 def validate_navheim_order(text: str) -> list[str]:
     """Ensure Navheim remains the final feature phase."""
     errors: list[str] = []
@@ -87,6 +113,7 @@ def main(argv: list[str]) -> int:
     path = Path(argv[1]) if len(argv) == 2 else Path("docs/RELEASE_PLAN.md")
     text = path.read_text(encoding="utf-8")
     errors = validate(text)
+    errors.extend(validate_review_coverage(text))
     errors.extend(validate_navheim_order(text))
     if errors:
         print("\n".join(errors), file=sys.stderr)

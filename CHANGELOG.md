@@ -15,6 +15,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 - Reordered the pre-1.0 roadmap so every Navheim-independent feature is
   implemented first and Navheim integration plus CGGTTS form the final feature
   phase.
+- Incorporated the July 2026 architecture gap review into existing milestones:
+  exact conversion residuals, capability truth, platform sys isolation,
+  explicit consensus fault assumptions, stronger protocol and privilege
+  boundaries, deterministic embedded evidence, and signed release assurance.
+- Preserved the broader pre-1.0 protocol registry commitment and Navheim-last
+  ordering instead of adopting the review's narrower replacement roadmap.
 
 ## [0.1.0] - Unreleased
 

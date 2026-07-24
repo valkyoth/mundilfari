@@ -90,31 +90,41 @@ instead of first-party bounded wire code, and hidden runtime or serialization
 defaults. Navheim is the deliberate GNSS implementation boundary, but only
 `mundilfari-navheim` may depend on it.
 
-### 2.3 `no_std` first
+### 2.3 Capability and authority tiers
 
-Published crates declare one capability level:
+Published crates declare one capability tier:
 
-| Level | Environment | Expected work |
+| Tier | Environment | Expected work |
 | --- | --- | --- |
-| A | `no_std`, no allocation | domains, arithmetic, wire codecs, fixed state machines |
-| B | `no_std` + `alloc` | owned messages, dynamic source sets, evidence chains |
-| C | `std` | sockets, files, DNS, threads, trust stores, applications |
-| D | privileged platform | raw sockets, PHC/PPS, hardware timestamps, clock discipline |
+| Core | `no_std`, no allocation | domains, arithmetic, wire codecs, fixed state machines |
+| Alloc | `no_std` + `alloc` | owned messages, dynamic source sets, evidence chains |
+| Standard | `std` | safe clocks, sockets, DNS, files, TLS adapters, applications |
+| Device | explicit platform features | PHC/PPS, hardware timestamps, raw links, device discovery |
+| Discipline | separate crate/process | system, PHC, or oscillator modification through authorization handles |
 
-Protocol crates default to Level A whenever the protocol permits it:
+Protocol crates default to the Core tier whenever the protocol permits it:
 
 ```toml
 [features]
 default = []
 alloc = []
 std = ["alloc"]
+udp = ["std"]
+dns-system = ["std"]
+rustls = ["std", "dep:rustls"]
+linux-timestamping = ["std"]
+linux-phc-read = ["std"]
+linux-clock-adjust = ["std"]
 client = []
 server = []
 ```
 
 Features are additive. No feature silently enables a privileged action,
 insecure fallback, historical protocol, active draft, network runtime, or
-system-clock modification.
+system-clock modification. A feature reports that code was compiled; it never
+asserts that a device exists, a process is authorized, or a source is healthy.
+Runtime capability reports distinguish `Compiled`, `Available`, `Authorized`,
+and `Healthy`, with reason-bearing failure states.
 
 ## 3. Crate Architecture
 
@@ -138,9 +148,15 @@ transport traits, and clock traits.
 clock-filter building blocks, servos, holdover, trusted virtual clocks,
 discipline policy, and runtime-neutral orchestration.
 
-`mundilfari-platform` owns native sockets, DNS adapters, timestamps, raw links,
-serial and capture adapters, PHC, PPS, platform clock access, system-clock
-adjustment, and narrowly isolated unsafe/FFI.
+`mundilfari-platform` owns safe native sockets, DNS adapters, timestamps, raw
+links, serial and capture adapters, PHC, PPS, platform clock access, and
+clock-control wrappers. It remains unsafe-free.
+
+Small OS-family-specific `mundilfari-platform-*-sys` crates own only necessary
+FFI, syscall, ancillary-layout, volatile MMIO, or intrinsic boundaries. They
+are not facade re-exports, never contain protocol policy, and are covered by a
+machine-readable unsafe inventory. Clock discipline lives behind a separate
+authorization boundary and ultimately a minimal helper process.
 
 `mundilfari` is a facade. It provides stable re-exports, easy builders,
 protocol selection, common reports, and optional application-facing helpers.
@@ -240,7 +256,9 @@ Enforced rules:
 - protocol wire modules never depend on OS code;
 - protocol crates never depend on the facade;
 - generic crypto adapters do not own time-protocol decisions;
-- platform crates do not contain protocol validation policy;
+- safe platform crates do not contain unsafe or protocol validation policy;
+- only narrowly scoped `mundilfari-platform-*-sys` crates may contain
+  registered unsafe code;
 - the engine consumes validated observations, not untrusted packets;
 - only `mundilfari-navheim` may depend on Navheim;
 - an upstream invalidation must withdraw the corresponding engine observation;
@@ -265,8 +283,11 @@ pub struct AtomicInstant {
 ```
 
 All constructors preserve the invariant
-`attoseconds < 1_000_000_000_000_000_000`. Arithmetic is checked. Conversions
-return rounding and quantization evidence.
+`0 <= attoseconds < 1_000_000_000_000_000_000`, and `seconds` is the
+mathematical floor of the represented value, including for negative instants.
+Thus negative one-half second is represented as `(-1, 5e17)`. Fields remain
+private, arithmetic and normalization are checked with wide intermediates,
+and public serialization never freezes the Rust memory layout.
 
 ### 4.2 Native representation
 
@@ -276,28 +297,42 @@ Decoding preserves both native and normalized forms:
 pub struct ProtocolTimestamp<R> {
     raw: R,
     normalized: AtomicInstant,
-    quantization: Duration,
-    rounding: RoundingDirection,
+    exact: RationalInstant,
+    error: Interval<AtomicInstant>,
+    rounding: RoundingMode,
 }
 ```
 
 NTP binary fractions, PTP scaled nanoseconds, broadcast counters, and
-device-specific epochs are not destructively rounded on parse. A resolved
-Navheim native GNSS instant is mapped without truncation by the companion; it
-is not parsed from GNSS wire data here.
+device-specific epochs are not destructively rounded on parse. The rational
+quantum and lower/upper residual bounds are retained because many binary and
+scaled fractions are not integral attoseconds. Full instants are never
+flattened into `i128` attoseconds. A resolved Navheim native GNSS instant is
+mapped without truncation by the companion; it is not parsed from GNSS wire
+data here.
 
 ### 4.3 Explicit scale and context
 
 UTC, TAI, UT1, POSIX, NTP, PTP, GPS, Galileo, BeiDou, GLONASS, terrestrial,
-and coordinate time scales remain distinct. Mundilfari keeps generic scale
-identifiers and versioned conversion context so GNSS-derived observations can
-be compared with other clocks. Navheim independently resolves native GNSS
-values; disagreement between its result and Mundilfari's admitted scale/leap
-model is visible and fail-closed.
+and coordinate time scales remain distinct. Conversion uses explicit
+operations under one immutable, versioned `ConversionContext`; it is not a
+general path-search graph that may mix model generations. NTP is an epoch/wire
+encoding with UTC semantics, PTP may distribute its defined timescale or an
+arbitrary timescale, GLONASS is not treated as a fixed-offset continuous
+scale, and UT1 or relativistic coordinate scales require named admitted
+models and uncertainty. UTC before 1972 has an explicit non-claim until a
+historical frequency-offset model is admitted.
+
+Mundilfari keeps generic scale identifiers and versioned conversion context so
+GNSS-derived observations can be compared with other clocks. Navheim
+independently resolves native GNSS values; disagreement between its result and
+Mundilfari's admitted scale/leap model is visible and fail-closed.
 
 UTC can represent leap second 60. Negative leap seconds are structurally
-supported. POSIX conversion requires an explicit repeat, clamp, reject, or
-smear policy. A smear is never labeled true UTC.
+supported. POSIX conversion returns a typed `Unique`, `Ambiguous`, or
+`Nonexistent` outcome before an explicit repeat, clamp, reject, or smear policy
+is applied. Smears carry provider/profile, window, function, model generation,
+and invertibility limitations. A smear is never labeled true UTC.
 
 ### 4.4 Era resolution
 
@@ -312,13 +347,21 @@ resolved evidence or rejects the observation.
 A usable reading contains:
 
 - an earliest/latest interval;
-- an estimated instant;
+- a preferred estimate only when policy permits one;
+- scale and realization identity;
 - monotonic capture correlation;
 - local offset and optional network delay;
 - resolution, precision, uncertainty, age, stability, traceability, leap, and
   holdover state;
 - authentication class separate from measured or advertised accuracy;
-- source, protocol, authority, path, raw-observation hash, and warnings.
+- source generation, protocol, authority, path, raw-observation hash, and
+  warnings.
+
+`query_once()` performs acquisition and returns a bounded `TimeEstimate`.
+`TrustedClock::now()` performs no network I/O and reads an already
+synchronized virtual application clock. Mobile and browser defaults are
+application clocks, not system discipline. Every C, WASM, Java/Kotlin, Swift,
+database, `time_t`, and JavaScript boundary rejects out-of-range narrowing.
 
 ## 5. Protocol Implementation Template
 
@@ -357,6 +400,12 @@ The stages are separate:
 
 Forensic decoding never grants clock authority.
 
+Where useful, distinct types enforce the progression from raw bytes through
+parsed, semantically valid, association-valid, authenticated, observed,
+consensus, and discipline-proposal states. Forensic and compatibility values
+do not implement the trait accepted by consensus. Runtime `trusted: bool`
+flags are not substitutes for these type boundaries.
+
 ### 5.2 Borrowed and bounded
 
 The primary decoder borrows input, performs no allocation, validates lengths
@@ -373,7 +422,10 @@ values cannot enter discipline state.
 Protocols consume platform-neutral datagram, stream, raw-link, serial, edge,
 sample, CAN, FlexRay, GATT, entropy, clock, and hardware-clock traits.
 Canonical engines use explicit polling and timers. `Future` adapters use
-`core::future`; Mundilfari does not require Tokio or another runtime.
+`core::future`; Mundilfari does not require Tokio or another runtime. Every
+timer, request, transmit timestamp, crypto operation, and hardware completion
+carries an association generation token. Each poll accepts explicit monotonic
+time, input, and a deterministic work budget, then emits bounded actions.
 
 ## 6. Security Architecture
 
@@ -388,6 +440,13 @@ The model distinguishes:
 - UTC from POSIX, monotonic, smeared, or local-network time;
 - syntactic evidence from externally certified conformance;
 - clock observation from permission to modify a clock.
+
+Consensus policy states its mathematical fault assumptions: admitted source
+count `n`, maximum faulty diversity groups `f`, required interval coverage,
+freshness and path-delay bounds, network-adversary reach, and whether correct
+source intervals are assumed to contain true time. Source weights cannot
+override the quorum. An indistinguishable malicious majority is an explicit
+residual risk, not a Byzantine-resilience claim.
 
 ### 6.2 Resource governance
 
@@ -433,6 +492,17 @@ minimal clock/PHC discipline helper
 
 Privileged requests are typed and bounded. The helper never accepts arbitrary
 paths, pointers, ioctl numbers, syscalls, packet bytes, or shell commands.
+The engine emits a bounded `DisciplineProposal`; policy may turn it into a
+short-lived authorized request, and the helper independently enforces phase,
+frequency, slew, step, generation, and expiry bounds.
+
+The helper is a dedicated executable with no protocol dependencies. It uses a
+pre-opened socketpair or fixed local endpoint, verifies peer credentials,
+accepts fixed-version and fixed-maximum-length messages, rejects replayed
+sequences and stale monotonic expiries, operates only on pre-opened allowlisted
+clock handles, drops privileges and sandboxes syscalls after initialization,
+and appends an audit result for every accepted or rejected request. Raw capture
+and clock discipline use separate authority where the OS permits it.
 
 ## 7. Platform Plan
 
@@ -455,6 +525,14 @@ Platform code is staged:
 10. per-platform interoperability and privilege tests.
 
 Accuracy is never inferred from API availability.
+
+Hardware samples retain raw device timestamps, origin class, device identity
+and generation, monotonic/system cross timestamps, measured cross-clock error,
+resolution, advertised precision, calibration, and asymmetry inputs. Core
+traits use HAL-like typed clock/register operations rather than Unix file
+descriptors. Linux PHC uses the kernel PTP-clock and timestamping interfaces;
+MMIO is a distinct embedded adapter with volatile, alignment, endian,
+ownership, ordering, and reset invariants.
 
 ## 8. Standards Governance
 
@@ -493,10 +571,14 @@ Protocol completion additionally requires:
 - differential and interoperability tests against independent implementations;
 - supported OS and target checks;
 - hardware-in-loop evidence where the claim depends on hardware;
+- WCET, stack-use, and deterministic work-budget evidence for fixed-capacity
+  industrial, automotive, and bare-metal engines;
 - changed-scope pentest and remediation before the tag.
 
 External test programs and fuzz engines may be CI tools without becoming
-runtime dependencies.
+runtime dependencies. Miri, sanitizers, and Kani claims name precisely what
+was modeled or executed; they do not imply proof of a kernel, driver, DMA,
+MMIO device, or unmodeled hardware.
 
 ## 10. Release And Documentation Discipline
 
@@ -511,6 +593,13 @@ Every release includes:
 - an implementation stop before tagging;
 - exact-commit pentest, remediation, retest, and permanent PASS report.
 
+Before `1.0.0`, independent reviewer identity and attestations, protected
+release refs, reproducible archives, artifact provenance, signatures, and
+archive/SBOM/hash reproduction become release gates. No ISO 26262, IEC 61508,
+IEC 62443, Common Criteria, FIPS, or comparable certification is claimed
+without its separate required traceability, tool qualification, safety
+manuals, assessment, and integration evidence.
+
 The root README and `crates/mundilfari/README.md` remain byte-identical.
 Published protocol crates use the common Mundilfari header and their own
 accurate scope/status README. Repository-only crates may link to root
@@ -521,3 +610,28 @@ stable registry entry is silently missing, a default protocol has unresolved
 high/critical findings, claimed no_std/OS support lacks builds, privileged
 discipline lacks pentesting, precision lacks hardware evidence, or draft APIs
 leak into stable surfaces.
+
+## 11. Review Integration And Version Ownership
+
+The July 2026 gap review strengthens the existing roadmap without replacing
+its broader pre-1.0 completeness contract:
+
+| Concern | Owning versions |
+| --- | --- |
+| Floor-normalized instants, wide math, rational residuals | `v0.5.0`, `v0.7.0`, `v0.9.0`, gate `v0.17.0` |
+| Immutable scale contexts, POSIX outcomes, smear identity | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
+| Type-state, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
+| Runtime capability truth and safe/sys platform split | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
+| NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
+| NTS assurance provenance and secret lifecycle | `v0.72.0`–`v0.81.0` |
+| PTP revision admission, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
+| Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
+| Cross-family fault model, bounded servos, holdover | `v0.133.0`–`v0.136.0` |
+| Truthful facade, application clocks, bindings | `v0.137.0`–`v0.145.0` |
+| Privilege-separated helper and audit evidence | `v0.142.0`, `v0.146.0`–`v0.148.0` |
+| Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
+
+The review's proposed narrower replacement matrix is not adopted. The
+existing registry contract, Navheim-last feature order, per-milestone
+verification and pentest exits, hardware evidence, and full production
+admission sequence remain mandatory.
