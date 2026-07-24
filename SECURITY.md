@@ -60,8 +60,12 @@ the release branch between review and tagging.
 - Fork, exec, VM snapshot/restore, and container checkpoint/restore rotate
   generic lifecycle generations and invalidate inherited security/time state.
 - Leap handling remains layered: core validates immutable candidates, lifecycle
-  preserves and withdraws evidence, engine policy admits authority/diversity,
-  and hosted publication exposes one generation-consistent UTC-model change.
+  preserves and withdraws evidence, engine policy alone constructs an opaque
+  admitted handoff, and hosted publication rechecks all bound generations,
+  expiry, withdrawal, and replacement state immediately before one consistent
+  UTC-model change. Raw expert replacement cannot update the default clock.
+- Source smear behavior is evidence; local smear-versus-step presentation
+  policy never decides whether the underlying UTC model contains a leap.
 - No silent downgrade from authenticated to unauthenticated time.
 - Legacy and historical protocols are disabled in secure defaults.
 - GNSS interpretation comes only from admitted Navheim timing evidence;
@@ -91,17 +95,21 @@ the release branch between review and tagging.
   internal invariant bugs are documented non-claims, not recoverable errors.
 - Strict certificate validation accepts only when the full trusted-time
   interval lies within certificate validity; midpoint or preferred estimates
-  cannot turn partial overlap into validity.
+  cannot turn partial overlap into validity, and scalar-time verifier success
+  cannot substitute for immutable whole-chain temporal/revocation evidence.
 - Retained TLS/NTS tickets, exporters, associations, cookies, and peer evidence
-  bind the exact trust-anchor, service-identity, certificate/revocation,
-  trusted-time/leap-model, and lifecycle validation-context generation; every
-  context change explicitly invalidates, revalidates, or narrowly bounds use.
+  bind a stable policy generation, immutable temporal-validation evidence, and
+  relevant time/leap-model and lifecycle generations. Normal clock refinement
+  does not churn identity; expiry, rollback, trust removal, revocation, or a
+  relevant discontinuity explicitly invalidates or requires revalidation.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
-- Hosted time-data and configuration updates verify and stage before atomic
-  activation; a candidate never authenticates the transport or signature that
-  delivered itself, redirects preserve admitted authority, remote retrieval is
-  explicit, and offline/manual ingestion uses the same candidate pipeline.
+- Early hosted time-data updates use a caller-serialized verify/stage/compare/
+  commit transaction and make no concurrent-reader claim; later publication
+  exposes leap, EOP, scale-offset, conversion, and clock state consistently. A
+  candidate never authenticates the transport or signature that delivered
+  itself, redirects preserve admitted authority, remote retrieval is explicit,
+  and offline/manual ingestion uses the same candidate pipeline.
 - The helper consumes one canonical pre-daemon policy ceiling and discipline
   audit/gap schema; later daemon configuration and exporters may extend those
   types but cannot replace, reinterpret, or widen them.

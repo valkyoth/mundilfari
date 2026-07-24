@@ -362,13 +362,20 @@ and invertibility limitations. A smear is never labeled true UTC.
 Leap announcements are evidence, not model updates. Authoritative signed or
 locally pinned tables, authenticated protocol announcements, and
 unauthenticated hints remain distinct. The core first owns only immutable
-candidate validation and a single-thread transactional generation replacement.
-Generic provenance/lifecycle is added after the observation foundations;
-authority/correlation/diversity/quorum admission belongs to the engine; and
-concurrent visibility belongs to TrustedClock publication. Early “atomic”
-means one indivisible model-generation transaction, not a lock-free
-publication claim. A single authenticated server cannot schedule a leap merely
-because its packet is authentic.
+table/candidate representation, pure validation, and a single-thread
+transactional replacement for an isolated caller-owned conversion model.
+Generic provenance/lifecycle is added after the observation foundations.
+Authority/correlation/diversity/quorum admission belongs to the engine, which
+alone constructs an opaque `AdmittedLeapCandidate` binding the candidate,
+evidence, policy/membership/decision generations, assumptions, and typed
+expiry. TrustedClock publication consumes that handoff and atomically rechecks
+every binding immediately before commit; withdrawal, expiry, replacement, or
+generation change closes the transaction. A raw expert replacement cannot
+alter TrustedClock or the default facade. Early “atomic” means one indivisible
+caller-serialized model transaction, not a concurrent publication claim. A
+single authenticated server cannot schedule a leap merely because its packet
+is authentic. Source smear behavior is evidence, while local smear-versus-step
+policy affects presentation only and never decides leap truth.
 
 ### 4.4 Era resolution
 
@@ -682,11 +689,18 @@ zeroization, page locking, core-dump exclusion, hardware-backed/non-exportable
 keys, and externally held operations. A container type never implies these
 protections, and unsupported capabilities remain non-claims.
 
-TLS/NTS retained state is bound to a credential-validation context generation
-covering trust anchors, service identity, validation/revocation policy and
-evidence, whole-chain temporal intervals, trusted-time/leap-model generation,
-and execution lifecycle. A context change explicitly invalidates, requires
-revalidation, or permits only policy-bounded continuation.
+TLS/NTS retained state is bound to a stable credential-validation context. A
+`CredentialPolicyGeneration` covers trust anchors, service identity,
+algorithms, and validation/revocation policy. Immutable
+`TemporalValidationEvidence` records the exact interval and validation instant,
+whole-chain and revocation-evidence digest/outcome, validity horizon, and
+revalidation deadline. The context binds those identities plus relevant
+time/leap-model and execution generations; it does not embed the continuously
+refined live-clock interval. Normal refinement therefore causes no context
+churn, while expiry, rollback, trust removal, confirmed revocation, or a
+relevant model/lifecycle discontinuity invalidates or requires revalidation.
+A scalar-`UnixTime` conventional verifier cannot be promoted into strict
+whole-interval `TemporalValidity` evidence.
 
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
@@ -704,10 +718,14 @@ interrupt-latency, stack, and WCET evidence.
 
 Hosted time-data updates use a bounded `TimeDataProvider`: embedded snapshots,
 application files, OS-managed data, or explicitly caller-authorized remote
-retrieval. Updates verify, stage, compare, and atomically activate or fail
-without disturbing the current model. Expiry, rollback capability,
-withdrawal, and refresh failure remain visible in capability reports and
-`system_defaults()`.
+retrieval. The early update transaction is explicitly caller-serialized:
+updates verify, stage, compare, and indivisibly commit a caller-owned snapshot
+or fail without disturbing the current model; competing writers are rejected
+or serialized. It does not claim concurrent-reader publication. The later
+TrustedClock publication mechanism exposes leap, EOP, external scale-offset,
+conversion-context, and clock generations as one consistent snapshot. Expiry,
+rollback capability, withdrawal, and refresh failure remain visible in
+capability reports and `system_defaults()`.
 
 Remote time data cannot authenticate itself: a candidate never validates the
 transport or credential interval that delivered it. Artifact signatures,
@@ -877,14 +895,14 @@ its broader pre-1.0 completeness contract:
 | Concern | Owning versions |
 | --- | --- |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
-| Layered leap candidate/evidence/engine/publication admission | `v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
+| Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers, activation, and independent trust bootstrap | `v0.52.0`–`v0.52.2`, product gate `v0.148.0` |
+| Hosted time-data providers, serialized commit, independent trust, concurrent publication | `v0.52.0`–`v0.52.2`, publication `v0.137.1`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |

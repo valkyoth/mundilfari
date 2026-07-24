@@ -16,11 +16,17 @@ REVIEW_COVERAGE = {
     "v0.2.0": ("transitive normative", "WireComplete"),
     "v0.3.0": ("per-source implementation evidence",),
     "v0.7.0": ("mathematical floor",),
-    "v0.12.0": ("TAI-to-UTC", "realization-evidence"),
+    "v0.12.0": (
+        "TAI-to-UTC",
+        "realization-evidence",
+        "source-neutral metadata",
+        "does not own evidence provenance",
+    ),
     "v0.12.1": (
         "LeapModelCandidate",
         "single-thread transactional",
         "no protocol type",
+        "cannot update `TrustedClock`",
     ),
     "v0.9.0": ("maximum limb width",),
     "v0.11.0": ("ConversionContext", "bipm-si-brochure-9-v4.01"),
@@ -64,7 +70,11 @@ REVIEW_COVERAGE = {
         "audit-full",
     ),
     "v0.53.0": ("unknown critical",),
-    "v0.52.1": ("TimeDataProvider", "verify → stage → compare"),
+    "v0.52.1": (
+        "TimeDataProvider",
+        "caller-serialized verify → stage → compare → commit",
+        "no concurrent-reader",
+    ),
     "v0.52.2": (
         "candidate data is never used",
         "no built-in production TLS claim",
@@ -73,18 +83,31 @@ REVIEW_COVERAGE = {
     "v0.59.0": ("association-local filtering only",),
     "v0.60.0": ("maximum faulty diversity groups",),
     "v0.61.0": ("engine-owned", "without either reimplementing"),
-    "v0.61.1": ("one authenticated malicious server", "no model installation"),
+    "v0.61.1": (
+        "one authenticated malicious server",
+        "AdmittedLeapCandidate",
+        "local smear-versus-step presentation policy",
+        "no model installation",
+    ),
     "v0.62.0": ("facade/application composition",),
     "v0.72.0": (
         "v0.24.1",
         "TLS/Rustls/certificate admission",
         "SecretMemoryProtection",
     ),
-    "v0.75.0": ("TemporalValidity", "entire trusted time interval"),
+    "v0.75.0": (
+        "TemporalValidity",
+        "entire trusted time interval",
+        "CredentialVerifier",
+        "scalar `UnixTime`",
+    ),
     "v0.75.1": (
         "CredentialValidationContextId",
+        "CredentialPolicyGeneration",
+        "TemporalValidationEvidence",
         "CRL/OCSP",
         "InvalidateImmediately",
+        "ordinary clock refinement",
     ),
     "v0.76.0": ("operation and byte limits", "entropy/nonce failure"),
     "v0.78.1": ("draft-ietf-ntp-nts-keyexchange-pool-01",),
@@ -103,6 +126,9 @@ REVIEW_COVERAGE = {
     ),
     "v0.134.4": ("ActuationFeedback", "anti-windup", "competing actuation"),
     "v0.137.1": (
+        "AdmittedLeapCandidate",
+        "atomically rechecks",
+        "external scale-offset data",
         "single-thread transactional",
         "concurrent-reader",
         "memory-ordering",
@@ -129,14 +155,33 @@ REVIEW_COVERAGE = {
         "honest ahead recovery",
         "frozen helper-policy/discipline-audit semantics",
         "CredentialValidationContextId",
+        "AdmittedLeapCandidate",
+        "all-component concurrent publication",
     ),
     "v0.157.0": ("CGGTTS coverage",),
     "v0.160.0": ("whole-safe-facade fuzzing",),
-    "v0.162.0": ("SecretMemoryProtection", "CredentialValidationContextId"),
+    "v0.162.0": (
+        "SecretMemoryProtection",
+        "CredentialValidationContextId",
+        "CredentialPolicyGeneration",
+        "TemporalValidationEvidence",
+        "scalar `UnixTime`",
+    ),
     "v0.164.0": ("Android/iOS lifecycle evidence",),
     "v0.166.0": ("safe-facade panic contract",),
     "v0.165.0": ("no unclassified", "family/bundle"),
     "v0.167.0": ("signed exact-commit attestation",),
+}
+
+REVIEW_FORBIDDEN = {
+    "v0.12.0": (
+        "versioned leap table, provenance, activation, and hash",
+        "leap announcement and conflict model",
+    ),
+    "v0.12.1": ("caller-admitted",),
+    "v0.52.1": ("concurrent readers", "atomic activate pipeline"),
+    "v0.61.1": ("the caller passes",),
+    "v0.75.1": ("revocation configuration/evidence, trusted-time",),
 }
 
 
@@ -190,6 +235,13 @@ def validate_review_coverage(text: str) -> list[str]:
         for phrase in phrases:
             if phrase not in block:
                 errors.append(f"{version} missing review requirement: {phrase}")
+    for version, phrases in REVIEW_FORBIDDEN.items():
+        block = blocks.get(version)
+        if block is None:
+            continue
+        for phrase in phrases:
+            if phrase in block:
+                errors.append(f"{version} contains stale review requirement: {phrase}")
     return errors
 
 

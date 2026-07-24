@@ -100,7 +100,9 @@ Additional boundaries:
 | Amplification | bounded response ratio, validation before response, rate and work limits |
 | Era/rollover confusion | explicit context and ambiguity errors |
 | Leap or scale confusion | typed scales, versioned leap data, explicit POSIX/smear policy |
-| False or conflicting leap injection | authority-classified evidence, diversity/quorum and conflict policy, withdrawal, staged atomic model generation activation; one authenticated source is insufficient |
+| False or conflicting leap injection | source-neutral candidates, authority-classified evidence, diversity/quorum and conflict policy, opaque admitted handoff, precommit generation/expiry/withdrawal recheck, and consistent publication; one authenticated source is insufficient |
+| Leap admission-to-commit race | raw candidates cannot publish the default clock; the admitted handoff binds candidate/evidence/policy/membership/decision generations and typed expiry, and commit linearizes revalidation with publication |
+| Smear policy changes leap truth | source smear behavior remains evidence; only admitted UTC evidence determines a leap, while local smear/step policy controls presentation |
 | Clock rollback | monotonic guard, default no backward step, virtual application clocks |
 | Monotonic-domain confusion | typed suspend/rate/scope/process/machine/namespace/generation identity; cross-domain deadline/elapsed rejection |
 | Fork/checkpoint replay | process/machine lifecycle generations invalidate requests, entropy/nonces, handles, timers, rate limits, helper sessions and TrustedClock state |
@@ -112,7 +114,7 @@ Additional boundaries:
 | Radio spoofing | source fusion, propagation checks, signal quality, independent corroboration |
 | PTP manipulation | authenticated mechanism or trusted boundary/corroboration for strict discipline, topology identity, correction/delay monitoring, redundant grandmasters and paths |
 | Timestamp misassociation | packet identity, sequence, error-queue, ancillary bounds, drop detection |
-| Torn concurrent clock snapshot | generation-consistent publication, explicit memory model, model checking, bounded read latency |
+| Torn concurrent clock snapshot | generation-consistent publication of leap/EOP/scale-offset/conversion/clock components, explicit memory model, model checking, bounded read latency |
 | Persisted-state corruption or rollback | early canonical bounded schema, torn-write detection, authenticated integrity where required, explicit rollback capability, no strong freshness claim from mutable local state/key |
 | Repeated bounded discipline abuse | helper-local cumulative phase/frequency windows, rate/settling limits, independent policy ceiling, session/domain binding, fault latch, bounded fail-closed audit |
 | Servo integrates an unapplied proposal | correlated actual-actuation feedback, target generation, residual/quantization handling, anti-windup, missing-feedback fault |
@@ -123,10 +125,11 @@ Additional boundaries:
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |
 | Specification drift | official revision registry, errata review, draft isolation, source hashes |
-| Malicious or partial time-data update | explicit provider authorization, bounded verify/stage/compare/atomic activation, rollback/withdrawal/expiry state, current model retained on failure |
+| Malicious or partial time-data update | explicit provider authorization, bounded caller-serialized verify/stage/compare/commit, competing-writer control, rollback/withdrawal/expiry state, current model retained on failure, and later consistent concurrent publication |
 | Circular remote time-data bootstrap | a candidate never validates the transport, certificate, signature time, or credential context that delivered itself; require an admitted signer/pin or HTTPS under already admitted time, preserve redirect authority, and route offline/manual ingestion through the same pipeline |
-| Certificate midpoint acceptance | interval-valued temporal validity; strict validation requires the entire trusted interval within certificate validity |
-| Stale retained TLS/NTS credentials after trust change | context-generation binding across trust anchors, identity policy, full chain, revocation evidence, provider configuration, trusted-time/leap model, and process/machine lifecycle; explicit invalidate, revalidate, or bounded-continuation action |
+| Certificate midpoint acceptance | concrete verifier returns immutable whole-chain/revocation evidence for interval-valued temporal validity; scalar `UnixTime`, midpoint, or preferred projection cannot satisfy strict validation |
+| Stale retained TLS/NTS credentials after trust change | stable policy generation plus immutable temporal evidence/horizon and relevant time-model/lifecycle generations; explicit invalidate, revalidate, or bounded-continuation action |
+| Credential-context churn from normal clock refinement | context identity references immutable validation evidence rather than the live clock interval; only expiry or relevant policy, revocation, rollback, model, or lifecycle change rotates/revalidates it |
 | Deep canonical-schema exhaustion | maximum depth/item counts, iterative or bounded recursion, common non-resettable work budget, stable tag namespaces |
 | False audit tamper-evidence claim | strict sequence/gap records, domain and TAI/model generations, append-only distinct from chained/sealed/witnessed tamper evidence |
 | Configuration rollback or secret leakage | provenance/integrity/rollback generation, staged atomic activation, opaque secret references, independent helper ceiling |

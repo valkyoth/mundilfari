@@ -75,6 +75,13 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   retained state follows full credential-context generations; canonical helper
   policy/audit types precede the daemon; and secret-memory protection claims
   are capability-qualified.
+- Follow-up consistency audit closed stale and underspecified boundaries:
+  `v0.12.0` now owns only source-neutral leap representation/conversion;
+  engine admission produces an opaque generation-bound handoff that hosted
+  publication revalidates at commit; smear presentation cannot change leap
+  truth; credential contexts use stable policy generations and immutable
+  whole-chain temporal evidence; and early time-data updates explicitly defer
+  concurrent-reader publication.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

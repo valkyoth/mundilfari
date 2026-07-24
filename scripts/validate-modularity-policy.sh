@@ -36,6 +36,7 @@ grep -q 'mundilfari-engine.workspace = true' crates/mundilfari/Cargo.toml
 ! grep -q 'linux-clock-adjust' docs/IMPLEMENTATION_PLAN.md
 grep -q 'Generic interval quorum, falseticker rejection' docs/modularity-policy.md
 grep -q 'Leap-candidate structure and pure validation live in core' docs/modularity-policy.md
+grep -q 'Core raw leap-model replacement is isolated' docs/modularity-policy.md
 grep -q 'Protocol crate feature sets contain no clock-adjustment' docs/modularity-policy.md
 grep -q 'canonical pre-daemon policy-ceiling' docs/modularity-policy.md
 grep -q 'unavailable atomics are not' docs/modularity-policy.md

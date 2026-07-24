@@ -35,6 +35,9 @@ Rules:
   lifecycle/provenance uses shared source types; leap authority, correlation,
   diversity, and quorum live only in engine; hosted concurrent publication
   lives only in the composition layer.
+- Core raw leap-model replacement is isolated and cannot publish
+  `TrustedClock` or default-facade state; only an opaque engine-issued admitted
+  handoff reaches composition, where its bindings are rechecked with commit.
 - Generic interval quorum, falseticker rejection, clustering, combining, and
   diversity are engine primitives implemented before NTP composition; NTP
   crates own association/filter metadata but no copy of those algorithms.

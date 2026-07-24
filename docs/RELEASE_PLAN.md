@@ -581,22 +581,25 @@ Goal: model UTC including positive and possible negative leaps.
 Deliverables:
 
 - UTC civil values capable of representing second 60;
-- versioned leap table, provenance, activation, and hash;
-- leap announcement and conflict model;
+- immutable versioned leap-table representation with content hash,
+  source-neutral metadata, and structural positive/negative leap entries;
 - explicit generic TAI-to-UTC and UTC-to-TAI conversion against the canonical
   `AtomicInstant` origin, including realization metadata and typed ambiguous,
   missing-table, stale-table, and out-of-coverage outcomes;
 - checked UTC/UT1 conversion using the admitted EOP model and matching
   conversion-context generations;
+- this milestone does not own evidence provenance, announcement lifecycle,
+  admission policy, active-model replacement, or concurrent publication;
 - explicit UTC-before-1972 non-claim until a historical frequency-offset model
   is separately admitted.
 
 Verification:
 
 - canonical TAI/UTC origin and published offset vectors, every historical leap
-  boundary, second 60, invalid leap dates, table replacement, rollback,
-  outside-coverage behavior, realization-evidence non-equivalence, and
-  negative-leap synthetic tests.
+  boundary, second 60, invalid leap dates, immutable table/hash/source-neutral
+  metadata, outside-coverage behavior, realization-evidence non-equivalence,
+  and negative-leap synthetic tests; compile/dependency tests prove the
+  deferred provenance/admission/publication layers are absent.
 
 Exit criteria:
 
@@ -621,10 +624,14 @@ Deliverables:
   and model compatibility;
 - deterministic candidate-to-current comparison with unchanged, extension,
   conflict, rollback, replacement, and unsupported outcomes;
-- single-thread transactional stage/commit/abort semantics that replace one
-  model generation indivisibly and invalidate stale conversion contexts;
+- single-thread transactional stage/commit/abort semantics for an isolated
+  caller-owned conversion model, replacing one model generation indivisibly
+  and invalidating stale conversion contexts;
 - “atomic activation” at this stage means one indivisible model-generation
   transaction, not lock-free or concurrent-reader publication;
+- raw validated-candidate replacement remains an explicit expert operation;
+  it cannot update `TrustedClock`, the default facade, or manufacture later
+  engine admission;
 - no protocol type, provenance policy, generic lifecycle event, authentication
   class, source quorum, or engine dependency.
 
@@ -638,8 +645,8 @@ Verification:
 
 Exit criteria:
 
-- core can validate and transactionally install only a caller-admitted
-  candidate without implementing source admission itself;
+- core can validate and transactionally replace an isolated caller-owned model
+  without claiming source admission or default-clock publication;
 - `v0.12.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.13.0 - POSIX And Smear Policy
@@ -2097,8 +2104,12 @@ Deliverables:
 - source identity, provenance, integrity, rollback capability, validity,
   expiry, model generation, retrieval authorization, network action, and
   resource limits in every candidate/report;
-- strict verify → stage → compare → atomic activate pipeline using the generic
-  loader, persistence, lifecycle, and conversion-generation boundaries;
+- caller-serialized verify → stage → compare → commit transaction using the
+  generic loader, persistence, lifecycle, and conversion-generation
+  boundaries; the update guard rejects or serializes competing writers;
+- caller-owned commit is indivisible but provides no concurrent-reader or
+  `TrustedClock` publication guarantee before
+  `v0.137.1`;
 - failed refresh leaves the current admitted snapshot untouched and reports
   stale/expired/degraded/faulted state; withdrawal and rollback invalidate
   dependent conversions;
@@ -2111,9 +2122,10 @@ Verification:
 
 - embedded/file/OS/authorized-remote providers, authorization refusal, SSRF/
   redirect/size/work limits, signature/checksum failure, older/conflicting
-  snapshots, stage/compare/activation races, crash during activation,
-  withdrawal, expiry, failed refresh, offline restart, concurrent readers,
-  and capability/system-default reports.
+  snapshots, competing-writer rejection/serialization, stage/compare/commit
+  failure and crash injection, withdrawal, expiry, failed refresh, offline
+  restart, explicit absence of a concurrent-reader guarantee, and
+  capability/system-default reports.
 
 Exit criteria:
 
@@ -2440,18 +2452,23 @@ Deliverables:
   rejected, pending, split, or insufficient decision for a validated
   `v0.12.1` candidate;
 - explicit authority, authentication/integrity, freshness, lead-time,
-  correlation, diversity/quorum, smear-versus-step, and minimum-evidence
-  requirements; authentication alone never grants leap authority;
+  correlation, diversity/quorum, and minimum-evidence requirements;
+  authentication alone never grants leap authority;
+- source smear behavior remains evidence about presentation/transport;
+  local smear-versus-step presentation policy never decides whether the
+  underlying UTC model contains a leap;
 - policy-defined treatment of authoritative pinned tables, authenticated
   announcements, corroborated evidence, unauthenticated hints, cancellations,
   withdrawals, and conflicting candidate hashes/generations;
 - generic evidence adapters allow future NTP/PTP/radio/external sources
   without adding protocol types or duplicate quorum logic to core/engine;
-- admitted decision carries exact evidence set, policy/membership generation,
-  candidate identifier/hash, assumptions, non-claims, and expiry;
-- no model installation or concurrent publication: the caller passes the
-  admitted candidate to the `v0.12.1` transaction, with concurrent visibility
-  completed only at `v0.137.1`.
+- opaque, engine-constructed `AdmittedLeapCandidate` binds candidate
+  identifier/hash, exact evidence set or digest, authority, policy and
+  membership generations, evidence and decision generations, assumptions,
+  non-claims, expiry, and the expiry's full `MonotonicClockId`;
+- the handoff exposes bounded activation revalidation but no raw constructor;
+  no model installation or concurrent publication occurs here, and
+  `v0.137.1` is the only default-clock consumer.
 
 Verification:
 
@@ -2459,7 +2476,8 @@ Verification:
   authoritative-table versus NTP/PTP/radio fixture conflict, false leap,
   late/withdrawn/cancelled evidence, source churn, smear/step disagreement,
   policy/membership reload, malicious majority, impossible quorum, and
-  candidate/decision generation mismatch.
+  candidate/decision generation mismatch; compile tests prevent external
+  `AdmittedLeapCandidate` construction or raw-candidate default publication.
 
 Exit criteria:
 
@@ -2809,6 +2827,14 @@ Deliverables:
   overlap or insufficient time evidence;
 - strict mode accepts only `DefinitelyValid`; no midpoint, preferred estimate,
   or monotonic projection substitutes for the trusted interval;
+- concrete bounded `CredentialVerifier` contract returns immutable
+  whole-chain `TemporalValidationEvidence`: exact trusted interval used,
+  validation instant, chain and supported revocation evidence digests,
+  per-member outcomes, capability/non-claims, validity horizon, and optional
+  revalidation deadline with its full `MonotonicClockId`;
+- a conventional verifier accepting one scalar `UnixTime` cannot by itself
+  produce `DefinitelyValid` or satisfy the strict `CredentialVerifier`
+  contract; adapters must preserve whole-interval and whole-chain evidence;
 - certificate-time bootstrap policy without disabling validity checks.
 
 Verification:
@@ -2816,7 +2842,8 @@ Verification:
 - Rustls interop, wrong identity, expired/not-yet-valid/revoked-policy chain,
   unavailable revocation, trust anchor, ALPN, TLS version, resumption, rejected
   early data, wholly-valid/disjoint/partial-overlap time intervals, boundary
-  precision, absent preferred estimate, close, fragmentation, and provider
+  precision, absent preferred estimate, scalar-`UnixTime` midpoint rejection,
+  incomplete chain/revocation evidence, close, fragmentation, and provider
   matrix tests.
 
 Exit criteria:
@@ -2828,21 +2855,33 @@ Exit criteria:
 
 Status: planned.
 
-Goal: bind retained TLS/NTS security state to the exact credential, identity,
-revocation, and trusted-time context under which it was validated.
+Goal: bind retained TLS/NTS security state to stable credential policy and
+immutable temporal evidence without rotating identity on normal clock
+refinement.
 
 Deliverables:
 
-- typed `CredentialValidationContextId` and generation covering trust-anchor
-  set, service-identity policy, certificate-validation policy, provider/
-  algorithm configuration, revocation configuration/evidence, trusted-time
-  interval, conversion/leap-model generation, and process/machine generation;
+- typed `CredentialPolicyGeneration` covering trust-anchor set,
+  service-identity policy, certificate-validation policy, provider/algorithm
+  configuration, and revocation policy;
+- immutable `TemporalValidationEvidence` from `v0.75.0` carries the exact
+  interval used for validation, validation instant, whole-chain/revocation
+  evidence digest and outcomes, capability/non-claims, validity horizon, and
+  revalidation deadline;
+- stable `CredentialValidationContextId` binds the credential-policy
+  generation, temporal-evidence identity/digest, relevant conversion/leap-model
+  generation, and process/machine generation, never the continuously refined
+  live clock interval;
 - resumption tickets, exporter contexts, NTS associations, cookie jars, and
   retained peer credential evidence carry the exact context identifier;
 - each context change has an explicit action:
   `InvalidateImmediately`, `RevalidateBeforeUse`, or policy-bounded
   `ContinueUntil`, with strict defaults for trust removal, revocation,
   identity-policy tightening, time-model rollback, or definite expiry;
+- ordinary clock refinement within the same admitted time/model generation
+  does not rotate the context; definite expiry, trust removal, confirmed
+  revocation, rollback, execution-generation change, or relevant time-model
+  discontinuity does;
 - `TemporalValidity` evaluates the whole validated chain and all supported
   time-bearing revocation evidence, including CRL/OCSP `thisUpdate`,
   `nextUpdate`, produced/validity times, and freshness policy;
@@ -2858,8 +2897,9 @@ Verification:
   received revocation, CRL/OCSP before/inside/partial/expired/future intervals,
   chain member expiry, resumption after context change, certificate expiry
   during cookie retention, time/leap-model rollback/replacement, process/
-  machine generation change, and every invalidation/revalidation/continued-
-  use action.
+  machine generation change, repeated normal clock refinements without
+  context churn, revalidation-horizon expiry, and every invalidation/
+  revalidation/continued-use action.
 
 Exit criteria:
 
@@ -5272,9 +5312,19 @@ Deliverables:
 - documented memory-ordering/publication model for one internally consistent
   snapshot across instant, hard/statistical uncertainty, scale/context model,
   source set, validity, and generation;
-- concurrent publication of an engine-admitted `LeapModelCandidate` makes the
-  new leap/conversion generation and dependent clock snapshot visible as one
-  synchronized transition; no reader observes half old/half new model state;
+- concurrent publication consumes only an engine-issued
+  `AdmittedLeapCandidate`; immediately before commit it atomically rechecks
+  candidate/evidence/authority/policy/membership/decision generations, expiry
+  in its exact monotonic domain, and replacement/withdrawal state;
+- withdrawal, expiry, policy or membership reload, evidence-generation change,
+  or candidate replacement between admission and commit invalidates the
+  transaction; generation comparison and commit share one linearized
+  publication boundary rather than a caller-controlled check-then-act gap;
+- leap tables, EOP, external scale-offset data, conversion-context generation,
+  UTC result, and dependent clock snapshot become visible as one internally
+  consistent transition; no reader observes mixed component generations;
+- raw `LeapModelCandidate` or expert core replacement can never update
+  `TrustedClock` or the default facade without `AdmittedLeapCandidate`;
 - clarifies that `v0.12.1` atomicity was only a single-thread transactional
   generation replacement, while this milestone supplies concurrent-reader
   visibility and ordering;
@@ -5293,8 +5343,9 @@ Verification:
 
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
-- old/new leap candidate, conversion context, UTC result, and clock snapshot
-  interleavings across admission/commit/publication/withdrawal;
+- old/new admitted/raw leap candidate, evidence/policy/membership generation,
+  expiry, withdrawal, EOP, scale-offset, conversion context, UTC result, and
+  clock snapshot interleavings across admission/recheck/commit/publication;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -5740,9 +5791,11 @@ Deliverables:
   reports;
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   process/machine lifecycle, monotonic domains, dependency-correct layered
-  leap admission/publication, independently trusted time-data activation,
-  competing discipline ownership, honest ahead recovery, embedded concurrency,
-  full-chain `CredentialValidationContextId` invalidation,
+  leap admission with `AdmittedLeapCandidate` precommit revalidation,
+  caller-serialized independently trusted time-data ingestion plus
+  all-component concurrent publication, competing discipline ownership,
+  honest ahead recovery, embedded concurrency, stable policy/evidence-based
+  `CredentialValidationContextId` invalidation without live-clock churn,
   capability-qualified secret memory, concurrent snapshot, canonical external
   schema, frozen helper-policy/discipline-audit semantics, and language-binding
   review;
@@ -6124,11 +6177,13 @@ Deliverables:
 - independent verification of every claimed `SecretMemoryProtection`
   capability and explicit unsupported/non-composable protection non-claims;
 - `CredentialValidationContextId` coverage for every retained TLS/NTS state,
-  trust/identity/revocation/provider/time/leap/lifecycle change, full validated
-  chain, CRL/OCSP temporal evidence, and invalidate/revalidate/continue action;
+  stable `CredentialPolicyGeneration`, immutable
+  `TemporalValidationEvidence`, trust/identity/revocation/provider/time/leap/
+  lifecycle change, revalidation horizon, full validated chain, CRL/OCSP
+  temporal evidence, and invalidate/revalidate/continue action;
 - interval-valued certificate temporal-validity and bootstrap review proving
-  strict validation never uses a midpoint/preferred projection or a candidate
-  artifact to authenticate its own retrieval;
+  strict validation never uses a scalar `UnixTime`, midpoint/preferred
+  projection, or a candidate artifact to authenticate its own retrieval;
 - generic provider-boundary assurance, per-key atomic usage/exhaustion,
   fail-closed rekey, and proof that persistence/protocol consumers bypass no
   admitted provider contract;
@@ -6157,9 +6212,11 @@ Deliverables:
 - persistence crash/rollback/migration campaigns and concurrent snapshot/
   withdrawal/cancellation stress;
 - fork/exec/VM/container restore invalidation, competing clock discipliners,
-  credential-context invalidation, independent time-data trust and layered
-  leap activation, audit/configuration rollback, helper audit-full/latch/gap
-  recovery, and virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
+  stable credential-context invalidation without refinement churn, independent
+  time-data trust and caller-serialized-to-concurrent publication, leap
+  admission-to-commit withdrawal/expiry/policy/member/candidate races,
+  audit/configuration rollback, helper audit-full/latch/gap recovery, and
+  virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
   claimed HFT-oriented configurations, including cache-line layout, bounded
   retry behavior, CPU migration, and per-core/socket/NUMA placement;
@@ -6266,8 +6323,10 @@ Deliverables:
   `estimate_now()` truth-seeking semantics, ahead-recovery states, monotonic
   domain identity, and cross-language range behavior documented;
 - secret-memory capability/non-claim, credential-validation-context,
-  independent time-data trust, layered leap admission/publication, and
-  helper-policy/audit-full behavior documented without stronger implied claims;
+  immutable temporal-validation evidence/scalar-time non-claim, independent
+  time-data trust and publication phases, opaque leap admission/precommit
+  revalidation, smear-presentation separation, and helper-policy/audit-full
+  behavior documented without stronger implied claims;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

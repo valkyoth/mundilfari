@@ -68,6 +68,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   generations; added non-circular remote time-data bootstrap; froze helper
   policy/audit types before the daemon; and made secret-memory protections
   capability-qualified rather than implied.
+- Reconciled the follow-up consistency review: removed stale leap
+  provenance/activation ownership from `v0.12.0`; added an opaque,
+  generation-bound leap admission handoff with atomic precommit revalidation;
+  separated leap truth from smear presentation; stabilized credential identity
+  around policy generations and immutable whole-chain validation evidence; and
+  deferred all-component concurrent time-data publication to `v0.137.1`.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.
