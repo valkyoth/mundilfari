@@ -359,6 +359,13 @@ supported. POSIX conversion returns a typed `Unique`, `Ambiguous`, or
 is applied. Smears carry provider/profile, window, function, model generation,
 and invertibility limitations. A smear is never labeled true UTC.
 
+Leap announcements are evidence, not model updates. Authoritative signed or
+locally pinned tables, authenticated protocol announcements, and
+unauthenticated hints remain distinct. Activation requires explicit policy,
+admitted authority/diversity, conflict resolution, and one atomic conversion-
+model generation change. A single authenticated server cannot schedule a leap
+merely because its packet is authentic.
+
 ### 4.4 Era resolution
 
 Truncated or wrapping Mundilfari protocol timestamps require a caller-visible
@@ -401,6 +408,30 @@ invalidate downstream state when evidence is withdrawn.
 synchronized virtual application clock. Mobile and browser defaults are
 application clocks, not system discipline. Every C, WASM, Java/Kotlin, Swift,
 database, `time_t`, and JavaScript boundary rejects out-of-range narrowing.
+
+### 4.6 Monotonic domains and lifecycle generations
+
+A monotonic value is typed by `MonotonicClockId`, not merely an integer. Its
+descriptor records suspend behavior, raw-versus-frequency-adjusted rate
+semantics, process-versus-system scope, boot/session, process generation,
+machine-instance generation, namespace, and clock generation. Deadlines,
+elapsed intervals, correlations, helper expiries, and persisted bootstrap
+anchors from different identities cannot be combined.
+
+Fork, VM snapshot/restore, and container checkpoint/restore are generic
+execution-lifecycle discontinuities. They rotate affected process/machine
+generations and invalidate inherited requests, entropy/nonces, sockets,
+timers, rate limits, helper sessions, and TrustedClock publication state.
+Hosted adapters document non-inherited and close-on-exec handles plus explicit
+child/restart initialization.
+
+`TrustedClock::now()` provides a nondecreasing preferred application
+projection only while that projection remains honest. Hard earliest/latest
+bounds may revise backward when evidence changes. `Ahead`, `Frozen`,
+`CatchingDown`, and `Faulted` states expose recovery; a preferred value is
+removed when it lies outside the honest interval. A separate
+`estimate_now()` returns the current truth-seeking interval without promising
+monotonic projection.
 
 ## 5. Protocol Implementation Template
 
@@ -551,6 +582,13 @@ the same safeguards. Every step, rate change, reset, suspend, namespace
 change, or device replacement publishes a discontinuity and changes affected
 generations.
 
+Adjustment targets also expose a discipline-ownership lease: `Exclusive`,
+`Cooperative`, `ObservedOnly`, or `Unmanaged`. A lease is a capability report,
+not proof that an administrator, hypervisor, kernel facility, or competing
+daemon cannot intervene. Observed external phase/rate changes rotate the
+target generation, invalidate outstanding proposals, publish a discontinuity,
+and force servo reacquisition.
+
 The helper is a dedicated executable with no protocol dependencies. It uses a
 pre-opened socketpair or fixed local endpoint, verifies peer credentials,
 accepts fixed-version and fixed-maximum-length messages, rejects replayed
@@ -605,9 +643,14 @@ ownership, ordering, and reset invariants.
 
 A no-`std`, caller-buffer canonical schema kernel is completed before any
 persistence consumer. It owns bounded envelopes, version/criticality rules,
-canonical integers and field ordering, but no filesystem behavior. Hosted
-platform adapters own atomic file replacement. Protocol crates export/import
-bounded state values and never perform persistence I/O.
+canonical integers and field ordering, fixed maximum nesting and total item
+counts, iterative or provably bounded-recursive parsing, and stable tag
+allocation/reserved ranges. Field identifiers are never reused with new
+meaning; core, protocol, experimental, and vendor namespaces have explicit
+collision rules. Schema work consumes the common work budget, but owns no
+filesystem behavior. Hosted platform adapters own atomic file replacement.
+Protocol crates export/import bounded state values and never perform
+persistence I/O.
 
 All persistent state uses that one versioned bounded foundation with
 crash-consistent replacement, torn-write detection, explicit durability,
@@ -637,6 +680,27 @@ rules, and read-latency guarantee are documented and model-tested; instant,
 uncertainty, scale model, source set, and generation cannot tear.
 Fast-path claims also name cache-line layout, reader retry bounds, CPU
 migration behavior, and per-core/NUMA benchmark conditions.
+
+`no_std` concurrency never assumes hosted atomics. Each target selects an
+explicit single-thread-only, target-atomic, caller-supplied-critical-section,
+or claimed ISR-safe producer/consumer profile. `target_has_atomic` gates
+atomic implementations; missing atomics are not silently replaced by an
+unbounded lock. Claimed interrupt-safe profiles carry priority-inversion,
+interrupt-latency, stack, and WCET evidence.
+
+Hosted time-data updates use a bounded `TimeDataProvider`: embedded snapshots,
+application files, OS-managed data, or explicitly caller-authorized remote
+retrieval. Updates verify, stage, compare, and atomically activate or fail
+without disturbing the current model. Expiry, rollback capability,
+withdrawal, and refresh failure remain visible in capability reports and
+`system_defaults()`.
+
+Configuration has identity, provenance, integrity, rollback capability, and
+generation; it is staged and fully validated before atomic activation. Secrets
+are opaque provider references, never inline values. Helper policy is an
+independent ceiling. Audit records bind strict sequence/gap events to a
+monotonic domain and TAI/model estimate; append-only storage is not called
+tamper-evident unless chaining, sealing, or external witnessing proves it.
 
 ## 8. Standards Governance
 
@@ -788,22 +852,25 @@ its broader pre-1.0 completeness contract:
 | Concern | Owning versions |
 | --- | --- |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
+| Leap evidence admission and atomic model activation | `v0.12.1`, time-data orchestration `v0.52.1`, product gate `v0.148.0` |
+| Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
-| Type-state, schema/crypto kernels, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
-| Runtime capability, RTC/counters/MMIO/GPIO/discipline/persistence | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
+| Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
+| Runtime capability, RTC/MMIO/discipline ownership/persistence | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
+| Hosted time-data providers and controlled activation | loaders `v0.52.0`, orchestration `v0.52.1`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | Generic engine quorum/diversity and NTP orchestration | `v0.60.0`–`v0.62.0`, cross-family composition `v0.133.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| Crypto production admission, NTS pool establishment, secret lifecycle | `v0.72.0`–`v0.81.0` |
+| Crypto production admission, interval certificate validity, NTS/bootstrap lifecycle | `v0.72.0`–`v0.81.0` |
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Snapshot concurrency, schema compatibility, panic-safe facade and bindings | `v0.137.0`–`v0.145.0` |
-| Privilege-separated helper and audit evidence | `v0.142.0`, `v0.146.0`–`v0.148.0` |
+| Hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | `v0.137.0`–`v0.145.0` |
+| Privilege helper, atomic configuration, sequenced/tamper-qualified audit | `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 
 No gap analysis is adopted as a replacement matrix. The existing registry

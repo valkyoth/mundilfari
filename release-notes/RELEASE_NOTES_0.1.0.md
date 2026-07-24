@@ -62,6 +62,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   actual actuation feedback, cumulative helper limits, panic-safe facade
   handling, a defined TAI origin, mobile lifecycle tests, and a final
   post-CGGTTS Navheim security gate.
+- Further lifecycle audit integrated through explicit versions for monotonic
+  suspend/rate/scope identities, fork/checkpoint machine generations,
+  competing discipline ownership, truthful ahead/frozen/catch-down clock
+  recovery, interval certificate validity, leap-announcement admission,
+  hosted time-data orchestration, no_std atomic/critical-section/ISR profiles,
+  schema depth/tag budgets, and configuration/audit integrity.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

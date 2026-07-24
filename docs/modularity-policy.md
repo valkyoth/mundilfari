@@ -36,6 +36,11 @@ Rules:
   crates own association/filter metadata but no copy of those algorithms.
 - Protocol crate feature sets contain no clock-adjustment or privileged
   authority feature.
+- Monotonic values and lifecycle events use shared core domain/generation
+  types; protocol crates do not invent private fork/checkpoint handling.
+- `no_std` concurrency selects single-thread, target-atomic, caller critical-
+  section, or explicitly supported ISR profiles; unavailable atomics are not
+  hidden behind an unbounded lock.
 - Navheim never depends on Mundilfari, preventing an integration cycle.
 - Stable crates do not expose experimental-draft types.
 - Non-generated Rust files may not exceed 500 lines.

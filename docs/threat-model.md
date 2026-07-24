@@ -35,6 +35,10 @@ authenticated, traceable, fresh, or safe for clock discipline.
   environmental sensors.
 - Local unprivileged users attacking daemon IPC or file/socket permissions.
 - Compromised unprivileged workers trying to abuse a privileged helper.
+- Competing clock discipliners, administrators, hypervisors, or kernel/device
+  facilities changing a target outside Mundilfari's control loop.
+- Forked, cloned, checkpoint-restored, or VM-restored execution replaying
+  inherited requests, entropy, sessions, timers, or clock state.
 - Dependency, registry, CI, action, toolchain, standards-source, or release
   supply-chain attackers.
 - Callers providing incorrect crypto, entropy, TLS, clock, or transport
@@ -95,7 +99,10 @@ Additional boundaries:
 | Amplification | bounded response ratio, validation before response, rate and work limits |
 | Era/rollover confusion | explicit context and ambiguity errors |
 | Leap or scale confusion | typed scales, versioned leap data, explicit POSIX/smear policy |
+| False or conflicting leap injection | authority-classified evidence, diversity/quorum and conflict policy, withdrawal, staged atomic model generation activation; one authenticated source is insufficient |
 | Clock rollback | monotonic guard, default no backward step, virtual application clocks |
+| Monotonic-domain confusion | typed suspend/rate/scope/process/machine/namespace/generation identity; cross-domain deadline/elapsed rejection |
+| Fork/checkpoint replay | process/machine lifecycle generations invalidate requests, entropy/nonces, handles, timers, rate limits, helper sessions and TrustedClock state |
 | Excessive clock change | startup-only step policy, slew/frequency limits, faulted state |
 | Loss of sources | holdover state with growing uncertainty and bounded recovery |
 | Retracted or invalid evidence remains active | generic identified withdrawal/discontinuity events, reserved invalidation capacity, generation propagation through filter/consensus/servo/clock/audit |
@@ -108,12 +115,18 @@ Additional boundaries:
 | Persisted-state corruption or rollback | early canonical bounded schema, torn-write detection, authenticated integrity where required, explicit rollback capability, no strong freshness claim from mutable local state/key |
 | Repeated bounded discipline abuse | helper-local cumulative phase/frequency windows, rate/settling limits, independent policy ceiling, session/domain binding, fault latch, bounded fail-closed audit |
 | Servo integrates an unapplied proposal | correlated actual-actuation feedback, target generation, residual/quantization handling, anti-windup, missing-feedback fault |
+| Competing clock adjustment | explicit discipline ownership capability, independent external-change detection, target-generation discontinuity, proposal invalidation, servo reacquisition |
 | Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/session/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
 | Crypto provider misuse or exhausted key | early protocol-neutral provider contract, provider assurance, atomic per-key usage limits, fail-closed entropy/rekey/exhaustion |
 | Secret disclosure | redaction, bounded lifetime, controlled exposure, admitted clearing |
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |
 | Specification drift | official revision registry, errata review, draft isolation, source hashes |
+| Malicious or partial time-data update | explicit provider authorization, bounded verify/stage/compare/atomic activation, rollback/withdrawal/expiry state, current model retained on failure |
+| Certificate midpoint acceptance | interval-valued temporal validity; strict validation requires the entire trusted interval within certificate validity |
+| Deep canonical-schema exhaustion | maximum depth/item counts, iterative or bounded recursion, common non-resettable work budget, stable tag namespaces |
+| False audit tamper-evidence claim | strict sequence/gap records, domain and TAI/model generations, append-only distinct from chained/sealed/witnessed tamper evidence |
+| Configuration rollback or secret leakage | provenance/integrity/rollback generation, staged atomic activation, opaque secret references, independent helper ceiling |
 | False precision claim | measurement uncertainty and hardware evidence required |
 
 ## Security Modes
@@ -164,6 +177,9 @@ Additional boundaries:
   reject, withdraw, cross-check, diversify, and refuse clock authority.
 - Clock steps can break certificates, databases, logs, leases, schedulers, and
   distributed systems even when the new time is more accurate.
+- A nondecreasing application-clock projection cannot always remain both
+  available and truthful after bad future time; Mundilfari may freeze,
+  catch down, remove its preferred estimate, or fault while truth bounds move.
 - External standards and certification suites may be inaccessible or licensed.
 - A dependency-minimal design reduces one risk class but concentrates review
   responsibility in first-party code.

@@ -603,6 +603,44 @@ Exit criteria:
 - leap handling is explicit and no UTC value is forced through POSIX rules;
 - `v0.12.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.12.1 - Leap Announcement Admission And Activation
+
+Status: planned.
+
+Goal: decide how leap evidence may stage and atomically change the active UTC
+model without granting one source unilateral authority.
+
+Deliverables:
+
+- typed evidence classes for authoritative table entries, authenticated
+  protocol announcements, corroborated observations, and unauthenticated
+  hints; authentication alone does not imply leap authority;
+- policy-defined authority, freshness, diversity/quorum, lead-time, conflict,
+  smear-versus-step, and minimum-evidence requirements;
+- cross-family comparison of NTP, PTP, radio, configured-table, and future
+  externally resolved announcements without protocol-type leakage into core;
+- pending, accepted, conflicting, cancelled, withdrawn, expired, and rejected
+  lifecycle states using generic identified events;
+- verify/stage/compare followed by atomic activation of one new conversion-
+  context/leap-model generation, invalidating stale conversions and pending
+  decisions;
+- unauthenticated hints may warn or increase uncertainty but never activate a
+  leap.
+
+Verification:
+
+- one authenticated malicious server, correlated aliases, diverse agreement,
+  NTP/PTP/radio/table conflict, false positive/negative leap, late
+  announcement, cancellation/withdrawal, source loss, smear/step disagreement,
+  concurrent readers, atomic activation, stale generation, and synthetic
+  negative-leap campaigns.
+
+Exit criteria:
+
+- no single protocol packet or authenticated endpoint can schedule a leap
+  outside explicit authority and diversity policy;
+- `v0.12.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.13.0 - POSIX And Smear Policy
 
 Status: planned.
@@ -726,14 +764,23 @@ Goal: relate fast monotonic readings to continuous/civil time safely.
 
 Deliverables:
 
-- monotonic instant, boot/session identity, correlation, rate, and uncertainty;
+- `MonotonicClockId`/domain token on every instant, deadline, elapsed duration,
+  expiry, and correlation;
+- explicit suspend semantics (`StopsDuringSuspend` or `IncludesSuspend`),
+  raw-oscillator versus frequency-adjusted rate semantics, process-local
+  versus system-wide scope, boot/session, namespace, process generation,
+  machine-instance generation, clock generation, rate, and uncertainty;
+- checked same-domain arithmetic only, with typed domain/suspend/generation
+  mismatch errors;
 - stale/rollback/restart detection;
 - virtual trusted-clock read model.
 
 Verification:
 
-- restart, suspend, rollback, drift, stale correlation, and uncertainty-growth
-  simulations.
+- compile-time/runtime cross-domain rejection, each suspend/rate/scope
+  combination, restart, suspend, rollback, drift, stale generation/
+  correlation, persisted-anchor mismatch, helper-expiry mismatch, and
+  uncertainty-growth simulations.
 
 Exit criteria:
 
@@ -806,6 +853,8 @@ Goal: audit the complete time model before protocols depend on it.
 Deliverables:
 
 - arithmetic and conversion audit;
+- leap-announcement authority/diversity/activation and monotonic-domain
+  suspend/rate/scope/generation audit;
 - hard/statistical uncertainty, error-budget, observation-lifecycle,
   formatting, and error-taxonomy audit;
 - Kani-style bounded proofs where useful;
@@ -964,20 +1013,28 @@ Deliverables:
 - one `no_std`, caller-buffer schema envelope with schema identity, version,
   criticality, canonical field order, duplicate/unknown-field rules, and
   explicit maximum record/message size;
+- fixed maximum nesting depth and total field/item count, with iterative
+  parsing or recursion whose stack depth is statically bounded;
 - canonical bounded integers including signed high/low wide limbs, byte
   strings, sequences, identifiers, generations, and nested values;
+- stable type/tag allocation registry with reserved core, protocol,
+  experimental, and vendor ranges, collision rejection, and a permanent rule
+  that a field/tag identifier is never reused with new meaning;
 - required-length and atomic encode-or-error behavior with no Rust-layout,
   serde-data-model, filesystem, IPC, or language-runtime dependency;
 - import/export value traits for protocol, engine, and platform consumers;
+- budget-consumption hooks completed by `v0.25.0` for bytes, items, nesting,
+  and work;
 - compatibility rules that later schema work may extend but never silently
   reinterpret.
 
 Verification:
 
 - golden bytes, every truncation, duplicate/noncanonical/unknown critical
-  field, integer extremes, required-length/short-buffer atomicity,
-  deterministic re-encoding, version skew, no-allocation, and arbitrary-byte
-  fuzz/property tests.
+  field, maximum/over-depth and item-count inputs, tag/range collisions,
+  identifier-reuse fixture, integer extremes, required-length/short-buffer
+  atomicity, deterministic re-encoding, version skew, stack bounds,
+  no-allocation, and arbitrary-byte fuzz/property tests.
 
 Exit criteria:
 
@@ -1009,6 +1066,43 @@ Exit criteria:
 - protocol engines can run in embedded, simulator, and hosted environments;
 - `v0.23.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.23.1 - Execution Lifecycle Generations
+
+Status: planned.
+
+Goal: make fork, clone, VM restore, and container checkpoint/restore generic
+lifecycle discontinuities before protocol associations exist.
+
+Deliverables:
+
+- typed `ProcessGeneration`, `MachineInstanceGeneration`, and lifecycle events
+  for fork child, process replacement, VM snapshot/restore, container
+  checkpoint/restore, clone, and explicit reinitialization;
+- one invalidation fan-out contract covering outstanding requests/transmit
+  identities, entropy/nonces, sockets, timers/deadlines, rate limits, helper
+  sessions, persistent bootstrap anchors, and TrustedClock publication state;
+- inherited state is unusable until explicit child/restored-instance
+  reinitialization establishes new generations;
+- hosted handle policy for non-inheritance, close-on-exec, pre-opened helper
+  handles, and safe closure/reopen; platform-specific detection stays in
+  platform adapters;
+- lifecycle events compose with generic discontinuity and withdrawal queues
+  without silent loss.
+
+Verification:
+
+- fork-before/after request, multithreaded fork boundary, exec, duplicate
+  entropy/request state, VM snapshot replay, container checkpoint restore,
+  inherited sockets/timers/rate limits/helper session, CLOEXEC/non-inherited
+  handles, queue saturation, child reinitialization, and deterministic
+  simulator schedules.
+
+Exit criteria:
+
+- cloned execution cannot silently continue security or timing state under the
+  old process/machine generation;
+- `v0.23.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.24.0 - Transport And Clock Traits
 
 Status: planned.
@@ -1019,6 +1113,8 @@ Deliverables:
 
 - datagram, stream, raw-link, serial, edge, sample, CAN, and clock traits;
 - receive/send metadata and timestamp quality;
+- monotonic providers return the full `MonotonicClockId` descriptor and reject
+  deadlines/elapsed values from another suspend/rate/scope/generation domain;
 - HAL-like device traits without Unix file descriptors in core signatures;
 - compiled/available/authorized/healthy capability discovery contracts;
 - entropy and hardware-clock traits without fallback implementations.
@@ -1075,6 +1171,9 @@ Deliverables:
 
 - non-copyable byte, item, nesting, work, allocation, and response budgets;
 - child reservations without reset or double release;
+- canonical-schema decode/encode charges bytes, total items/fields, nesting,
+  and parsing work through the same non-resettable budget before descent or
+  allocation;
 - deterministic per-poll work ceilings and reported remaining work;
 - local exhaustion distinct from protocol invalidity.
 - pre-allocation validation of every network-controlled size and explicit
@@ -1083,8 +1182,9 @@ Deliverables:
 Verification:
 
 - conservation properties, nested operations, cancellation, adversarial
-  complexity, allocator failure injection, oversized pre-allocation rejection,
-  and exhaustion outcome tests.
+  complexity, deep-small schema inputs, field/item floods, budget-before-
+  descent checks, allocator failure injection, oversized pre-allocation
+  rejection, and exhaustion outcome tests.
 
 Exit criteria:
 
@@ -1169,6 +1269,8 @@ Deliverables:
 - canonical-schema kernel and generic crypto-provider contract audit,
   including canonicality, assurance, redaction, entropy, usage accounting,
   exhaustion, and proof that test providers are not production constructors;
+- execution-lifecycle generation/invalidation and schema budget/depth/tag
+  governance audit;
 - API stability and code-size review;
 - fuzz corpus and complexity-oracle report.
 
@@ -1195,8 +1297,14 @@ Deliverables:
 - Linux, Windows, BSD, and macOS adapters;
 - generated capability report distinguishing compiled, available, authorized,
   and healthy states with resolution and explicit platform errors;
+- exact native mapping for each monotonic clock's suspend behavior,
+  raw/frequency-adjusted rate semantics, process/system scope, boot/session,
+  namespace, process/machine instance generation, and clock generation;
 - process/container/time-namespace identity and clock generation in every
   hosted clock report;
+- fork/exec and VM/container checkpoint/restore detection where the platform
+  exposes it, explicit fallback/non-claim otherwise, plus close-on-exec and
+  child reinitialization for affected handles;
 - checked native time conversion that returns `OutOfRange` rather than
   narrowing, saturating, or panicking;
 - Android/iOS library-safe support.
@@ -1206,6 +1314,9 @@ Verification:
 - host matrix, monotonic nondecrease, conversion bounds, suspend documentation,
   capability-state transitions, denied authorization, unavailable devices, and
   mock fault tests;
+- cross-clock/domain arithmetic refusal, suspend/no-suspend elapsed behavior,
+  raw/adjusted drift, fork/exec, VM/container restore, inherited handle, and
+  process/machine generation tests;
 - Android/iOS application lifecycle tests for background suspension/resume,
   network roaming and path changes, captive-network transitions, and
   battery-budgeted resynchronization.
@@ -1527,7 +1638,8 @@ Deliverables:
 - restored state carries its rollback capability and freshness evidence,
   separately from authentication, confidentiality, and corruption detection;
 - monotonic generation where the selected trust root supports it,
-  boot/session binding, corruption, replay, and discontinuity handling;
+  boot/session/process/machine-instance and monotonic-domain binding,
+  corruption, replay, and lifecycle-discontinuity handling;
 - caller-supplied storage/no_std backend traits plus reviewed hosted file
   adapter; protocols import/export bounded values and perform no file I/O.
 
@@ -1544,6 +1656,43 @@ Exit criteria:
 - no protocol or engine invents an unaudited private state-file format;
 - `v0.39.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.39.2 - Discipline Ownership And Competing Adjusters
+
+Status: planned.
+
+Goal: detect and contain external clock changes by other daemons,
+administrators, hypervisors, kernels, or device controllers.
+
+Deliverables:
+
+- typed `ClockDisciplineLease` carrying `DisciplineOwnership` capability
+  (`Exclusive`, `Cooperative`, `ObservedOnly`, or `Unmanaged`), holder/target
+  identity, lease generation, expiry clock domain, renewal, loss, and platform
+  assurance;
+- acquisition/release adapters where an OS/device offers enforceable
+  ownership, cooperative observation otherwise, and no false exclusivity
+  claim;
+- independent observation of target phase/rate/configuration and detection of
+  changes not correlated to an accepted Mundilfari `AppliedAdjustment`;
+- every competing/external change rotates target/lease generation, publishes a
+  discontinuity, invalidates proposals/feedback/correlations, and requires
+  servo reacquisition;
+- helper authorization binds the current ownership mode/generation and cannot
+  convert `ObservedOnly` or `Unmanaged` into adjustment authority.
+
+Verification:
+
+- simultaneous Mundilfari/chrony/PTP-style writers, administrator step,
+  hypervisor correction, kernel/device autonomous rate change, lease loss/
+  expiry/renewal, false exclusivity, cooperative changes, stale proposal/
+  feedback, helper race, generation rollover, and VM/platform fault tests.
+
+Exit criteria:
+
+- Mundilfari never continues a servo as though it exclusively controlled a
+  target after evidence of competing adjustment;
+- `v0.39.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.40.0 - Platform And Privilege Security Gate
 
 Status: planned.
@@ -1555,8 +1704,8 @@ Deliverables:
 - machine-readable unsafe inventory, per-block invariants, safe-wrapper/ABI
   review, granular permission model, and privilege-separation plan;
 - RTC/counter/MMIO/GPIO/frequency/actuator, namespace identity, discipline,
-  discontinuity, early canonical-schema/crypto-provider, and persistence
-  boundary review;
+  ownership/competing-adjuster, lifecycle discontinuity, early canonical-
+  schema/crypto-provider, and persistence boundary review;
 - proof that core, engine, facade, protocol, crypto-state, IPC-schema, and safe
   platform crates still forbid unsafe code;
 - resolved critical/high platform findings;
@@ -1839,6 +1988,45 @@ Exit criteria:
 
 - scale conversion data is versioned, inspectable, and replaceable;
 - `v0.52.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.52.1 - Hosted Time-Data Update Orchestration
+
+Status: planned.
+
+Goal: update leap, EOP, and scale-offset snapshots through explicit
+application policy without adding automatic network behavior to core.
+
+Deliverables:
+
+- bounded `TimeDataProvider` values for embedded/static snapshots,
+  application-supplied files, OS-managed data, and optional explicitly
+  caller-authorized remote retrieval;
+- source identity, provenance, integrity, rollback capability, validity,
+  expiry, model generation, retrieval authorization, network action, and
+  resource limits in every candidate/report;
+- strict verify → stage → compare → atomic activate pipeline using the generic
+  loader, persistence, lifecycle, and conversion-generation boundaries;
+- failed refresh leaves the current admitted snapshot untouched and reports
+  stale/expired/degraded/faulted state; withdrawal and rollback invalidate
+  dependent conversions;
+- no remote retrieval in core, protocol crates, builds, tests, or default
+  constructors;
+- `TrustedClock::system_defaults(...)` reports the selected provider, source,
+  network behavior, refresh policy, fallback, and current capability.
+
+Verification:
+
+- embedded/file/OS/authorized-remote providers, authorization refusal, SSRF/
+  redirect/size/work limits, signature/checksum failure, older/conflicting
+  snapshots, stage/compare/activation races, crash during activation,
+  withdrawal, expiry, failed refresh, offline restart, concurrent readers,
+  and capability/system-default reports.
+
+Exit criteria:
+
+- hosted applications can maintain time data without hidden download,
+  rollback, or partial-activation behavior;
+- `v0.52.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.53.0 - Documented Vendor Extension Framework
 
@@ -2401,7 +2589,8 @@ Deliverables:
 - TLS 1.3 early data/0-RTT forbidden for NTS-KE;
 - exact exporter label/context and directional key derivation requests;
 - session-resumption, ticket, exporter-context, connection, and process
-  generation lifecycle with no key reuse across an invalid generation;
+  generation lifecycle through the generic `v0.23.1` process/machine events,
+  with no key reuse across an invalid generation;
 - endpoint, algorithm, cookie, shutdown, transcript, and TLS-channel evidence
   policy without an arbitrary authenticated boolean.
 
@@ -2429,13 +2618,22 @@ Deliverables:
 - RFC 9325 deployment policy and RFC 9525 service-identity verification;
 - explicit certificate-revocation capability report and deployment non-claim
   where the selected provider/configuration supplies no live revocation;
+- typed interval-valued certificate outcome `TemporalValidity`:
+  `DefinitelyValid` only when the entire trusted time interval lies within
+  the admitted certificate-validity interval, `DefinitelyInvalid` when the
+  intervals are disjoint on an invalid side, and `Indeterminate` for partial
+  overlap or insufficient time evidence;
+- strict mode accepts only `DefinitelyValid`; no midpoint, preferred estimate,
+  or monotonic projection substitutes for the trusted interval;
 - certificate-time bootstrap policy without disabling validity checks.
 
 Verification:
 
 - Rustls interop, wrong identity, expired/not-yet-valid/revoked-policy chain,
   unavailable revocation, trust anchor, ALPN, TLS version, resumption, rejected
-  early data, close, fragmentation, and provider matrix tests.
+  early data, wholly-valid/disjoint/partial-overlap time intervals, boundary
+  precision, absent preferred estimate, close, fragmentation, and provider
+  matrix tests.
 
 Exit criteria:
 
@@ -2488,7 +2686,8 @@ Deliverables:
 - non-`Copy`, redacted-debug, non-automatic-serialization secret types;
 - prohibition on logging unique identifiers, cookies, exporter material, or
   stable client correlators;
-- fork/process-generation-aware entropy and request identity;
+- generic `v0.23.1` fork/checkpoint/restore-generation-aware entropy and
+  request identity;
 - one-use/replenishment, replay/failure/rekey state, common secure persistence
   with capability-qualified rollback evidence, atomic per-key exhaustion,
   fail-closed rekey, key-rotation overlap, and best-effort clearing boundary
@@ -2498,7 +2697,7 @@ Verification:
 
 - public server interop, cookie exhaustion/reuse prevention, local age expiry,
   replay, server restart, key rotation, endpoint migration, process fork,
-  log-capture redaction, tamper, and long simulation.
+  VM/container restore, log-capture redaction, tamper, and long simulation.
 
 Exit criteria:
 
@@ -2631,13 +2830,23 @@ Deliverables:
 - pinned Roughtime/NTS key, provisioned interval, hardware clock, persisted
   interval through the common secure persistence boundary plus monotonic
   elapsed, and SPKI-pin policies;
-- state transitions from unknown to rough to certificate-validatable time;
+- state transitions from unknown to rough to certificate-validatable time,
+  with `TemporalValidity` propagated rather than collapsed to a boolean;
+- strict certificate validation requires the complete trusted interval inside
+  certificate validity; partial overlap remains `Indeterminate` and cannot
+  silently use a midpoint/preferred estimate;
+- persisted monotonic elapsed is admissible only when the
+  `MonotonicClockId`, process/machine generation, and suspend semantics prove
+  the elapsed interval remained meaningful; otherwise the anchor is rejected
+  or uncertainty grows from separately admitted evidence;
 - rollback/restart/expiry and uncertainty growth.
 
 Verification:
 
 - no clock, wildly wrong clock, stale snapshot, restart, rollback, key
-  mismatch, interval outside certificate, and recovery simulations.
+  mismatch, interval wholly inside/outside/partially overlapping certificate
+  validity, exact validity boundaries, missing preferred estimate, mismatched
+  monotonic domain, suspend/restore/fork, and recovery simulations.
 
 Exit criteria:
 
@@ -2655,7 +2864,8 @@ Deliverables:
 - complete RFC/draft clause maps and dependency admission reports;
 - NTS early-data, resumption/exporter generation, cookie
   privacy/unlinkability, logging, cluster-key rollback/compromise, certificate
-  revocation capability, and fork-generation audit;
+  revocation capability, interval-valued temporal validity, and generic
+  process/machine lifecycle-generation audit;
 - provider assurance and secret lifecycle/redaction/rollback/clearing review;
 - fixed-capacity codec, machine, AEAD provider, cookie jar, and Rustls adapter
   boundary audit;
@@ -4707,6 +4917,9 @@ Deliverables:
 - PLL, FLL, hybrid, and discipline-proposal state consuming feedback before
   further integration, with anti-windup/reset behavior for saturation,
   rejection, partial application, delayed feedback, and discontinuity;
+- `v0.39.2` ownership loss or externally observed phase/rate change treated as
+  discontinuous competing actuation, invalidating feedback correlation and
+  forcing reacquisition rather than being integrated as oscillator error;
 - bounded missing-feedback timeout and degraded/faulted outcomes;
 - persistence/audit representation through the common schema without granting
   the engine adjustment authority.
@@ -4715,8 +4928,9 @@ Verification:
 
 - exact, quantized, clamped, partial, rejected, delayed, duplicate, missing,
   reordered, wrong-proposal, wrong-target-generation, and discontinuous
-  feedback traces; repeated saturation, integrator-windup adversarial cases,
-  actuator mock faults, and closed-loop analytical/simulator comparison.
+  feedback traces; external/competing adjustment and lease-loss schedules,
+  repeated saturation, integrator-windup adversarial cases, actuator mock
+  faults, and closed-loop analytical/simulator comparison.
 
 Exit criteria:
 
@@ -4789,12 +5003,14 @@ Goal: provide a monotonic application clock with civil correlation.
 
 Deliverables:
 
-- synchronized/rough/holdover/faulted states;
+- synchronized/rough/holdover/ahead/frozen/catching-down/faulted state model,
+  with detailed ahead recovery completed at `v0.137.3`;
 - `TimeEstimate` with earliest/latest, optional policy-approved preferred
   estimate, scale/realization, resolution, uncertainty, monotonic correlation,
   freshness/holdover age, separate authentication/integrity/traceability,
   leap policy, source generation, and warnings;
-- monotonic nonrollback reads with no network I/O, plus explicit UTC/POSIX
+- monotonic nonrollback preferred application projection with no network I/O,
+  distinct truth-seeking interval semantics, plus explicit UTC/POSIX
   conversion context and policy;
 - common secure persistence and restart bootstrap boundary;
 - one logically consistent instant/uncertainty/scale-model/source-set/
@@ -4848,6 +5064,79 @@ Exit criteria:
 - no reader can observe fields from different logical clock generations;
 - `v0.137.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.137.2 - no_std Concurrency Profiles
+
+Status: planned.
+
+Goal: publish observations and trusted-clock state on bare-metal targets
+without assuming hosted atomics or hiding unbounded locks.
+
+Deliverables:
+
+- explicit mutually exclusive profiles: single-thread-only, target-atomic,
+  caller-supplied critical section, and ISR-safe producer/consumer where
+  supported;
+- `target_has_atomic` width/capability gating and compile-time refusal when a
+  selected atomic profile cannot represent required publication state;
+- typed caller critical-section contract with maximum hold/disable time,
+  nesting/reentrancy, memory-ordering, and priority rules;
+- bounded ISR queues, producer/consumer ownership, overflow/invalidation
+  behavior, and prohibition on allocation/blocking/user callbacks in ISR
+  paths;
+- no silent emulation of unavailable atomics by an unbounded spinlock, mutex,
+  interrupt mask, or critical section;
+- capability report and `Send`/`Sync` policy per profile.
+
+Verification:
+
+- representative no-atomic and atomic-width targets, compile-fail feature
+  combinations, interrupt/preemption schedules, nested/reentrant critical
+  sections, queue saturation with reserved withdrawal capacity, priority
+  inversion, memory-order model tests, interrupt-latency/stack/WCET
+  measurement, and target hardware/simulator fixtures.
+
+Exit criteria:
+
+- every `no_std` concurrency claim names its atomic/critical-section/ISR model
+  and bounded timing behavior;
+- `v0.137.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.3 - Honest Virtual Clock Ahead Recovery
+
+Status: planned.
+
+Goal: recover when a previously accepted application-clock projection is
+discovered to be too far ahead without labeling known-false time synchronized.
+
+Deliverables:
+
+- nondecreasing semantics apply only to the preferred application projection;
+  hard earliest/latest truth bounds may revise backward with evidence;
+- explicit `Ahead`, `Frozen`, `CatchingDown`, and `Faulted` states plus
+  configured maximum divergence, catch-down rate/duration, and transition
+  evidence;
+- preferred estimate removed whenever it lies outside the current honest
+  interval; synchronized status is unavailable during unresolved divergence;
+- separate `estimate_now()` truth-seeking interval API with no monotonic
+  projection promise;
+- policy for freeze versus bounded catch-down versus fault, with no hidden
+  backward application projection and no discipline authority;
+- generation/withdrawal/persistence/audit handling for detection and recovery.
+
+Verification:
+
+- accepted source far in the future then withdrawn/corrected, hard bounds
+  revising backward, preferred estimate outside interval, every state edge,
+  maximum divergence/catch-down duration, restart during recovery, repeated
+  corrections, leap/smear interaction, concurrent readers, and property tests
+  proving monotonic projection never implies false synchronized status.
+
+Exit criteria:
+
+- monotonic application behavior never forces the truth-seeking estimate or
+  synchronization label to preserve a known-false future value;
+- `v0.137.3 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.138.0 - Easy Blocking APIs
 
 Status: planned.
@@ -4859,8 +5148,8 @@ Deliverables:
 - `query_once()` acquisition distinct from `TrustedClock::now()` virtual-clock
   reads, plus strict `TrustedClock::system_defaults(...)`;
 - a named, versioned system-defaults policy profile whose report enumerates
-  selected sources, trust roots, network actions, fallbacks, platform
-  assumptions, and rejected alternatives;
+  selected sources, trust roots, time-data provider/source/refresh state,
+  network actions, fallbacks, platform assumptions, and rejected alternatives;
 - local clock, SNTP, NTP, NTS, Roughtime, TIME, and selected source builders;
 - facade capability report replacing repository-foundation booleans with
   compiled, available, authorized, and healthy states;
@@ -4999,7 +5288,7 @@ Deliverables:
 - unprivileged workers/consensus, bounded `DisciplineProposal`, policy-issued
   authorization, and a dedicated minimal helper with no protocol dependencies;
 - pre-opened socketpair/fixed endpoint, OS peer credentials, fixed-version
-  maximum-length canonical-schema messages, sequence/monotonic
+  maximum-length canonical-schema messages, sequence/typed-monotonic-domain
   expiry/source-generation replay defense, and pre-opened allowlisted clock
   handles;
 - helper-enforced phase/frequency/slew/step bounds, privilege reduction,
@@ -5009,8 +5298,11 @@ Deliverables:
   maximum request rate, minimum settling interval, and an independent policy
   ceiling that worker configuration cannot expand;
 - helper-generated session nonce, boot/session generation, clock-domain
-  identity for monotonic expiries, and newly authorized generations for
-  recovery;
+  identity for monotonic expiries, generic process/machine-instance
+  generation, and newly authorized generations for recovery;
+- fork/exec/VM/container restore invalidates the helper session and all
+  outstanding authorization; inherited/pre-opened handles follow the
+  `v0.23.1` lifecycle and close-on-exec/non-inheritance policy;
 - fault latching after configured repeated rejected, saturated,
   contradictory, or feedback-missing requests, with bounded fail-closed audit
   behavior when storage is unavailable/full;
@@ -5022,9 +5314,9 @@ Verification:
   arbitrary path/clock-ID/ioctl/FD refusal, compromised-worker simulation,
   repeated individually valid maximum adjustments, cumulative budget and rate
   boundaries, settling violations, worker policy-expansion attempts, wrong
-  session/domain, fault-latch/re-authorize recovery, audit-full/unavailable,
-  socket/file permissions, restart, downgrade, service sandbox, VM clock
-  tests, and soak.
+  session/domain/process/machine generation, fork/checkpoint restore,
+  fault-latch/re-authorize recovery, audit-full/unavailable, socket/file
+  permissions, restart, downgrade, service sandbox, VM clock tests, and soak.
 
 Exit criteria:
 
@@ -5122,6 +5414,14 @@ Deliverables:
 - source/consensus/servo/holdover/daemon health;
 - bounded labels, cardinality, audit schema, redaction, retention, and export
   traits;
+- every audit record carries strict record sequence, explicit gap/loss events,
+  monotonic clock identity/domain, TAI estimate interval, scale/model/policy/
+  membership/configuration generations, and process/machine instance;
+- optional bounded hash/MAC chaining, hardware sealing, or external witnessing
+  with exact provider and verification capability;
+- `AppendOnly` and `TamperEvident` are distinct capabilities: append-only
+  storage is never described as tamper-evident without a verified chain,
+  sealed root, or witness;
 - append-only discipline-request outcomes and capability states separated into
   compiled, available, authorized, and healthy;
 - accuracy/authentication/traceability fields kept separate.
@@ -5129,7 +5429,10 @@ Deliverables:
 Verification:
 
 - cardinality attacks, secret/cookie/certificate redaction, malformed exporter,
-  backpressure, schema compatibility, and incident replay.
+  backpressure, record reorder/duplicate/drop and explicit gap generation,
+  monotonic/TAI/model mismatch, chain truncation/fork/rollback/key rotation,
+  unavailable witness/storage, append-only versus tamper-evident capability,
+  schema compatibility, and incident replay.
 
 Exit criteria:
 
@@ -5146,13 +5449,25 @@ Deliverables:
 
 - bounded configuration for sources, trust, diversity, protocols, clocks,
   steps/slew, holdover, resources, platform privileges, and logging;
-- secure defaults, unknown-field rejection, versioning, and dry-run;
+- configuration identity, provenance, integrity, rollback capability,
+  generation, applicable process/machine/target identity, and audit linkage;
+- verify/parse → stage → semantic/capability/resource/helper-ceiling validate
+  → atomic activate, with old configuration retained on any failure;
+- opaque secret-provider/key references only; no inline secret material in the
+  canonical configuration value, diagnostics, audit, or dry-run output;
+- independent helper-policy ceiling validation that worker configuration
+  cannot widen, including cumulative discipline envelope and ownership mode;
+- secure defaults, unknown-field rejection, versioning, migration, dry-run,
+  withdrawal, and rollback behavior;
 - no generic deserialization dependency in protocol cores.
 
 Verification:
 
 - valid/invalid fixtures, unknown/duplicate/conflicting fields, resource
-  extremes, downgrade attempts, migration, and property fuzzing.
+  extremes, identity/provenance/integrity/rollback/generation changes,
+  stage-versus-activation races, partial activation refusal, inline-secret
+  rejection/redaction, stale secret reference, helper-ceiling expansion,
+  downgrade attempts, migration, withdrawal, and property fuzzing.
 
 Exit criteria:
 
@@ -5173,7 +5488,10 @@ Deliverables:
 - privilege, IPC, config, C/WASM, observability, and cross-protocol threat
   reports;
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
-  concurrent snapshot, canonical external-schema, and language-binding review;
+  process/machine lifecycle, monotonic domains, leap/time-data activation,
+  competing discipline ownership, honest ahead recovery, embedded concurrency,
+  certificate temporal validity, concurrent snapshot, canonical external-
+  schema, configuration/audit semantics, and language-binding review;
 - resolved critical/high product findings.
 
 Verification:
@@ -5482,7 +5800,9 @@ Goal: re-audit every untrusted parser and operation-wide budget.
 
 Deliverables:
 
-- parser inventory, complexity oracle, allocation/work/response limits;
+- parser inventory, complexity oracle, allocation/work/response limits,
+  canonical-schema maximum depth/item counts, iterative/bounded recursion, and
+  stable tag/range collision review;
 - allocator-failure behavior and abort-on-OOM non-claims for every alloc path,
   proving untrusted sizes are bounded before allocation;
 - full corpus minimization and panic/timeout triage;
@@ -5516,6 +5836,9 @@ Deliverables:
 - ABI drift, ancillary parsing, PHC/PPS/RTC/counters, GPIO/frequency capture,
   oscillator/DAC/DCO, raw socket, namespace identity, and discipline-backend
   review;
+- monotonic suspend/rate/scope/domain identity, fork/checkpoint lifecycle,
+  handle inheritance, discipline ownership lease, and competing-adjuster
+  review;
 - safe-wrapper length/alignment/discriminant/ownership/lifetime/kernel-size
   validation;
 - sanitizer/Miri coverage, MMIO volatile/alignment/order/endian/reset review,
@@ -5544,6 +5867,8 @@ Deliverables:
 - dependency/provider/algorithm inventory and update check;
 - transcript, exporter, AEAD, signature, certificate, entropy, cookie, and
   secret lifecycle review;
+- interval-valued certificate temporal-validity and bootstrap review proving
+  strict validation never uses a midpoint/preferred projection;
 - generic provider-boundary assurance, per-key atomic usage/exhaustion,
   fail-closed rekey, and proof that persistence/protocol consumers bypass no
   admitted provider contract;
@@ -5571,6 +5896,9 @@ Deliverables:
 - hardware lab for PTP/White Rabbit/Navheim-derived GNSS/PPS/IRIG/oscillators;
 - persistence crash/rollback/migration campaigns and concurrent snapshot/
   withdrawal/cancellation stress;
+- fork/exec/VM/container restore invalidation, competing clock discipliners,
+  time-data/leap activation, audit/configuration rollback, and virtual-clock
+  ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
   claimed HFT-oriented configurations, including cache-line layout, bounded
   retry behavior, CPU migration, and per-core/socket/NUMA placement;
@@ -5601,6 +5929,9 @@ Deliverables:
   roaming, captive networks, and battery-budgeted resynchronization;
 - representative allocator-free `*-unknown-none` and browser-WASM evidence,
   not only hosted cross-target compilation;
+- single-thread, `target_has_atomic`, caller critical-section, and claimed
+  ISR-safe no_std concurrency profiles with priority-inversion,
+  interrupt-latency, stack, and WCET evidence;
 - every supported feature combination and published crate package check;
 - documented unsupported privileged capabilities.
 
@@ -5671,7 +6002,8 @@ Deliverables:
 - generated facade capability report replacing foundation-ready booleans and
   distinguishing compiled, available, authorized, and healthy states;
 - `query_once()` versus `TrustedClock::now()` acquisition semantics and
-  cross-language range behavior documented;
+  `estimate_now()` truth-seeking semantics, ahead-recovery states, monotonic
+  domain identity, and cross-language range behavior documented;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

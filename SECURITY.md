@@ -49,11 +49,18 @@ the release branch between review and tagging.
   independent properties.
 - `AtomicInstant` is the canonical TAI coordinate; realization and trust
   evidence are separate and equality never manufactures either.
+- Monotonic instants, deadlines, elapsed durations, correlations, and expiries
+  carry suspend/rate/scope/process/machine/namespace/generation identity and
+  cannot cross domains implicitly.
 - Guaranteed hard bounds and statistical covariance/confidence are distinct;
   statistical estimates require explicit policy before contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
+- Fork, exec, VM snapshot/restore, and container checkpoint/restore rotate
+  generic lifecycle generations and invalidate inherited security/time state.
+- Leap announcements remain evidence until explicit authority, diversity,
+  conflict, and atomic activation policy admits a new UTC-model generation.
 - No silent downgrade from authenticated to unauthenticated time.
 - Legacy and historical protocols are disabled in secure defaults.
 - GNSS interpretation comes only from admitted Navheim timing evidence;
@@ -65,6 +72,8 @@ the release branch between review and tagging.
 - The privileged helper independently limits cumulative adjustment and request
   rate, binds authorization to a session/clock domain, and latches repeated
   faults; per-request bounds alone are insufficient.
+- Discipline ownership is capability-qualified; externally observed
+  phase/rate changes invalidate proposals and force servo reacquisition.
 - Servo state consumes correlated actual-actuation feedback and cannot assume
   that a proposal was applied exactly.
 - Persisted authentication, confidentiality, corruption detection, and
@@ -75,6 +84,16 @@ the release branch between review and tagging.
 - Safe facade APIs return structured errors for caller, capacity, platform,
   authorization, cancellation, and resource failures; allocator aborts and
   internal invariant bugs are documented non-claims, not recoverable errors.
+- Strict certificate validation accepts only when the full trusted-time
+  interval lies within certificate validity; midpoint or preferred estimates
+  cannot turn partial overlap into validity.
+- `TrustedClock::now()` monotonicity applies to a preferred application
+  projection, never to hard truth bounds or a false synchronization label.
+- Hosted time-data and configuration updates verify and stage before atomic
+  activation; remote retrieval is explicit, and inline configuration secrets
+  are forbidden.
+- Append-only audit storage is not called tamper-evident without a verified
+  chain, sealed root, or external witness.
 - Delay attacks remain in scope even when a protocol is authenticated.
 - Official specifications, revisions, and verified errata precede protocol
   claims.

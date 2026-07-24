@@ -55,6 +55,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   closed actuation feedback and helper cumulative limits, assigned stable PTP
   security, made the facade panic contract explicit, fixed the TAI origin, and
   moved the final Navheim security gate after CGGTTS.
+- Integrated the next lifecycle and truthfulness review with typed monotonic
+  suspend/rate domains, generic fork/checkpoint invalidation, competing-
+  discipliner leases, honest virtual-clock ahead recovery, interval-valued
+  certificate validation, leap-evidence consensus, controlled hosted
+  time-data updates, explicit bare-metal concurrency profiles, bounded schema
+  tag/depth governance, and atomic configuration/sequenced audit semantics.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.
