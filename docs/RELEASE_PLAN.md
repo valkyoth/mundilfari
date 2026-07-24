@@ -3269,22 +3269,27 @@ Deliverables:
   while root-specific evidence or condition failure affects only that
   membership; independent roots continue so a completed batch reports every
   member;
-- `BatchVerificationOutcome<T>` is explicitly `Complete` or `Aborted`. A
-  `Complete` outcome has a terminal result for every admitted member and may
-  convert to non-forgeable `CompleteBatchVerification<T>`. Successful per-root
-  proof/token identities equal independent verification under the same
-  snapshot. Consensus or any API claiming the full admitted membership set
-  requires that complete witness, never an iterator or prefix of successes;
+- `BatchVerificationOutcome<T>` is explicitly `Complete` or `Aborted` with
+  disjoint member types. `Complete` contains exactly one processed
+  `CompleteMemberStatus<T>`—accepted, failed, contradicted, expired,
+  indeterminate, or withdrawn—for every admitted member and may convert to
+  non-forgeable `CompleteBatchVerification<T>`. `CompleteMemberStatus` has no
+  `Unprocessed` variant. Successful per-root proof/token identities equal
+  independent verification under the same snapshot. Consensus or any API
+  claiming the full admitted membership set requires that complete witness,
+  never an iterator or prefix of successes;
 - cancellation, shared work-budget exhaustion, snapshot invalidation, or
   internal invariant failure globally aborts the transaction and mints no
   externally consumable `VerifiedBoundDerivation` or
   `PolicyAcceptedHardBound`, including work completed before the abort.
-  Already visited affected members report explicit `Indeterminate` diagnostics
-  and unvisited members report `Unprocessed`; snapshot invalidation may
-  deterministically mark every member `Indeterminate`. The abort reason,
-  canonical stopping checkpoint, unique shared work, per-root work, and
-  consumed/unused budget are reported, and an aborted outcome cannot convert
-  to `CompleteBatchVerification`;
+  `Aborted` uses only `AbortMemberDiagnostic`: already visited affected members
+  report diagnostic `Indeterminate` state and unvisited members report
+  `Unprocessed`; snapshot invalidation may deterministically mark every member
+  indeterminate. Thus `Unprocessed` exists only inside
+  `BatchVerificationOutcome::Aborted`. The aborted outcome still reports
+  complete membership accounting, abort reason, canonical stopping checkpoint,
+  unique shared work, per-root work, and consumed/unused budget, but cannot
+  construct or convert to `CompleteBatchVerification`;
 - resource accounting is complete and stable: shared-node work is charged once
   to the unique total and attributed to reachable roots by one documented
   deterministic rule; root/evidence work remains per member. Capacity checks
@@ -3293,18 +3298,32 @@ Deliverables:
 - a complete witness preserves every configured member, its terminal status,
   and the original policy-defined `n`. Only a member with a current
   `PolicyAcceptedHardBound` is an eligible interval contributor. Failed,
-  contradicted, expired, indeterminate, withdrawn, or unprocessed members
+  contradicted, expired, indeterminate, or withdrawn processed members
   contribute no interval and no vote, but cannot be filtered out to reduce
-  `n`, `f`, the required overlap, or any threshold. Too few remaining eligible
-  contributors yields explicit `Insufficient` or `Unsafe`, never a quorum
-  recomputed over a smaller denominator;
+  `n`, `f`, the required overlap, or any threshold. `Unprocessed` cannot appear
+  in this witness, and quorum entry has no API accepting
+  `BatchVerificationOutcome::Aborted` or `AbortMemberDiagnostic`. Too few
+  remaining eligible contributors yields explicit `Insufficient` or `Unsafe`,
+  never a quorum recomputed over a smaller denominator;
 - removing, merging, or reclassifying a member requires atomic installation of
   a new membership generation and complete reassessment under that generation.
   A caller-side filtered result list, duplicate-root optimization, or failed
   refresh cannot mutate the membership embodied by
   `CompleteBatchVerification`;
-- every refresh result carries
-  `PriorAuthorityDisposition::{Retained, Invalidated, Absent}`. Cancellation,
+- every refresh result carries a fixed-size `PriorAuthorityObservation` sampled
+  at the refresh linearization point, not caller receipt. Its tagged
+  `PriorAuthorityDisposition::{Retained, Invalidated, Absent}` binds the
+  prior-authority identity/generation when present, exact-domain
+  `MonotonicReadInterval`, observed engine-state generation, and optional
+  concurrent-publication generation. `Retained` additionally carries the
+  unchanged prior `valid_until`; `Invalidated` carries a fixed-size
+  invalidation generation and typed reason; `Absent` carries the engine/
+  publication generation in which absence was observed;
+- `Retained` means only that the prior token revalidated with
+  `observed_at.latest < valid_until` at that linearization point. It grants no
+  authority through caller receipt, and any later use must perform the normal
+  current-token/deadline/generation check. Monotonic sampling/domain failure
+  can never report `Retained`. Cancellation,
   local result-capacity exhaustion, or transient work exhaustion leaves an
   older batch unchanged only if its exact policy/membership/evidence/
   lifecycle/deadline generations still revalidate; retention never extends its
@@ -3317,8 +3336,10 @@ Deliverables:
 - a failed refresh never replaces any prefix of current state. Committing a
   new complete batch and retiring the prior batch occur at one documented
   engine linearization point after both the new and prior generation vectors
-  are rechecked. `v0.137.1` implements the corresponding concurrent
-  publication transition without changing these engine semantics;
+  are rechecked; `PriorAuthorityObservation.observed_at` samples that same
+  boundary. `v0.137.1` implements the corresponding concurrent publication
+  transition and fills its publication generation without changing these
+  engine semantics;
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -3422,14 +3443,19 @@ Verification:
   aborts mint no authoritative artifact, classify every member as
   `Indeterminate` or `Unprocessed`, return stable complete accounting, and
   cannot convert to `CompleteBatchVerification`; every root permutation
-  produces the same canonical outcome;
+  produces the same canonical outcome. Compile-fail/type-state tests prove
+  `AbortMemberDiagnostic`/`Unprocessed` cannot construct
+  `CompleteMemberStatus`, `CompleteBatchVerification`, or a quorum input;
 - for every admitted quorum/threshold rule, failures leave eligible
   contributors exactly one below, at, and one above the boundary; each failed,
-  contradicted, expired, indeterminate, withdrawn, and unprocessed status
-  contributes no interval/vote yet remains in original-`n` accounting.
+  contradicted, expired, indeterminate, and withdrawn
+  `CompleteMemberStatus` contributes no interval/vote yet remains in
+  original-`n` accounting.
   Caller-side failure filtering, denominator reduction, threshold
   recomputation, and duplicate-root independence forgery fail, while each
-  explicitly admitted duplicate/correlation policy is covered;
+  explicitly admitted duplicate/correlation policy is covered. `Unprocessed`
+  appears only in separate aborted-outcome refusal tests, never this threshold
+  matrix;
 - refresh state machines inject cancellation, each capacity/work failure,
   internal-invariant failure, withdrawal, expiry, and every policy/membership/
   evidence/lifecycle generation change before and after each work/commit step.
@@ -3437,6 +3463,13 @@ Verification:
   `Retained`/`Invalidated`/`Absent` reporting, no retained-deadline extension,
   no partial replacement, invalidation despite replacement failure, and one
   linearization point for complete replacement plus prior retirement;
+- prior-observation tests bind identity/generation, exact-domain
+  `MonotonicReadInterval`, unchanged `valid_until`, invalidation generation/
+  reason, and engine/publication generation to the same refresh boundary.
+  Exact expiry, straddling reads, monotonic failure/domain mismatch, invalidation
+  immediately after linearization, delayed synchronous return, and delayed
+  async polling prove `Retained` is historical-at-`observed_at`, never
+  authority through receipt;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -3469,6 +3502,9 @@ Exit criteria:
 - failed members never vote or contribute intervals, never silently reduce the
   configured quorum, and an aborted refresh neither preserves invalid prior
   authority nor partially replaces still-current prior authority;
+- `Unprocessed` is unrepresentable in a complete witness or quorum input, and
+  prior-authority disposition is an interval-valued linearization observation
+  rather than a through-receipt authority claim;
 - `v0.60.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.61.0 - Generic Clustering Combining And Diversity
@@ -3495,7 +3531,9 @@ Deliverables:
   accepted bounds are eligible interval contributors; failed members cast no
   vote, cannot reduce the required threshold, and force `Insufficient` or
   `Unsafe` when too few eligible contributors remain. A successful prefix or
-  aborted diagnostic outcome is never treated as the admitted set;
+  aborted diagnostic outcome is never treated as the admitted set; the quorum
+  API accepts `CompleteMemberStatus` through the witness and has no
+  `AbortMemberDiagnostic`/`Unprocessed` input path;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
@@ -3510,8 +3548,9 @@ Verification:
   diversity thresholds, stale/lost assessment, conditional-claim rejection,
   complete batches with eligible contributors one below/at/above every
   threshold and each terminal failure status, aborted/prefix/filter outcome
-  refusal, original-`n` preservation, duplicate-root correlation policy,
-  membership-generation substitution, and simulator campaigns.
+  refusal including every `Unprocessed` position, original-`n` preservation,
+  duplicate-root correlation policy, membership-generation substitution, and
+  simulator campaigns.
 
 Exit criteria:
 
@@ -6291,9 +6330,10 @@ Deliverables:
   successful prefixes, and caller-filtered result iterators cannot silently
   shrink `n`, remove a failed member, or enter consensus as a complete set.
   Only current accepted-bound members contribute intervals/votes; all other
-  statuses remain visible non-contributors, and shortage returns
-  `Insufficient`/`Unsafe` until an atomic new membership generation is fully
-  reassessed;
+  processed `CompleteMemberStatus` values remain visible non-contributors, and
+  shortage returns `Insufficient`/`Unsafe` until an atomic new membership
+  generation is fully reassessed. `AbortMemberDiagnostic`, including
+  `Unprocessed`, is refused before orchestration;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
   claims with assertion provenance, configured/measured/authenticated/inferred/
   unknown assurance, expiry, and generation;
@@ -6324,8 +6364,9 @@ Verification:
   properties; aborted-batch and caller-filtered successful-prefix attempts
   cannot shrink the admitted source set. One-below/at/above threshold matrices
   cover every non-contributor status, duplicate/correlated memberships, and
-  atomic membership-generation replacement. Navheim is represented only by
-  protocol-neutral fixtures here.
+  atomic membership-generation replacement; separate type-state tests reject
+  every aborted/unprocessed outcome. Navheim is represented only by protocol-
+  neutral fixtures here.
 
 Exit criteria:
 
@@ -6650,7 +6691,10 @@ Deliverables:
   reports `Retained`; genuine withdrawal, expiry, or policy/membership/
   evidence/lifecycle change publishes its invalidation even when replacement
   fails and reports `Invalidated`. No prior state reports `Absent` as retained,
-  and no reader observes a replacement prefix;
+  and no reader observes a replacement prefix. The published
+  `PriorAuthorityObservation` binds the exact prior identity/generation,
+  `MonotonicReadInterval`, unchanged deadline or invalidation generation/
+  reason, engine generation, and this commit's publication generation;
 - every concurrent linearization-time strict read obtains one logical snapshot
   and exact-domain `MonotonicReadInterval`, validates
   `observed_at.latest < valid_until`, and returns both values from the same
@@ -6722,7 +6766,11 @@ Verification:
   work abort, genuine invalidation, prior absence, deadline crossing, commit,
   and retirement. Readers observe exactly retained-old, invalidated/diagnostic,
   or complete-new state with the matching
-  `PriorAuthorityDisposition`, never a mixed or partial replacement;
+  `PriorAuthorityObservation`, never a mixed or partial replacement;
+- delayed-reader and delayed-return schedules prove the disposition describes
+  only its recorded publication linearization interval: a retained prior may
+  expire or invalidate immediately afterward, and no caller may use the report
+  itself as current or through-receipt authority;
 - verified-derivation replacement/invalidation and exact-deadline, idle-expiry,
   timer-starvation, suspend/resume, coarse/straddling monotonic intervals,
   latency/rate-uncertainty spikes, observed-at/deadline pairing, delayed caller
@@ -6853,6 +6901,11 @@ Deliverables:
 - no `is_trusted` boolean, convenience conversion, default unwrap, or preferred
   estimate erases why, under which policy/generations, or until when a bound is
   accepted;
+- blocking refresh APIs return `PriorAuthorityObservation` rather than a
+  current-authority boolean. The facade exposes its observation interval,
+  unchanged deadline/invalidation data, and engine/publication generation, and
+  requires ordinary current-token validation before later use; delayed blocking
+  return cannot upgrade historical `Retained` into through-receipt authority;
 - a named, versioned system-defaults policy profile whose report enumerates
   selected sources, trust roots, time-data provider/source/refresh state,
   network actions, fallbacks, platform assumptions, and rejected alternatives;
@@ -6878,6 +6931,8 @@ Verification:
   compile-fail no_std clock lifetime escape,
   delayed hosted return with valid linearization metadata, unavailable/stale/
   violated WCET capability and contract non-substitution,
+  refresh observation followed by immediate expiry/invalidation and delayed
+  blocking receipt,
   no-trusted-boolean misuse compile tests, and iterator/builder/callback/
   formatting/state-transition panic tests plus whole-facade fuzzing.
 
@@ -6910,7 +6965,9 @@ Deliverables:
   `Unprocessed`, and only `CompleteBatchVerification` may enter
   full-membership consensus. The future returns the exact prior-authority
   disposition; cancellation does not clear a still-current prior batch and
-  cannot preserve one invalidated concurrently;
+  cannot preserve one invalidated concurrently. Its
+  `PriorAuthorityObservation` is historical at `observed_at`, and delayed
+  waking/polling/return never turns `Retained` into authority through receipt;
 - no Tokio or runtime dependency.
 
 Verification:
@@ -6920,7 +6977,9 @@ Verification:
   multi-root shared queue equivalence/retention/exhaustion, cancellation/drop
   races at pending/wake/ready boundaries with no proof/token or complete-
   witness escape, retained-versus-concurrently-invalidated prior-batch
-  outcomes, wake discipline, and feature matrix.
+  outcomes, expiry/invalidation immediately after the observation point,
+  arbitrarily delayed result polling/receipt, wake discipline, and feature
+  matrix.
 
 Exit criteria:
 
@@ -6952,9 +7011,10 @@ Deliverables:
 - batch-verification builders additionally size membership/result slots,
   canonical-order scratch state, global/per-root generation snapshots,
   unique/per-root work accounting, cancellation checkpoints, and the
-  `CompleteBatchVerification` witness plus prior-authority disposition;
-  insufficient capacity aborts without a proof/token prefix or prior-state
-  mutation;
+  `CompleteMemberStatus`/`AbortMemberDiagnostic` disjoint result buffers,
+  `CompleteBatchVerification` witness, and fixed-size
+  `PriorAuthorityObservation`; insufficient capacity aborts without a
+  proof/token prefix or prior-state mutation;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6969,7 +7029,9 @@ Verification:
   compile-fail borrowed-result escape; multi-root sharing, duplicate roots,
   removal retention, bounded re-compaction, batch/individual equivalence, and
   zero/minimum/exact/short capacity for every batch membership, result,
-  canonical-order, snapshot, accounting, and cancellation-checkpoint buffer.
+  canonical-order, snapshot, accounting, and cancellation-checkpoint buffer;
+  compile-fail cross-status construction plus exact size/stack evidence for
+  every prior-observation variant.
 
 Exit criteria:
 
@@ -6987,7 +7049,17 @@ Deliverables:
 
 - compatible extensions for atomic instants, durations,
   hard/statistical uncertainty, scales/models/generations, provenance,
-  capability reports, observation events, and discontinuities;
+  capability reports, observation events, `CompleteMemberStatus`,
+  `AbortMemberDiagnostic`, fixed-size `PriorAuthorityObservation`, and
+  discontinuities;
+- schema tags for processed complete-member status and abort-only diagnostics
+  are disjoint. `Unprocessed` has no complete-witness encoding, and decode can
+  never convert an aborted diagnostic into a quorum-capable value;
+- prior-authority observations encode exact identity/generation, monotonic
+  observation interval/domain, unchanged deadline or typed invalidation
+  generation/reason, and engine/optional publication generation as historical
+  evidence only; they never deserialize as a current accepted token or
+  through-receipt authority claim;
 - every IPC, persistence, C, WASM, log/evidence, and language-binding encoding
   of a bound condition preserves the `v0.7.3` unresolved/resolved type-state;
   identifier-only forms require the exact verified registry generation and no
@@ -7023,7 +7095,9 @@ Verification:
   missing/rolled-back registries, forged/stale serialized assessments and
   accepted-bound tokens, derivation replay/rollback/cross-engine copy,
   missing-input/stale-rule-or-model substitution, direct verified-type decode
-  refusal, C/WASM/JNI-or-C/Swift-or-C fixtures, context-first/child-first/
+  refusal, complete-versus-abort tag substitution and forged `Unprocessed`
+  complete witness, prior-observation field/variant substitution and
+  current-authority misuse, C/WASM/JNI-or-C/Swift-or-C fixtures, context-first/child-first/
   arbitrary destruction order, double release, use after context close, shared
   frozen-owner threads, allocation/promotion failure without leaked or
   partially initialized handles, and fuzzing.
@@ -7312,7 +7386,10 @@ Deliverables:
   views, complete invalidation generations, and deterministic
   `BatchVerificationOutcome` complete/abort semantics with no authoritative
   prefix, original-`n` membership accounting with accepted-bound-only interval
-  contributors, and atomic retained/invalidated/absent prior-state replacement,
+  contributors, disjoint complete-member versus abort-diagnostic type-state,
+  and atomic retained/invalidated/absent prior-state replacement bound to a
+  fixed-size interval-valued linearization observation rather than caller
+  receipt,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, bounded core `UnverifiedBoundDerivation` preservation
@@ -7668,7 +7745,9 @@ Deliverables:
   attribution, and abort at every work/cancellation checkpoint with no
   proof/token prefix or prior-state mutation; retained prior state remains
   bounded by its existing owner/deadline and cannot accumulate failed refresh
-  state;
+  state. Complete/abort member buffers are separately bounded, and every
+  fixed-size prior-observation variant has explicit size/stack/accounting
+  evidence;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -7810,13 +7889,17 @@ Deliverables:
   shared-node failure fan-out versus root-specific evidence independence,
   cancellation/work exhaustion after every node/root, snapshot invalidation
   after every verified prefix, no-token global abort, complete
-  `Indeterminate`/`Unprocessed` classification, stable unique/per-root
-  accounting, complete-membership witness enforcement, and batch/individual
-  proof/token identity equivalence; failed/contradicted/expired/indeterminate/
-  withdrawn contributor matrices one below/at/above every threshold,
+  aborted-membership `Indeterminate`/`Unprocessed` diagnostic accounting,
+  compile-fail complete/abort status mixing, stable unique/per-root accounting,
+  complete-membership witness enforcement, and batch/individual proof/token
+  identity equivalence; processed failed/contradicted/expired/indeterminate/
+  withdrawn complete-member matrices one below/at/above every threshold,
   original-`n`/no-vote enforcement, duplicate-root correlation admission,
   failed-refresh prior retained/invalidated/absent outcomes, and atomic
-  complete-new/prior-retirement races,
+  complete-new/prior-retirement races; prior identity/generation,
+  interval/deadline, invalidation generation/reason, engine/publication
+  generation, immediate post-linearization expiry/invalidation, and delayed
+  receipt,
   missing/truncated/over-budget early recipes, narrowed/spliced/substituted
   derivations, serialized-record replay/rollback/cross-engine restore and stale
   input/rule/model/lifecycle reverification, mixed-generation assessment
@@ -7981,9 +8064,13 @@ Deliverables:
   memberships, cancellation/work/snapshot aborts with no token prefix, and the
   `CompleteBatchVerification` requirement for full-membership consensus. They
   distinguish configured membership accounting from accepted-bound interval
-  contributors, cover unchanged thresholds and `Insufficient`/`Unsafe`, and
-  document atomic refresh replacement plus
-  `PriorAuthorityDisposition::{Retained, Invalidated, Absent}`;
+  contributors, show that `Unprocessed` belongs only to
+  `AbortMemberDiagnostic` and cannot reach a complete witness/quorum, cover
+  unchanged thresholds and `Insufficient`/`Unsafe`, and document atomic refresh
+  replacement plus fixed-size `PriorAuthorityObservation` payloads for
+  `PriorAuthorityDisposition::{Retained, Invalidated, Absent}`. Examples state
+  the exact observation interval and warn that `Retained` is not authority
+  through caller receipt;
 - no_std examples define `EngineProofHandle<'engine, K, T>` as the sole
   checked engine-store reference and
   `VerifiedBoundDerivationRef`/`PolicyAcceptedHardBoundRef` as its two

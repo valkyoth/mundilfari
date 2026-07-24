@@ -56,11 +56,15 @@ Rules:
 - Engine alone owns canonical multi-root verification order, shared-node work,
   batch generation snapshots, complete/aborted outcomes, and the non-forgeable
   complete-membership witness. Facade, async, and consensus layers cannot
-  extract an authoritative successful prefix from an aborted batch. Engine
-  also owns the distinction between original configured membership and current
+  extract an authoritative successful prefix from an aborted batch.
+  `CompleteMemberStatus` and `AbortMemberDiagnostic` are disjoint; only the
+  latter can represent `Unprocessed`, and it cannot enter quorum. Engine also
+  owns the distinction between original configured membership and current
   accepted-bound interval contributors, unchanged quorum thresholds, and the
-  retained/invalidated/absent prior-authority refresh transaction. Concurrent
-  publication implements its one-point replacement but cannot redefine it.
+  retained/invalidated/absent prior-authority refresh transaction plus its
+  fixed-size linearization observation. Concurrent publication supplies its
+  generation and one-point replacement but cannot redefine the observation as
+  authority through receipt.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.

@@ -150,6 +150,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   lower a threshold, and cause insufficient/unsafe results when contributors
   are short. Batch refresh now reports retained, invalidated, or absent prior
   authority and atomically replaces old state only with a complete new batch.
+- Split processed `CompleteMemberStatus` from abort-only
+  `AbortMemberDiagnostic`, making `Unprocessed` unrepresentable in complete
+  witnesses and quorum input. Prior-authority disposition now binds fixed-size
+  identity/generation, monotonic observation interval, deadline/invalidation,
+  and engine/publication generation data at the refresh linearization point;
+  `Retained` is explicitly not authority through caller receipt.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

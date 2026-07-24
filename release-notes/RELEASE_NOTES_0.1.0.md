@@ -162,6 +162,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   threshold, and shortage is explicitly insufficient/unsafe. Aborted refreshes
   report whether prior authority was retained, invalidated, or absent, while
   complete replacement and prior retirement share one linearization point.
+- Complete and aborted batches now use disjoint member types:
+  `Unprocessed` exists only in abort diagnostics and cannot reach a complete
+  witness or quorum. Prior-authority reports bind fixed-size identity,
+  generation, monotonic interval, deadline/invalidation, and publication data
+  to their refresh linearization point; delayed return never makes `Retained`
+  a current-authority claim.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

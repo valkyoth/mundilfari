@@ -105,6 +105,9 @@ the release branch between review and tagging.
   Cancellation, global work exhaustion, snapshot invalidation, or invariant
   failure mints no proof/token prefix and explicitly reports every member as
   indeterminate or unprocessed with stable complete resource accounting.
+  Complete outcomes use processed-only `CompleteMemberStatus`; aborted outcomes
+  use disjoint `AbortMemberDiagnostic`, the sole location of `Unprocessed`.
+  No aborted/unprocessed value can construct a complete witness or enter quorum.
   Completeness preserves original configured membership; only a current
   accepted-bound member contributes an interval/vote. Every other terminal
   status stays in `n` and cannot lower the threshold, so contributor shortage
@@ -115,6 +118,10 @@ the release branch between review and tagging.
   batch; genuine dependency invalidation revokes it even without replacement.
   An internal invariant fault invalidates prior authority. Complete-new commit
   and prior retirement are one transaction, with no partial replacement.
+  Fixed-size `PriorAuthorityObservation` binds disposition, prior identity/
+  generation, exact monotonic observation interval, unchanged deadline or
+  invalidation generation/reason, and engine/publication generation at that
+  linearization point. `Retained` never claims authority through caller receipt.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,
