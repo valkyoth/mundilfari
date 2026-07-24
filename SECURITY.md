@@ -47,6 +47,11 @@ the release branch between review and tagging.
 - Parsing does not grant semantic validity or clock authority.
 - Authentication, accuracy, uncertainty, freshness, and traceability are
   independent properties.
+- Guaranteed hard bounds and statistical covariance/confidence are distinct;
+  statistical estimates require explicit policy before contributing a bound.
+- Every source can withdraw evidence or publish a discontinuity, and that
+  invalidation propagates through consensus, servo, clock, persistence, and
+  audit state.
 - No silent downgrade from authenticated to unauthenticated time.
 - Legacy and historical protocols are disabled in secure defaults.
 - GNSS interpretation comes only from admitted Navheim timing evidence;

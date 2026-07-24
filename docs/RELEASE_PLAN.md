@@ -26,6 +26,10 @@ v1.0.0       first serious production-ready release
 Every release requires:
 
 - one clear definition of done;
+- one independently standardized protocol/profile family or one algorithmic
+  control unit per implementation stop; a tightly coupled exception names its
+  normative coupling and is split again if its state/security/conformance
+  evidence can be reviewed independently;
 - official specification revisions and verified errata for changed protocols;
 - bounded positive, negative, malformed, state, rollover, and resource tests;
 - documented security impact, limitations, and platform/no_std capability;
@@ -149,6 +153,10 @@ Deliverables:
 - versioned protocol, standard, errata, license, and document-hash registries;
 - promote the `v0.1.0` RFC and external-source acquisition baseline into
   clause-level requirement and errata disposition ledgers;
+- stable domain-qualified requirement IDs with bidirectional links among
+  normative clauses/architecture decisions, owning crate/module,
+  implementation items, positive/negative/property/fuzz/conformance/HIL
+  evidence, and explicit exclusions/non-claims;
 - recursively inventory every normative reference from each admitted source
   and classify it as implemented, provider-owned, registry/procedure-only,
   syntax/transport support, superseded, not applicable, or blocked;
@@ -174,6 +182,8 @@ Verification:
 
 - registry round trips, malformed schema corpus, duplicate/conflict tests, and
   comparison with `PROTOCOLS.md`;
+- orphan requirement, implementation, test, proof/fuzz/HIL evidence, and
+  non-claim mutations in both trace directions;
 - generated transitive-reference closure fixtures covering cycles, updates,
   obsoletes, provider boundaries, and a newly introduced unclassified
   normative reference;
@@ -185,6 +195,8 @@ Exit criteria:
 
 - every initial registry entry and transitive normative dependency has an
   exact status, disposition, consumer, and roadmap assignment;
+- every implementation-bound requirement has a stable ID and no orphaned
+  source, implementation, test/evidence, exclusion, or non-claim edge;
 - every source needed through the next implementation pass has an exact
   legitimate artifact, reviewed errata state, and clause dispositions;
 - `v0.2.0 implementation stop reached. Run pentest for this exact commit.`
@@ -347,15 +359,21 @@ Goal: preserve and convert protocol-native fractions exactly.
 
 Deliverables:
 
-- binary, decimal, scaled-nanosecond, and rational fraction adapters;
+- binary, decimal, scaled-nanosecond, and bounded exact-fraction adapters;
 - caller-selected rounding, exact rational quantum, and lower/upper residual
   interval;
+- fixed maximum limb width, canonical sign location, positive nonzero
+  denominator, and explicit reduced/unreduced invariants;
+- bounded comparison, reduction, and conversion algorithms without
+  cross-product overflow, attacker-selected arbitrary precision, or
+  attacker-sized allocation;
 - raw representation retention.
 
 Verification:
 
-- exhaustive reduced-width fractions, official protocol examples, halfway
-  rounding, maximum precision, and monotonicity tests.
+- exhaustive reduced-width fractions, zero/maximum denominators, worst-case
+  reduction work, comparison-overflow cases, official protocol examples,
+  halfway rounding, maximum precision, and monotonicity tests.
 
 Exit criteria:
 
@@ -384,33 +402,170 @@ Exit criteria:
 - calendar conversion is first-party, bounded, and independent of `std`;
 - `v0.10.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.11.0 - Time Scales
+### v0.11.0 - Scale Identity And Conversion Context
 
 Status: planned.
 
-Goal: represent UTC, TAI, UT1, POSIX, PTP, NTP, and named GNSS scales
-distinctly without interpreting GNSS messages or mixing model generations.
+Goal: establish stable scale identity and immutable conversion context without
+implementing every scale family in one review pass.
 
 Deliverables:
 
-- stable scale identifiers and explicit conversions under one immutable,
-  versioned `ConversionContext`, never a general path-search graph;
-- explicit leap, Earth-orientation, relativistic-coordinate, and GNSS-offset
-  contexts used to cross-check externally resolved observations;
-- NTP-as-UTC-encoding, PTP-timescale/arbitrary-timescale, and
-  non-fixed-offset GLONASS distinctions;
-- missing-data and stale-data failures.
+- stable identifiers for continuous, civil, protocol-encoding, and named
+  externally resolved scales;
+- the SI second and unit foundations reviewed from
+  `bipm-si-brochure-9-v4.01`, with the exact locally locked revision recorded
+  in the requirement ledger;
+- one immutable versioned `ConversionContext`, never a general path-search
+  graph, with explicit model generations and admissible data;
+- typed missing, stale, mixed-generation, unavailable, and unsupported
+  conversion outcomes;
+- no GNSS signal, navigation-message, receiver, or UTC-model interpretation.
 
 Verification:
 
-- mixed-generation path rejection, forbidden implicit conversions, stale
-  table rejection, PTP arbitrary timescale, GLONASS non-fixed behavior, and
-  cross-scale published examples.
+- scale-identity non-substitution, context generation replacement,
+  mixed-generation rejection, missing/stale data, and forbidden implicit
+  conversion tests.
 
 Exit criteria:
 
-- public APIs cannot confuse scale identity with epoch encoding;
+- scale identity and model identity are explicit before any family conversion;
 - `v0.11.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.11.1 - UT1 And Earth Orientation
+
+Status: planned.
+
+Goal: implement the EOP/UT1 model foundation needed for later UTC conversion
+with explicit provenance and uncertainty.
+
+Deliverables:
+
+- the official `iers-conventions-2010-tn36` model baseline, its official
+  corrections register, and the distinction between the official release and
+  non-definitive working updates reviewed and recorded;
+- versioned Earth-orientation records, source, validity, interpolation policy,
+  model generation, and hard/statistical uncertainty separation;
+- checked UT1-offset evaluation and application to continuous instants through
+  `ConversionContext`; UTC civil conversion completes with `v0.12.0`;
+- stale, extrapolated, missing, and withdrawn model outcomes.
+
+Verification:
+
+- official EOP examples, interpolation boundaries, stale/extrapolated data,
+  model replacement/withdrawal, mixed generations, and uncertainty
+  propagation.
+
+Exit criteria:
+
+- the UT1 model is never represented as a fixed offset or silently
+  extrapolated;
+- `v0.11.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.11.2 - Relativistic Coordinate Scales
+
+Status: planned.
+
+Goal: add only admitted relativistic-coordinate scales and conversion models
+required by registered protocols.
+
+Deliverables:
+
+- the applicable clauses of `iau-2000-resolutions`,
+  `iau-2006-resolution-b3`, and `bipm-si-brochure-9-v4.01` reviewed and mapped
+  to exact constants and equations;
+- exact identifiers, epochs, rates, model constants, validity, and references
+  for each admitted scale;
+- checked conversions under an explicit model/context generation;
+- explicit out-of-scope scales and accuracy non-claims.
+
+Verification:
+
+- official published examples, epoch/rate extremes, rounding, reverse
+  conversion residuals, wrong model, and unsupported-scale tests.
+
+Exit criteria:
+
+- no relativistic conversion is inferred from a name or approximate
+  floating-point offset;
+- `v0.11.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.11.3 - NTP And PTP Scale Semantics
+
+Status: planned.
+
+Goal: distinguish protocol timestamp encodings from underlying time scales.
+
+Deliverables:
+
+- NTP-as-UTC-encoding and era context separated from a standalone scale;
+- PTP timescale, arbitrary-timescale, epoch, and UTC-offset semantics;
+- exact conversion-context/model generation attached to normalized results;
+- protocol identity retained through conversion.
+
+Verification:
+
+- NTP era/UTC examples, PTP timescale/arbitrary-timescale cases, stale offset,
+  mixed model generations, and cross-protocol non-substitution.
+
+Exit criteria:
+
+- a wire encoding cannot masquerade as an independent physical time scale;
+- `v0.11.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.11.4 - Externally Resolved GNSS Scale Identities
+
+Status: planned.
+
+Goal: represent named GNSS scales for generic externally resolved
+observations without performing Navheim-owned interpretation.
+
+Deliverables:
+
+- identifiers and externally supplied scale-offset/model evidence for GPS,
+  Galileo, BeiDou, GLONASS, QZSS, and NavIC observations;
+- non-fixed-offset GLONASS distinction and typed unknown/custom identities;
+- cross-check-only adapters under `ConversionContext`;
+- no week resolution, navigation UTC model, receiver, health, or
+  authentication logic.
+
+Verification:
+
+- externally resolved examples, missing/stale offset evidence, GLONASS
+  non-fixed behavior, unknown identities, mixed generations, and compile-time
+  Navheim-boundary checks.
+
+Exit criteria:
+
+- Mundilfari can name an externally resolved GNSS scale without determining
+  time from GNSS;
+- `v0.11.4 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.11.5 - Time-Scale Family Security Gate
+
+Status: planned.
+
+Goal: audit scale identity, conversion models, and family boundaries before
+UTC/leap implementation builds on them.
+
+Deliverables:
+
+- clause/model maps and cross-family non-substitution review;
+- resolved critical/high generation, stale-data, rounding, and boundary
+  findings;
+- explicit Navheim ownership confirmation.
+
+Verification:
+
+- full scale corpus, differential published examples, arbitrary conversion
+  requests, model replacement/withdrawal, no_std/MSRV, and focused pentest.
+
+Exit criteria:
+
+- all admitted scale families preserve identity, model generation, and
+  uncertainty semantics;
+- `v0.11.5 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.12.0 - UTC And Leap Seconds
 
@@ -423,6 +578,8 @@ Deliverables:
 - UTC civil values capable of representing second 60;
 - versioned leap table, provenance, activation, and hash;
 - leap announcement and conflict model;
+- checked UTC/UT1 conversion using the admitted EOP model and matching
+  conversion-context generations;
 - explicit UTC-before-1972 non-claim until a historical frequency-offset model
   is separately admitted.
 
@@ -469,12 +626,19 @@ Goal: make uncertain time a first-class interval.
 Deliverables:
 
 - earliest/latest intervals and asymmetric uncertainty;
+- a typed distinction between guaranteed hard bounds and statistical
+  estimates carrying covariance, confidence level, model identity, and model
+  generation;
+- explicit, policy-named statistical-to-hard-bound conversion only where its
+  assumptions and confidence are supplied; no implicit covariance promotion;
 - checked intersection, union, expansion, containment, and midpoint policy;
 - empty/disjoint/saturated results.
 
 Verification:
 
-- interval algebra properties, extremes, asymmetry, empty sets, and rounding.
+- interval algebra properties, extremes, asymmetry, empty sets, rounding,
+  covariance units/symmetry, confidence/model substitution, and compile-fail
+  hard/statistical mixing.
 
 Exit criteria:
 
@@ -493,18 +657,56 @@ Deliverables:
   realization, resolution, precision, age, stability, traceability, leap, and
   holdover;
 - authentication class separate from advertised/measured/verified accuracy;
-- source generation, protocol, authority, path, raw hash, monotonic capture,
-  warnings, integrity, and reading.
+- source generation, protocol, authority, path, optional typed
+  `EvidenceDigest { algorithm, value, assurance }`, monotonic capture,
+  warnings, integrity, and reading;
+- bounded error-budget components separating systematic/random,
+  measured/asserted, correlation identity, calibration, quantization, path,
+  capture, scale-model, and oscillator contributions;
+- diversity assertions carrying provenance, assurance class, validity,
+  generation, and conservative unknown-correlation behavior.
 
 Verification:
 
 - construction invariants, redacted debug output, non-substitution type tests,
-  and no trusted-boolean API.
+  forged diversity, correlation conflicts, digest assurance, error-budget
+  composition, and no trusted-boolean API.
 
 Exit criteria:
 
 - callers can distinguish authentic, accurate, traceable, and merely formatted;
 - `v0.15.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.15.1 - Generic Observation Lifecycle
+
+Status: planned.
+
+Goal: make insertion, withdrawal, and discontinuity generic for every time
+source before any protocol or Navheim adapter exists.
+
+Deliverables:
+
+- unique observation/artifact identity, source identity, generation,
+  monotonic sequence, capture time, and `valid_until`;
+- protocol-neutral `Upsert`, `Withdraw`, and `Discontinuity` events with typed
+  reasons and affected correlation generations;
+- monotonic ordering, duplicate/idempotence policy, and bounded event queues;
+- reserved withdrawal capacity/backpressure so an invalidation cannot be
+  silently dropped behind ordinary observations;
+- withdrawal propagation contract for filters, consensus, servos, virtual
+  clocks, persistence, and audit records.
+
+Verification:
+
+- duplicate/out-of-order events, generation rollover, withdrawal before/after
+  upsert, expiry, queue saturation, reserved-capacity exhaustion,
+  discontinuity fan-out, restart, and deterministic replay.
+
+Exit criteria:
+
+- every source can retract evidence without relying on a source-specific
+  mechanism;
+- `v0.15.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.16.0 - Monotonic Clock Correlation
 
@@ -528,6 +730,63 @@ Exit criteria:
 - monotonic values cannot become civil time without an explicit correlation;
 - `v0.16.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.16.1 - Core No-Allocation Formatting
+
+Status: planned.
+
+Goal: format foundational time values in `no_std` without allocation, locale,
+or partial semantic output.
+
+Deliverables:
+
+- unambiguous `core::fmt::Display` implementations and caller-buffer
+  `format_into` APIs with required-length reporting;
+- atomic write-or-error behavior for insufficient output;
+- explicit `ConversionContext` for UTC/civil forms, preserved fractional
+  precision, leap-second formatting, and no locale dependence;
+- no formatting path that silently selects an era, scale, zone, or smear.
+
+Verification:
+
+- exact/minus-one buffer sizes, extremes, negative years, second 60,
+  fractional precision, stale/missing context, writer failure, no allocation,
+  and round-trip cases where a parser exists.
+
+Exit criteria:
+
+- core values have bounded human-readable output without hiding conversion
+  policy;
+- `v0.16.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.16.2 - Common Error Taxonomy
+
+Status: planned.
+
+Goal: give callers stable error classification without flattening detailed
+protocol or platform causes.
+
+Deliverables:
+
+- stable classes for malformed, unsupported, ambiguous, stale,
+  unauthenticated, integrity failure, policy rejection, resource exhaustion,
+  unavailable, unauthorized, discontinuous, out of range, transport, and
+  platform failures;
+- structured source chains and redacted details in `no_std` and `std`;
+- peer invalidity, local exhaustion, transport failure, and authorization
+  failure kept distinct;
+- exhaustive classification required for every public error.
+
+Verification:
+
+- one fixture per class, protocol/platform wrapper mappings, redaction,
+  unknown future detail, source chaining, and compile-time exhaustive internal
+  mapping checks.
+
+Exit criteria:
+
+- applications never need to parse error strings to make safe policy choices;
+- `v0.16.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.17.0 - Foundation Security Gate
 
 Status: planned.
@@ -537,6 +796,8 @@ Goal: audit the complete time model before protocols depend on it.
 Deliverables:
 
 - arithmetic and conversion audit;
+- hard/statistical uncertainty, error-budget, observation-lifecycle,
+  formatting, and error-taxonomy audit;
 - Kani-style bounded proofs where useful;
 - API and serialization stability review proving no raw Rust layout, `repr(C)`,
   or implicit serialization freezes the internal instant representation;
@@ -632,6 +893,11 @@ Deliverables:
 - explicit capacity errors and deterministic iteration;
 - no hidden heap use.
 
+Alloc-enabled companions use fallible `try_*` construction and
+`try_reserve`-style growth, or caller-supplied storage. APIs that cannot
+recover from allocator failure carry an explicit process-abort-on-OOM
+non-claim and are never the only network-facing path.
+
 Verification:
 
 - zero/full capacity, reuse, order, duplicate, removal, and model comparison.
@@ -650,6 +916,10 @@ Goal: standardize lossless parse/validate/encode APIs.
 Deliverables:
 
 - borrowed packet references, unknown-field iterators, owned opt-in forms;
+- unknown preservation for inspection separated from semantic acceptance,
+  forwarding, response echo, authentication, and re-encoding authority;
+- unknown fields echoed only when the exact protocol revision requires it and
+  response/work budgets permit it;
 - strict/compatible/forensic modes;
 - type-state transitions from parsed through semantic, association, and
   authenticated validity where applicable;
@@ -657,8 +927,9 @@ Deliverables:
 
 Verification:
 
-- unknown preservation, compile-fail forensic/compatibility non-authority,
-  exact round trips, and insufficient-output atomicity.
+- unknown preservation, forbidden reflection/forwarding, required-echo
+  fixtures, compile-fail forensic/compatibility non-authority, exact round
+  trips, and insufficient-output atomicity.
 
 Exit criteria:
 
@@ -725,11 +996,14 @@ Deliverables:
 - child reservations without reset or double release;
 - deterministic per-poll work ceilings and reported remaining work;
 - local exhaustion distinct from protocol invalidity.
+- pre-allocation validation of every network-controlled size and explicit
+  fallible-allocation outcomes for alloc-enabled paths.
 
 Verification:
 
 - conservation properties, nested operations, cancellation, adversarial
-  complexity, and exhaustion outcome tests.
+  complexity, allocator failure injection, oversized pre-allocation rejection,
+  and exhaustion outcome tests.
 
 Exit criteria:
 
@@ -836,6 +1110,8 @@ Deliverables:
 - Linux, Windows, BSD, and macOS adapters;
 - generated capability report distinguishing compiled, available, authorized,
   and healthy states with resolution and explicit platform errors;
+- process/container/time-namespace identity and clock generation in every
+  hosted clock report;
 - checked native time conversion that returns `OutOfRange` rather than
   narrowing, saturating, or panicking;
 - Android/iOS library-safe support.
@@ -1004,13 +1280,13 @@ Deliverables:
   calibration, and asymmetry inputs;
 - Linux PTP character-device/standard-ioctl implementation separated from
   embedded device-specific MMIO;
-- phase/frequency adjustment traits with strict bounds;
 - device identity and hotplug handling.
 
 Verification:
 
-- mock ioctl corpus, live PHC tests, overflow, stale device, concurrency, and
-  cross-timestamp uncertainty checks covering reset and clock-ID lifetime.
+- mock ioctl corpus, live PHC tests, overflow, stale device, concurrency,
+  time-namespace mismatch, cross-timestamp uncertainty and maximum-latency
+  benchmarks covering reset and clock-ID lifetime.
 
 Exit criteria:
 
@@ -1028,6 +1304,8 @@ Deliverables:
 - `/dev/ppsN` capabilities, sequence, assert/clear edge, timeout, and quality;
 - generic caller-supplied edge capture trait;
 - device identity and loss reporting.
+- explicit distinction between kernel/device capture and caller-supplied
+  already captured edges.
 
 Verification:
 
@@ -1039,28 +1317,132 @@ Exit criteria:
 - physical edges become observations without inventing civil time;
 - `v0.38.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.39.0 - System Clock Adjustment
+### v0.38.1 - RTC And Architectural Counters
 
 Status: planned.
 
-Goal: implement bounded platform clock-control adapters.
+Goal: expose bounded real-time-clock and architectural counter observations
+without treating either as automatically valid civil time.
 
 Deliverables:
 
+- RTC read, set-backend boundary, validity, battery/power-loss, oscillator,
+  resolution, update-in-progress, device identity, generation, and uncertainty;
+- architectural monotonic/cycle counter identity, width, wrap extension,
+  frequency generation, invariance, suspend/reset, and cross-correlation;
+- read-only safe APIs separated from later discipline authorization;
+- platform-specific capability and non-claim reports.
+
+Verification:
+
+- invalid/battery-low RTC, torn register reads, BCD/range faults, century
+  ambiguity, counter wrap, frequency change, reset, suspend, CPU migration,
+  namespace mismatch, and mock/live platform tests.
+
+Exit criteria:
+
+- RTCs and cycle counters are typed observations with validity and generation,
+  never implicit UTC authorities;
+- `v0.38.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.38.2 - Embedded MMIO GPIO And Frequency Capture
+
+Status: planned.
+
+Goal: implement deterministic embedded clock/register, GPIO edge, and
+frequency-counter backends behind safe capability traits.
+
+Deliverables:
+
+- uniquely owned register/capture tokens and narrowly scoped sys/device crates;
+- volatile access, alignment, endianness, memory ordering/barriers, reset and
+  power-domain generations, and documented register invariants;
+- counter wrap extension, frequency changes, interrupt-versus-poll capture,
+  GPIO edge identity/sequence/loss, and frequency-counter gate/calibration
+  evidence;
+- target-specific mock register blocks and no Unix descriptor assumptions.
+
+Verification:
+
+- mock MMIO/register models, misalignment/endian faults, stale ownership,
+  reorder/barrier cases, reset/power cycle, counter wrap/frequency change,
+  interrupt races, GPIO bounce/loss, frequency calibration, WCET, and
+  representative embedded targets.
+
+Exit criteria:
+
+- embedded hardware access is bounded, generation-aware, and isolated from
+  protocol and engine policy;
+- `v0.38.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.39.0 - Discipline API And Clock Adjustment Backends
+
+Status: planned.
+
+Goal: separate discipline proposals and authorization from internal
+platform/device adjustment backends.
+
+Deliverables:
+
+- a separate `mundilfari-discipline` API owning typed discipline proposals,
+  target identity/generation, authorization, bounds, and applied results;
 - Linux, Windows, BSD, and macOS supported slew/step/frequency operations;
+- internal platform and RTC/PHC/oscillator/DAC/DCO adjustment backends not
+  re-exported by the ordinary facade;
+- `AppliedAdjustment` reporting requested, actually applied, residual, and
+  target generation rather than success alone;
 - separate read/configure/adjust capabilities and a short-lived
-  policy-generated authorization handle;
+  policy-generated authorization handle rechecked at operation time to close
+  discovery/TOCTOU gaps;
+- separately named expert in-process embedded API with identical numerical,
+  generation, authority, and audit safeguards;
+- every step, rate change, PHC/RTC reset, suspend, or device replacement
+  publishes a discontinuity and increments affected generations;
 - no default backward or post-startup step.
 
 Verification:
 
-- mock kernel faults, bounds, authorization compile tests, isolated VM tests,
-  rollback refusal, and degraded capability.
+- mock kernel/device faults, partial/applied/residual adjustment, saturation,
+  stale target generation, authorization revocation between discovery and
+  operation, discontinuity publication, isolated VM/embedded tests, rollback
+  refusal, and degraded capability.
 
 Exit criteria:
 
 - no protocol parser or client can directly modify a system clock;
 - `v0.39.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.39.1 - Secure Bounded Persistence Foundation
+
+Status: planned.
+
+Goal: provide one reviewed persistence contract for cookies, bootstrap,
+calibration, holdover, policies, and trusted-clock snapshots.
+
+Deliverables:
+
+- versioned canonical envelope and schema identity with explicit maximum
+  record size and unknown-version behavior;
+- crash-consistent atomic replacement, partial/torn-write detection, explicit
+  durability semantics, and bounded schema migration;
+- checksum separated from authenticated integrity and confidentiality;
+- secret-bearing snapshot provider boundary, redaction, and best-effort
+  clearing without overstated guarantees;
+- monotonic generation/rollback detection, boot/session binding, corruption,
+  replay, and discontinuity handling;
+- caller-supplied storage/no_std backend traits plus reviewed hosted file
+  adapter.
+
+Verification:
+
+- failure injection at every write/rename/sync boundary, partial/torn records,
+  corruption, wrong key, rollback, copied boot/session state, unknown schema,
+  migration chains, size exhaustion, concurrent readers, and recovery.
+
+Exit criteria:
+
+- no protocol or engine invents an unaudited private state-file format;
+- `v0.39.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.40.0 - Platform And Privilege Security Gate
 
@@ -1072,6 +1454,8 @@ Deliverables:
 
 - machine-readable unsafe inventory, per-block invariants, safe-wrapper/ABI
   review, granular permission model, and privilege-separation plan;
+- RTC/counter/MMIO/GPIO/frequency/actuator, namespace identity, discipline,
+  discontinuity, and persistence boundary review;
 - proof that core, engine, facade, protocol, crypto-state, IPC-schema, and safe
   platform crates still forbid unsafe code;
 - resolved critical/high platform findings;
@@ -1889,14 +2273,18 @@ Goal: implement TLS-neutral NTS key establishment state.
 Deliverables:
 
 - ALPN `ntske/1` verification, TLS 1.3 minimum, request/response state;
+- TLS 1.3 early data/0-RTT forbidden for NTS-KE;
 - exact exporter label/context and directional key derivation requests;
+- session-resumption, ticket, exporter-context, connection, and process
+  generation lifecycle with no key reuse across an invalid generation;
 - endpoint, algorithm, cookie, shutdown, transcript, and TLS-channel evidence
   policy without an arbitrary authenticated boolean.
 
 Verification:
 
-- RFC transcript cases, wrong/missing ALPN, TLS downgrade, exporter context
-  bytes, partial records, duplicate negotiation, and mock session failures.
+- RFC transcript cases, wrong/missing ALPN, TLS downgrade, rejected 0-RTT,
+  resumed sessions, ticket/exporter/process generation changes, exporter
+  context bytes, partial records, duplicate negotiation, and mock failures.
 
 Exit criteria:
 
@@ -1914,12 +2302,15 @@ Deliverables:
 - client/server adapter behind `std` and `rustls` features;
 - application-provided crypto provider and trust configuration;
 - RFC 9325 deployment policy and RFC 9525 service-identity verification;
+- explicit certificate-revocation capability report and deployment non-claim
+  where the selected provider/configuration supplies no live revocation;
 - certificate-time bootstrap policy without disabling validity checks.
 
 Verification:
 
-- Rustls interop, wrong identity, expired/not-yet-valid chain, trust anchor,
-  ALPN, TLS version, close, fragmentation, and provider matrix tests.
+- Rustls interop, wrong identity, expired/not-yet-valid/revoked-policy chain,
+  unavailable revocation, trust anchor, ALPN, TLS version, resumption, rejected
+  early data, close, fragmentation, and provider matrix tests.
 
 Exit criteria:
 
@@ -1937,6 +2328,8 @@ Deliverables:
 - provider-backed mandatory AES-SIV-CMAC-256;
 - unique identifier, cookie, placeholders, authenticator/encrypted extension;
 - associated data, nonce, padding, directional key, and NAK policy.
+- request/response sizing through placeholders and bounded amplification/work
+  accounting before encryption or allocation.
 
 Verification:
 
@@ -1958,16 +2351,23 @@ Goal: deliver a complete bounded NTS client.
 Deliverables:
 
 - NTS-KE plus protected NTP orchestration;
-- fixed-capacity cookie jar, generation, endpoint, expiry, use, and replenish;
+- fixed-capacity cookie jar, generation, endpoint, local discard policy, use,
+  and replenish;
+- local discard deadline/policy age clearly distinguished from any
+  authenticated server expiration supplied by a future protocol revision;
 - non-`Copy`, redacted-debug, non-automatic-serialization secret types;
-- one-use/replenishment, replay/failure/rekey state, bounded persistence with
-  rollback detection, key-rotation overlap, and best-effort clearing boundary
-  without overstated guarantees.
+- prohibition on logging unique identifiers, cookies, exporter material, or
+  stable client correlators;
+- fork/process-generation-aware entropy and request identity;
+- one-use/replenishment, replay/failure/rekey state, common secure persistence
+  with rollback detection, key-rotation overlap, and best-effort clearing
+  boundary without overstated guarantees.
 
 Verification:
 
-- public server interop, cookie exhaustion/reuse prevention, replay, server
-  restart, key rotation, endpoint migration, tamper, and long simulation.
+- public server interop, cookie exhaustion/reuse prevention, local age expiry,
+  replay, server restart, key rotation, endpoint migration, process fork,
+  log-capture redaction, tamper, and long simulation.
 
 Exit criteria:
 
@@ -1983,13 +2383,18 @@ Goal: deliver NTS-KE and protected NTP server operation.
 Deliverables:
 
 - cookie construction/key rotation, stateless validation where applicable;
+- cluster/server cookie-key provider with explicit key IDs, generation,
+  distribution boundary, overlap, compromise recovery, and rollback refusal;
+- cookie plaintext/privacy/unlinkability review and minimum correlator policy;
 - bounded expensive-work admission and rate limits;
 - rekey overlap, NAK, algorithm, endpoint, and certificate policy.
 
 Verification:
 
-- independent client interop, flood/amplification, invalid-cookie CPU budget,
-  key rotation/restart, certificate rotation, replay, and malformed records.
+- independent client interop, placeholder response sizing, flood/amplification,
+  invalid-cookie CPU budget, cluster key distribution, key rollback/compromise,
+  rotation/restart, certificate rotation, privacy/linkability, replay, and
+  malformed records.
 
 Exit criteria:
 
@@ -2026,31 +2431,61 @@ Exit criteria:
   stable NTS trust or endpoint policy;
 - `v0.78.1 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.79.0 - Roughtime
+### v0.79.0 - Roughtime Client And Verifier
 
 Status: planned.
 
-Goal: implement the exact pinned Roughtime protocol revision.
+Goal: implement client, response verification, and chain evidence for the
+exact pinned Roughtime revision.
 
 Deliverables:
 
 - `draft-ietf-ntp-roughtime-19` exact source hash and final-RFC migration
   check immediately before implementation;
-- request/server codecs, nonce linkage, Merkle path, delegation, signature,
+- request/response codecs, nonce linkage, Merkle path, delegation, signature,
   midpoint/radius interval, and chain evidence;
-- provider-backed signatures and pinned server identities;
+- provider-backed signature verification and pinned server identities;
 - revision-specific experimental namespace until finalized.
 
 Verification:
 
 - official/reference vectors, tag/length/duplicate errors, nonce mismatch,
-  Merkle/signature/delegation failure, radius bounds, chain inconsistency, and
-  server interop.
+  Merkle/signature/delegation failure, radius bounds, chain inconsistency,
+  replay, and independent server interop.
 
 Exit criteria:
 
 - Roughtime yields authenticated intervals and never steps a clock directly;
 - `v0.79.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.79.1 - Bounded Roughtime Server
+
+Status: planned.
+
+Goal: complete the pinned Roughtime revision with explicit bounded server
+behavior rather than treating a codec as server completeness.
+
+Deliverables:
+
+- request admission, nonce batching/tree construction, response construction,
+  delegation/signing keys, validity, and generation;
+- online/offline signing boundary, delegation rotation, overlap, rollback,
+  compromise, and restart policy;
+- per-source/global rate and work limits, response-size/amplification budget,
+  malformed-request no-response policy, and entropy failure handling;
+- revision-specific experimental server API and audit events.
+
+Verification:
+
+- independent client interop, official/reference vectors, malformed/flooded
+  requests, nonce batching, key/delegation rotation, rollback/compromise,
+  restart, entropy failure, amplification ratio, and long server simulation.
+
+Exit criteria:
+
+- the Roughtime server is explicitly implemented, bounded, and separately
+  reviewable from client verification;
+- `v0.79.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.80.0 - Secure Time Bootstrap
 
@@ -2061,7 +2496,8 @@ Goal: resolve certificate validation when civil time is initially untrusted.
 Deliverables:
 
 - pinned Roughtime/NTS key, provisioned interval, hardware clock, persisted
-  interval plus monotonic elapsed, and SPKI-pin policies;
+  interval through the common secure persistence boundary plus monotonic
+  elapsed, and SPKI-pin policies;
 - state transitions from unknown to rough to certificate-validatable time;
 - rollback/restart/expiry and uncertainty growth.
 
@@ -2084,6 +2520,9 @@ Goal: audit dependency, NTS, Roughtime, cookie, and bootstrap boundaries.
 Deliverables:
 
 - complete RFC/draft clause maps and dependency admission reports;
+- NTS early-data, resumption/exporter generation, cookie
+  privacy/unlinkability, logging, cluster-key rollback/compromise, certificate
+  revocation capability, and fork-generation audit;
 - provider assurance and secret lifecycle/redaction/rollback/clearing review;
 - fixed-capacity codec, machine, AEAD provider, cookie jar, and Rustls adapter
   boundary audit;
@@ -2114,12 +2553,15 @@ Deliverables:
   receivers, and recorded laboratory observations;
 - mandatory scale, uncertainty, capture, freshness, health, integrity,
   authentication, and provenance policy;
+- mandatory observation identity, source generation/sequence, `valid_until`,
+  and generic upsert/withdraw/discontinuity events from `v0.15.1`;
 - explicit provider and conformance non-claims.
 
 Verification:
 
 - missing/contradictory evidence, stale provider, unknown scale, malicious
-  uncertainty, source replacement, and custom no_std provider fixtures.
+  uncertainty, source replacement, retroactive withdrawal, discontinuity,
+  saturated event queue, and custom no_std provider fixtures.
 
 Exit criteria:
 
@@ -2265,29 +2707,32 @@ Exit criteria:
 - frequency and time-of-arrival observations retain calibration uncertainty;
 - `v0.88.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.89.0 - Physical Source Fusion And Spoof Monitoring
+### v0.89.0 - Physical Evidence And Spoof Monitoring
 
 Status: planned.
 
-Goal: compare generic externally validated observations, PPS, IRIG, radio, and
-local oscillators securely without requiring Navheim.
+Goal: extract and preserve physical-source risk evidence without duplicating
+the generic source fusion owned by `v0.133.0`.
 
 Deliverables:
 
 - inconsistency, propagation, delay, health, authentication, and common-mode
-  source models;
+  evidence and correlation metadata;
 - preserved provider health, spoof/meaconing evidence, and invalidations;
+- protocol-neutral events for later consensus, with no survivor selection,
+  source weighting, fusion, servo, or clock change;
 - no automatic trust solely from physical origin.
 
 Verification:
 
-- mixed simulator/hardware attacks, common antenna/reference, delayed
-  authenticated external evidence, radio spoof, oscillator fault, and
-  split-brain cases.
+- per-source and paired comparison fixtures, common antenna/reference, delayed
+  authenticated external evidence, radio spoof, oscillator fault, withdrawal,
+  and proof that no local fusion result is emitted.
 
 Exit criteria:
 
-- physical source authentication and path-delay risk remain separate;
+- physical evidence remains source-local and feeds only the later generic
+  consensus engine;
 - `v0.89.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.90.0 - Physical Timing Security Gate
@@ -2408,8 +2853,9 @@ Deliverables:
 
 Verification:
 
-- licensed examples, reorder/loss/duplicate, wrong sequence/source, correction
-  overflow, delayed transmit timestamp, asymmetry, and simulator runs.
+- licensed examples, reorder/loss/duplicate, 16-bit sequence-ID wrap, wrong
+  sequence/source, correction overflow, delayed transmit timestamp, asymmetry,
+  and simulator runs.
 
 Exit criteria:
 
@@ -2453,7 +2899,8 @@ Deliverables:
 Verification:
 
 - transition coverage, timer boundaries, grandmaster change, port fault,
-  message mutation, and independent PTP implementation interop.
+  message mutation, 16-bit sequence-ID wrap across every active exchange,
+  stale pre-wrap messages, and independent PTP implementation interop.
 
 Exit criteria:
 
@@ -2470,7 +2917,8 @@ Deliverables:
 
 - per-port datasets/state, one selected parent, downstream master behavior;
 - topology loop and domain protection;
-- cross-port timestamp/servo coordination.
+- cross-port timestamp/correction association and validated observation
+  outputs, with no generic servo implementation.
 
 Verification:
 
@@ -2548,23 +2996,29 @@ Exit criteria:
 - unauthenticated management cannot alter live clock state;
 - `v0.100.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.101.0 - PTP Hardware And Servo Integration
+### v0.101.0 - PTP Hardware Measurement Integration
 
 Status: planned.
 
-Goal: integrate hardware timestamps, PHC, and PTP-oriented servo/holdover.
+Goal: admit and correlate PTP hardware measurements without implementing a
+second servo or holdover engine.
 
 Deliverables:
 
 - timestamp quality admission, PHC/system target choice, cross timestamps;
-- interval-preserving bounded phase/frequency servo with saturation,
-  anti-windup, generation-aware reset, and holdover uncertainty;
-- calibration and asymmetry inputs.
+- calibration, quantization, path/asymmetry, correction, capture, and
+  cross-timestamp error-budget inputs;
+- validated interval observations, discontinuities, withdrawals, and target
+  capability evidence for later `mundilfari-engine` servos;
+- no source fusion, servo, holdover, or discipline decision.
 
 Verification:
 
-- hardware NIC/PHC lab, timestamp loss/reorder, oscillator drift, grandmaster
-  changes, cable asymmetry, long holdover, and fault injection.
+- hardware NIC/PHC lab, timestamp loss/reorder, sequence wrap, oscillator
+  drift evidence, grandmaster changes/withdrawal, PHC reset, cable asymmetry,
+  cross-timestamp latency, and fault injection;
+- dependency tests proving PTP/platform crates do not depend on engine and
+  contain no servo/holdover algorithm.
 
 Exit criteria:
 
@@ -2616,28 +3070,79 @@ Exit criteria:
 - profile rules remain outside and cannot weaken the base engine;
 - `v0.103.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.104.0 - Power Media And Fronthaul Profiles
+### v0.104.0 - Power PTP Profiles
 
 Status: planned.
 
-Goal: implement power, broadcast/media, AES67, and fronthaul timing profiles.
+Goal: implement power-system PTP profiles as one independently reviewed
+licensed family.
 
 Deliverables:
 
-- IEEE C37.238, IEC/IEEE 61850-9-3, SMPTE ST 2059-2, AES67, 802.1CM, and
-  applicable O-RAN timing;
+- IEEE C37.238 and IEC/IEEE 61850-9-3 exact admitted revisions;
 - exact licensed parameters, identities, TLVs, intervals, and quality;
-- no media or power-control functionality outside timing.
+- no power-control functionality outside timing.
 
 Verification:
 
-- licensed vectors/conformance, equipment interoperability, wrong profile,
-  domain collision, topology, grandmaster switch, and long soak.
+- licensed vectors/conformance, power equipment interoperability, wrong
+  profile, domain collision, topology, grandmaster switch, and long soak.
 
 Exit criteria:
 
 - every profile claim names its exact revision and evidence;
 - `v0.104.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.104.1 - Media PTP And AES67 Profiles
+
+Status: planned.
+
+Goal: implement broadcast/media PTP and AES67 timing profiles separately from
+power and fronthaul.
+
+Deliverables:
+
+- SMPTE ST 2059-2 and AES67 exact admitted revisions and their required base
+  profiles;
+- profile identities, domains, intervals, datasets, quality, and media-clock
+  correlation boundaries;
+- no media payload or uncorrelated UTC claim.
+
+Verification:
+
+- licensed vectors/conformance, studio/audio equipment interop, wrong profile,
+  epoch/rate correlation, domain collision, grandmaster switch, and long soak.
+
+Exit criteria:
+
+- media profile time remains distinct from media counters and names exact
+  revision/evidence;
+- `v0.104.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.104.2 - Fronthaul And O-RAN Timing Profiles
+
+Status: planned.
+
+Goal: implement IEEE 802.1CM and applicable O-RAN timing profiles as a
+separate topology/security domain.
+
+Deliverables:
+
+- exact admitted IEEE 802.1CM and O-RAN WG4 revisions;
+- fronthaul profile parameters, topology, quality, timing chain, SyncE/PTP
+  interaction, identities, and failure evidence;
+- no radio/access-network functionality outside timing.
+
+Verification:
+
+- licensed vectors/conformance, fronthaul lab/simulator, wrong profile/domain,
+  topology/path changes, source/SyncE quality changes, holdover evidence, and
+  multi-vendor interop.
+
+Exit criteria:
+
+- fronthaul timing claims are revision-, topology-, and evidence-specific;
+- `v0.104.2 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.105.0 - Synchronous Ethernet
 
@@ -2757,7 +3262,8 @@ Deliverables:
   domain, or independent corroboration with bounded correction authority;
 - explicit residual-risk statement for malicious on-link grandmasters and
   untruthful BMCA priority;
-- resolved critical/high parser, state, FFI, timestamp, servo, and profile issues.
+- resolved critical/high parser, state, FFI, timestamp, correction,
+  observation, and profile issues.
 
 Verification:
 
@@ -2771,28 +3277,51 @@ Exit criteria:
 
 ## Phase 9: Industrial Automotive Wireless Media And Space
 
-### v0.109.0 - BACnet And DNP3 Time
+### v0.109.0 - BACnet Time
 
 Status: planned.
 
-Goal: implement timing services of BACnet and DNP3.
+Goal: implement only the timing services of the admitted BACnet revision.
 
 Deliverables:
 
-- time/date, synchronization, delay, and timestamped-event objects assigned by
-  licensed revisions;
-- surrounding transport/application traits;
-- no complete BACnet/DNP3 stack claim.
+- BACnet time/date, synchronization, and timestamped-event objects assigned by
+  the exact licensed revision;
+- surrounding BACnet transport/application trait boundary;
+- no complete BACnet stack claim.
+
+Verification:
+
+- licensed vectors, malformed objects, rollover, event order, simulator, and
+  independent BACnet stack interop.
+
+Exit criteria:
+
+- the BACnet crate exposes timing only and preserves application context;
+- `v0.109.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.109.1 - DNP3 Time
+
+Status: planned.
+
+Goal: implement only the timing services of the admitted DNP3 revision.
+
+Deliverables:
+
+- DNP3 synchronization, delay measurement, timestamped-event objects, quality,
+  and source/session identity from the exact licensed revision;
+- surrounding DNP3 transport/application trait boundary;
+- no complete DNP3 stack claim.
 
 Verification:
 
 - licensed vectors, malformed objects, sequence/delay, rollover, event order,
-  simulator and independent stack interop.
+  replay, simulator, and independent DNP3 stack interop.
 
 Exit criteria:
 
-- both crates expose timing only and preserve application context;
-- `v0.109.0 implementation stop reached. Run pentest for this exact commit.`
+- the DNP3 crate exposes timing only and preserves application context;
+- `v0.109.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.110.0 - IEC Power Time
 
@@ -2840,27 +3369,121 @@ Exit criteria:
 - CAN timing state is source-bound and bounded;
 - `v0.111.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.112.0 - Industrial Ethernet Timing
+### v0.112.0 - EtherCAT Distributed Clocks
 
 Status: planned.
 
-Goal: implement EtherCAT, PROFINET, CIP Sync, Sercos, and POWERLINK timing.
+Goal: implement EtherCAT distributed-clock timing as one licensed family.
 
 Deliverables:
 
-- separately scoped licensed distributed-clock/time services;
-- cycle/frequency/time-of-day correlation and quality;
-- integration with PTP/gPTP only where normative.
+- exact distributed-clock registers/messages/state, cycle/time correlation,
+  delay, quality, and topology from the admitted revision;
+- bounded timing-only transport/device boundary;
+- no general EtherCAT motion/control stack.
 
 Verification:
 
-- licensed vectors, industrial simulators/equipment, cycle wrap, source loss,
-  jitter, wrong profile, and topology changes.
+- licensed vectors, simulator/equipment, cycle wrap, source loss, jitter,
+  topology changes, and independent stack interop.
 
 Exit criteria:
 
-- no crate claims surrounding motion/control protocol completeness;
+- EtherCAT timing is independently reviewable and scope-limited;
 - `v0.112.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.112.1 - PROFINET Time Synchronization
+
+Status: planned.
+
+Goal: implement the admitted PROFINET timing profile independently.
+
+Deliverables:
+
+- exact timing messages/state, cycle/time correlation, quality, domains, and
+  normative PTP integration;
+- bounded timing-only transport/profile boundary;
+- no general PROFINET stack.
+
+Verification:
+
+- licensed vectors, simulator/equipment, cycle wrap, loss/jitter, wrong
+  profile/domain, topology changes, and independent interop.
+
+Exit criteria:
+
+- PROFINET timing claims name their exact revision and profile;
+- `v0.112.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.112.2 - CIP Sync
+
+Status: planned.
+
+Goal: implement CIP Sync timing independently of other industrial Ethernet
+families.
+
+Deliverables:
+
+- exact admitted profile objects/messages, identities, PTP mapping, quality,
+  and cycle/time correlation;
+- bounded timing-only application/transport boundary;
+- no general CIP/EtherNet-IP stack.
+
+Verification:
+
+- licensed vectors, simulator/equipment, object faults, source/profile
+  changes, cycle wrap, PTP mismatch, and independent interop.
+
+Exit criteria:
+
+- CIP Sync behavior cannot leak assumptions into other industrial profiles;
+- `v0.112.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.112.3 - Sercos Timing
+
+Status: planned.
+
+Goal: implement the admitted Sercos timing mechanisms separately.
+
+Deliverables:
+
+- exact cycle, phase, time correlation, quality, synchronization, and topology
+  behavior from the licensed revision;
+- bounded timing-only transport/device boundary;
+- no motion/control completeness claim.
+
+Verification:
+
+- licensed vectors, simulator/equipment, cycle/phase wrap, jitter, loss,
+  topology/source changes, malformed timing data, and interop.
+
+Exit criteria:
+
+- Sercos timing is independently tested and revision-bound;
+- `v0.112.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.112.4 - POWERLINK Timing
+
+Status: planned.
+
+Goal: implement the admitted POWERLINK timing mechanisms separately.
+
+Deliverables:
+
+- exact cycle, synchronization, time correlation, quality, source, and
+  topology behavior from the licensed revision;
+- bounded timing-only transport/device boundary;
+- no general POWERLINK stack.
+
+Verification:
+
+- licensed vectors, simulator/equipment, cycle wrap, jitter/loss, source and
+  topology change, malformed timing data, and interop.
+
+Exit criteria:
+
+- POWERLINK timing is independently tested and revision-bound;
+- `v0.112.4 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.113.0 - KNX And OPC UA Time
 
@@ -2958,139 +3581,501 @@ Exit criteria:
 - local wireless time cannot silently authorize system-clock changes;
 - `v0.116.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.117.0 - Zigbee Matter And LoRaWAN Time
+### v0.117.0 - Zigbee Time
 
 Status: planned.
 
-Goal: implement timing services for Zigbee, Matter, and LoRaWAN.
+Goal: implement the admitted Zigbee time cluster independently.
 
 Deliverables:
 
-- exact time clusters/services and LoRaWAN DeviceTime request/answer;
-- GPS/UTC scale identity, precision, network authority, replay, and transport
+- exact time attributes/commands, authority, validity, zone/DST, and transport
   boundary;
-- no complete IoT stack.
+- replay/age, sleep/rejoin, and unauthorized-writer policy;
+- no general Zigbee stack.
 
 Verification:
 
-- licensed vectors, replay/counter, rollover, unauthorized writer, network
-  delay, sleep/rejoin, malformed payload, and ecosystem interop.
+- licensed vectors, invalid civil values, replay, unauthorized updates,
+  sleep/rejoin, malformed payloads, and ecosystem interop.
 
 Exit criteria:
 
-- low-power network time retains scale and security provenance;
+- Zigbee time retains authority, validity, and civil-time provenance;
 - `v0.117.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.118.0 - Wi-Fi TSF FTM TSCH And 6TiSCH
+### v0.117.1 - Matter Time
 
 Status: planned.
 
-Goal: implement wireless clock synchronization and ranging-time correlations.
+Goal: implement the admitted Matter time-synchronization service independently.
 
 Deliverables:
 
-- TSF/FTM timing fields and 802.15.4 TSCH/6TiSCH timing services;
-- local clock domain/correlation types, rollover, slot identity, and quality;
-- no ranging/position calculation.
+- exact cluster/service fields, trust, granularity, source, failure, and
+  transport boundary;
+- fabric/node identity, replay/age, and administrator policy;
+- no general Matter stack.
 
 Verification:
 
-- licensed vectors, counter wrap, AP/coordinator changes, delayed frames,
-  slot drift, malicious time source, and simulator/device captures.
+- licensed vectors, fabric/node changes, unauthorized writer, stale/replayed
+  data, malformed payloads, failover, and ecosystem interop.
 
 Exit criteria:
 
-- local wireless clocks are not mislabeled civil UTC;
+- Matter time is source- and fabric-bound with explicit trust;
+- `v0.117.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.117.2 - LoRaWAN DeviceTime
+
+Status: planned.
+
+Goal: implement the admitted LoRaWAN DeviceTime exchange independently.
+
+Deliverables:
+
+- exact request/answer fields, scale/epoch, fraction, network/session identity,
+  frame-counter binding, delay, and uncertainty;
+- replay, join/rejoin, rollover, and age policy;
+- no general LoRaWAN stack.
+
+Verification:
+
+- licensed vectors, frame-counter/replay, rollover, delay/asymmetry,
+  join/rejoin, malformed answers, and network-server interop.
+
+Exit criteria:
+
+- LoRaWAN time retains scale, session, delay, and security provenance;
+- `v0.117.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.118.0 - Wi-Fi TSF And FTM Correlation
+
+Status: planned.
+
+Goal: implement Wi-Fi TSF/FTM clock correlations without ranging or position.
+
+Deliverables:
+
+- exact TSF/FTM timing fields, clock/AP identity, counter wrap, capture, and
+  correlation quality;
+- association/roam/generation and delay evidence;
+- no ranging-distance or position calculation.
+
+Verification:
+
+- licensed vectors, counter wrap, AP/association changes, delayed/replayed
+  frames, capture quality, malicious peer, and device captures.
+
+Exit criteria:
+
+- Wi-Fi local clocks are not mislabeled civil UTC or distance;
 - `v0.118.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.119.0 - WirelessHART ISA100 And Thread Time
+### v0.118.1 - TSCH And 6TiSCH Timing
 
 Status: planned.
 
-Goal: implement timing portions of WirelessHART, ISA100, and Thread.
+Goal: implement the tightly coupled IEEE 802.15.4 TSCH and 6TiSCH timing
+profiles separately from Wi-Fi.
 
 Deliverables:
 
-- network time, slots, synchronization updates, source/quality, and loss state;
-- accessible licensed profiles and transport boundaries;
-- no general mesh stack.
+- slot/ASN timing, coordinator/source identity, synchronization updates,
+  rollover, quality, and loss state;
+- exact 6TiSCH profile behavior over the admitted TSCH revision;
+- no general 802.15.4/6LoWPAN stack.
 
 Verification:
 
-- licensed vectors, coordinator loss, slot/counter wrap, delayed/replayed
-  updates, partition/merge, malformed frames, and simulator interop.
+- licensed/RFC vectors, slot/counter wrap, coordinator change, drift,
+  delayed/replayed updates, partition/merge, malformed frames, and simulation.
 
 Exit criteria:
 
-- deterministic network timing retains partition and authority state;
-- `v0.119.0 implementation stop reached. Run pentest for this exact commit.`
+- deterministic slot timing retains profile, source, and partition state;
+- `v0.118.1 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.120.0 - Cellular NITZ And 5G Time
+### v0.119.0 - WirelessHART Time
 
 Status: planned.
 
-Goal: implement cellular network time and 5G reference-time mappings.
+Goal: implement only the timing portion of WirelessHART.
 
 Deliverables:
 
-- NITZ civil/zone fields and applicable 5G timing/reference information;
-- source/network identity, uncertainty, replay/age, and correction policy;
+- exact network time, slots, synchronization updates, source/quality, and loss
+  behavior;
+- timing-only transport boundary and revision identity;
+- no general WirelessHART stack.
+
+Verification:
+
+- licensed vectors, manager loss, slot/counter wrap, replay/delay, partition,
+  malformed frames, and simulator/equipment interop.
+
+Exit criteria:
+
+- WirelessHART timing remains independently revision-bound;
+- `v0.119.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.119.1 - ISA100 Time
+
+Status: planned.
+
+Goal: implement only the timing portion of ISA100.
+
+Deliverables:
+
+- exact network time, slots, updates, source/quality, and loss behavior;
+- timing-only transport boundary and revision identity;
+- no general ISA100 stack.
+
+Verification:
+
+- licensed vectors, manager loss, slot/counter wrap, replay/delay, partition,
+  malformed frames, and simulator/equipment interop.
+
+Exit criteria:
+
+- ISA100 timing remains independently revision-bound;
+- `v0.119.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.119.2 - Thread Time
+
+Status: planned.
+
+Goal: implement only the admitted Thread time services.
+
+Deliverables:
+
+- exact network-time fields/state, leader/source identity, quality, age, and
+  partition behavior;
+- timing-only Thread transport/application boundary;
+- no general Thread stack.
+
+Verification:
+
+- licensed vectors, leader change, partition/merge, replay/delay, counter
+  wrap, malformed data, and ecosystem interop.
+
+Exit criteria:
+
+- Thread time retains partition, leader, and trust provenance;
+- `v0.119.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.120.0 - Cellular NITZ
+
+Status: planned.
+
+Goal: implement NITZ civil/zone information as low-trust network evidence.
+
+Deliverables:
+
+- exact civil, zone, DST, network identity, age, and receipt metadata;
+- roaming/change/replay and correction policy;
 - no modem or radio-access stack.
 
 Verification:
 
-- licensed/public vectors, zone/DST, stale network, roaming, replay, malformed
-  fields, leap/scales, and modem captures.
+- public/licensed vectors, zone/DST, stale network, roaming, replay, malformed
+  fields, leap boundaries, and modem captures.
 
 Exit criteria:
 
-- unauthenticated network civil time remains visibly low trust;
+- unauthenticated NITZ civil time remains visibly low trust;
 - `v0.120.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.121.0 - SMPTE MIDI AES And Broadcast Time
+### v0.120.1 - 5G Reference Time
 
 Status: planned.
 
-Goal: implement SMPTE/MIDI/AES time and RDS/DVB/ATSC/ISDB timing.
+Goal: implement applicable 5G reference-time mappings independently of NITZ.
 
 Deliverables:
 
-- frame/drop-frame, sample, broadcast civil time, offsets, quality, and
-  clock-correlation types;
-- exact licensed revisions and transport boundaries;
-- wall time distinct from media counters.
+- exact reference-time information, scale, network/source identity, quality,
+  uncertainty, age, and correction semantics;
+- generation, replay, roaming/handover, and withdrawal behavior;
+- no radio-access stack.
 
 Verification:
 
-- licensed vectors, frame-rate/drop-frame boundaries, discontinuities,
-  wraparound, signal loss, malformed fields, and equipment/file interop.
+- licensed vectors, scale/leap cases, stale/replayed data, roaming/handover,
+  source generation, malformed fields, and modem/network fixtures.
 
 Exit criteria:
 
-- frame and sample positions never become UTC without correlation;
+- 5G reference time retains scale, uncertainty, and network provenance;
+- `v0.120.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.0 - SMPTE Timecode
+
+Status: planned.
+
+Goal: implement the exact admitted SMPTE timecode revision.
+
+Deliverables:
+
+- frame/drop-frame values, rates, user/control data, discontinuity, source, and
+  clock-correlation types;
+- exact transport/profile boundaries;
+- no uncorrelated UTC claim.
+
+Verification:
+
+- licensed vectors, every frame rate/drop-frame boundary, day wrap,
+  discontinuity, malformed codes, and equipment/file interop.
+
+Exit criteria:
+
+- SMPTE frame position becomes civil time only through explicit correlation;
 - `v0.121.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.122.0 - RTP MPEG DASH HLS And SCTE Timing
+### v0.121.1 - MIDI Timecode
 
 Status: planned.
 
-Goal: implement packet/media/web presentation timing and wall-clock correlation.
+Goal: implement the exact admitted MIDI timecode revision.
 
 Deliverables:
 
-- RTP/RTCP correlation, MPEG PTS/DTS/PCR, DASH/HLS/SCTE timing constructs;
-- wrap/discontinuity, clock identity, capture, and synchronization metadata;
-- no media codec/player implementation.
+- full-frame/quarter-frame forms, rates, direction, source, reconstruction,
+  discontinuity, and correlation;
+- exact MIDI transport boundary;
+- no general MIDI stack.
 
 Verification:
 
-- RFC/licensed vectors, counter wrap, discontinuity, jitter/reorder, wrong
-  sender mapping, manifest extremes, and reference tool interop.
+- licensed vectors, frame assembly/reorder/loss, rate changes, reverse
+  direction, wrap, malformed messages, and equipment interop.
 
 Exit criteria:
 
-- media timeline and civil timeline stay type-distinct;
+- MIDI position remains a media timeline until explicitly correlated;
+- `v0.121.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.2 - AES Audio Timing
+
+Status: planned.
+
+Goal: implement the exact admitted AES audio timing mechanisms independently.
+
+Deliverables:
+
+- sample/frame counters, rates, source/clock identity, quality,
+  discontinuities, and wall-clock correlation where specified;
+- exact licensed transport/profile scope;
+- no audio codec/processing stack.
+
+Verification:
+
+- licensed vectors, sample wrap, rate/source changes, discontinuity, malformed
+  timing data, and equipment/file interop.
+
+Exit criteria:
+
+- AES sample position never becomes UTC without normative correlation;
+- `v0.121.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.3 - RDS Time
+
+Status: planned.
+
+Goal: implement the admitted RDS civil-time signaling independently.
+
+Deliverables:
+
+- exact date/time/offset/quality fields, station identity, acquisition age,
+  propagation uncertainty, and trust;
+- no general radio-data decoder claim beyond required timing framing.
+
+Verification:
+
+- licensed vectors/captures, offset/date boundaries, stale/repeated groups,
+  signal loss, malformed fields, propagation, and receiver interop.
+
+Exit criteria:
+
+- RDS civil time remains station/path-bound evidence;
+- `v0.121.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.4 - DVB Time
+
+Status: planned.
+
+Goal: implement the admitted DVB time tables independently.
+
+Deliverables:
+
+- exact UTC/local-offset tables, descriptors, service/network identity,
+  versioning, validity, and update behavior;
+- bounded section/transport boundary and no general broadcast stack.
+
+Verification:
+
+- licensed vectors/captures, table version/change, offset transitions,
+  malformed sections, replay/staleness, and receiver interop.
+
+Exit criteria:
+
+- DVB time retains table version, service identity, and validity;
+- `v0.121.4 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.5 - ATSC Time
+
+Status: planned.
+
+Goal: implement the admitted ATSC time signaling independently.
+
+Deliverables:
+
+- exact system-time, offset/daylight, source/service identity, version, and
+  validity behavior;
+- bounded table/transport boundary and no general broadcast stack.
+
+Verification:
+
+- licensed vectors/captures, GPS/UTC/leap mapping, version changes, malformed
+  tables, replay/staleness, and receiver interop.
+
+Exit criteria:
+
+- ATSC time retains scale/model, table version, and service provenance;
+- `v0.121.5 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.6 - ISDB Time
+
+Status: planned.
+
+Goal: implement the admitted ISDB time signaling independently.
+
+Deliverables:
+
+- exact civil/time-offset tables, service/network identity, version, validity,
+  and update behavior;
+- bounded table/transport boundary and no general broadcast stack.
+
+Verification:
+
+- licensed vectors/captures, table version/change, offset transitions,
+  malformed sections, replay/staleness, and receiver interop.
+
+Exit criteria:
+
+- ISDB time retains table version, service identity, and validity;
+- `v0.121.6 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.0 - RTP And RTCP Clock Correlation
+
+Status: planned.
+
+Goal: implement RTP/RTCP media-clock correlation independently.
+
+Deliverables:
+
+- RTP counters, RTCP sender mappings, clock/source identity, wrap,
+  discontinuity, capture, and synchronization metadata;
+- RFC updates and no media codec/session stack.
+
+Verification:
+
+- RFC vectors, counter wrap, jitter/reorder, wrong sender mapping, source
+  change, discontinuity, malicious mappings, and independent interop.
+
+Exit criteria:
+
+- RTP media and civil timelines remain type-distinct;
 - `v0.122.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.1 - MPEG Timing
+
+Status: planned.
+
+Goal: implement MPEG PTS/DTS/PCR timing independently.
+
+Deliverables:
+
+- exact counters/rates, wrap, discontinuity, program/source identity, capture,
+  and clock-correlation types;
+- licensed systems timing scope and no codec implementation.
+
+Verification:
+
+- licensed vectors, counter wrap, discontinuity, jitter, program/source
+  changes, malformed fields, and reference-tool interop.
+
+Exit criteria:
+
+- MPEG timestamps remain program-clock values until explicitly correlated;
+- `v0.122.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.2 - DASH Timing
+
+Status: planned.
+
+Goal: implement DASH presentation and wall-clock timing independently.
+
+Deliverables:
+
+- exact manifest timeline, availability, UTC-timing, periods, discontinuities,
+  source identity, and uncertainty;
+- bounded manifest timing boundary and no player implementation.
+
+Verification:
+
+- licensed vectors, manifest extremes, period/discontinuity changes, stale or
+  malicious wall-clock source, overflow, and reference-tool interop.
+
+Exit criteria:
+
+- DASH presentation and wall-clock timelines remain explicitly correlated;
+- `v0.122.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.3 - HLS Timing
+
+Status: planned.
+
+Goal: implement RFC 8216 HLS timing independently.
+
+Deliverables:
+
+- media sequence, durations, discontinuities, program-date-time, source, and
+  wall-clock correlation;
+- bounded playlist timing boundary and no player implementation.
+
+Verification:
+
+- RFC vectors, sequence/wrap, discontinuity, malformed/extreme playlists,
+  conflicting program dates, stale sources, and reference-tool interop.
+
+Exit criteria:
+
+- HLS media and civil timelines remain explicitly correlated;
+- `v0.122.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.4 - SCTE Timing
+
+Status: planned.
+
+Goal: implement the exact admitted SCTE timing constructs independently.
+
+Deliverables:
+
+- exact splice/event timing, clock/source identity, wrap, discontinuity, and
+  wall-clock correlation from licensed revisions;
+- bounded signaling boundary and no broadcast automation stack.
+
+Verification:
+
+- licensed vectors, event/counter wrap, discontinuity, source change,
+  malformed signaling, conflicting correlations, and equipment interop.
+
+Exit criteria:
+
+- SCTE event time retains exact source and clock correlation;
+- `v0.122.4 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.123.0 - CCSDS Time
 
@@ -3257,27 +4242,77 @@ Exit criteria:
 - evidence is cryptographically bound to the intended object and context;
 - `v0.129.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.130.0 - X9.95 Authenticode And OpenTimestamps
+### v0.130.0 - ANSI X9.95 Timestamp Profile
 
 Status: planned.
 
-Goal: implement remaining registry timestamp evidence families.
+Goal: implement the legitimately licensed ANSI X9.95 timestamp profile
+independently.
 
 Deliverables:
 
-- legitimately licensed ANSI X9.95 profile;
-- Authenticode timestamp compatibility;
-- OpenTimestamps generation/verification and calendar proof handling.
+- exact profile revision, messages, policies, algorithms, identities, and
+  RFC 3161/CMS relationships;
+- profile-specific validation and renewal evidence;
+- no Authenticode or OpenTimestamps semantics.
 
 Verification:
 
-- licensed/public vectors, cross-protocol confusion, digest/nonce/policy
-  mismatch, calendar equivocation, malformed proofs, and ecosystem interop.
+- licensed vectors, cross-protocol confusion, digest/nonce/policy mismatch,
+  algorithm/revision errors, malformed evidence, and profile interop.
 
 Exit criteria:
 
-- each evidence family retains its own trust and renewal semantics;
+- X9.95 retains its exact profile, trust, and renewal semantics;
 - `v0.130.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.130.1 - Authenticode Timestamp Compatibility
+
+Status: planned.
+
+Goal: implement Authenticode timestamp compatibility independently.
+
+Deliverables:
+
+- exact admitted Authenticode timestamp forms, content binding, signer,
+  countersignature, certificate, algorithm, and validation policy;
+- legacy/modern form distinction and compatibility-only boundaries;
+- no X9.95 or OpenTimestamps semantic reuse.
+
+Verification:
+
+- official/ecosystem vectors, wrong content/signer, countersignature
+  substitution, algorithm downgrade, malformed CMS, certificate-time cases,
+  and tool interop.
+
+Exit criteria:
+
+- Authenticode compatibility has its own trust and validation report;
+- `v0.130.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.130.2 - OpenTimestamps
+
+Status: planned.
+
+Goal: implement OpenTimestamps generation and verification independently.
+
+Deliverables:
+
+- exact proof operations, calendar attestations, digest algorithms, upgrade,
+  verification, and bounded proof graph;
+- calendar identity/equivocation, network, caching, and trust policy;
+- no RFC 3161/X9.95/Authenticode authority inference.
+
+Verification:
+
+- public vectors, malformed/deep proofs, digest mismatch, calendar
+  equivocation, unavailable/malicious calendars, upgrade/replay, resource
+  limits, and ecosystem interop.
+
+Exit criteria:
+
+- OpenTimestamps proofs retain calendar, operation, and trust provenance;
+- `v0.130.2 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.131.0 - Evidence Chain Policy
 
@@ -3335,11 +4370,21 @@ Deliverables:
 
 - normalization, uncertainty expansion, correlated groups, supported interval,
   authentication/diversity policy, split-brain, and evidence;
+- exact conversion-context/model generation on every normalized input;
+  mixed generations are rejected or explicitly re-normalized before quorum;
+- generic upsert/withdraw/discontinuity consumption with withdrawal
+  propagation and recomputation before any later servo action;
+- hard bounds remain distinct from statistical estimates/covariance and may
+  mix only through an explicit reviewed conversion policy;
 - explicit `n` admitted sources, maximum faulty diversity groups `f`, required
   overlap, freshness/path-delay bounds, network-adversary scope, and
   correct-interval assumptions in every result;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
-  and weights that cannot override the fault quorum;
+  claims with assertion provenance, configured/measured/authenticated/inferred/
+  unknown assurance, expiry, and generation;
+- conservative correlation for unknown/untrusted diversity and policy that
+  prevents custom providers from self-declaring arbitrary independence;
+- weights that cannot override the fault quorum;
 - bounded sources and stable result ordering;
 - no clock change authority.
 
@@ -3347,8 +4392,10 @@ Verification:
 
 - NTP/NTS/Roughtime/PTP/generic-external/radio mixed simulations, Byzantine
   coalitions and malicious majorities, Sybil/correlation cases, impossible
-  guarantees, common upstreams, partitions, stale sources, and interval
-  properties. Navheim is represented only by protocol-neutral fixtures here.
+  guarantees, forged diversity, unknown correlation, common upstreams,
+  partitions, stale/mixed-generation sources, withdrawal under queue pressure,
+  hard/statistical mixing attempts, and interval properties. Navheim is
+  represented only by protocol-neutral fixtures here.
 
 Exit criteria:
 
@@ -3356,30 +4403,110 @@ Exit criteria:
   or unsafe explicitly;
 - `v0.133.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.134.0 - PLL FLL And Hybrid Servo
+### v0.134.0 - Bounded PLL Servo
 
 Status: planned.
 
-Goal: implement bounded fixed-point software clock servos.
+Goal: implement one bounded fixed-point phase-locked-loop servo.
 
 Deliverables:
 
-- step-only test, slew, PLL, FLL, and hybrid control;
+- PLL phase/frequency state and proposal output;
 - interval-valued input, saturating anti-windup control, phase/frequency
   limits, panic thresholds, startup/recovery, and generation-aware reset;
-- explicit measurement uncertainty and target capability.
+- hard/statistical uncertainty kept distinct and explicit target capability;
+- withdrawals and discontinuities reset or invalidate state before new output.
 
 Verification:
 
-- analytical traces, drift/noise/step/loss simulations, saturation, numerical
-  stability, reference implementation comparison, and property tests.
+- analytical PLL traces, drift/noise/step/loss simulations, saturation,
+  numerical stability, mixed uncertainty, withdrawal/discontinuity,
+  reference implementation comparison, and property tests.
 
 Exit criteria:
 
 - servos cannot issue out-of-policy adjustments;
 - `v0.134.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.135.0 - PTP And Kalman-Style Servo
+### v0.134.1 - Bounded FLL Servo
+
+Status: planned.
+
+Goal: implement one bounded fixed-point frequency-locked-loop servo.
+
+Deliverables:
+
+- FLL frequency estimation and proposal output over explicit sample intervals;
+- saturation, frequency/aging limits, startup/recovery, target generation,
+  withdrawal, and discontinuity behavior;
+- error-budget and hard/statistical uncertainty preservation.
+
+Verification:
+
+- analytical frequency traces, irregular/lost samples, drift, steps,
+  saturation, numerical extremes, generation changes, withdrawal,
+  reference comparison, and properties.
+
+Exit criteria:
+
+- FLL behavior is independently reviewable and cannot bypass adjustment
+  policy;
+- `v0.134.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.134.2 - Hybrid Servo Selection
+
+Status: planned.
+
+Goal: combine admitted PLL and FLL behavior through an explicit bounded mode
+policy rather than a second hidden implementation.
+
+Deliverables:
+
+- typed PLL/FLL/hybrid modes, transition conditions, hysteresis, state
+  transfer, and evidence;
+- startup, recovery, source-quality, holdover-entry, generation, and
+  discontinuity transitions;
+- no implicit statistical-to-hard uncertainty conversion.
+
+Verification:
+
+- every transition edge, chatter resistance, delayed/lost samples, source
+  replacement, withdrawal, discontinuity, numerical boundaries, and long
+  simulator/reference traces.
+
+Exit criteria:
+
+- hybrid behavior is a visible policy over reviewed PLL/FLL engines;
+- `v0.134.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.134.3 - Step Slew And Discipline Proposal Policy
+
+Status: planned.
+
+Goal: convert servo estimates into bounded discipline proposals without
+granting adjustment authority.
+
+Deliverables:
+
+- typed step/slew/rate proposals, thresholds, maximum correction, backward and
+  post-startup step policy, target identity/generation, and expiry;
+- requested versus predicted applied/residual values and saturation evidence;
+- proposal-only engine output consumed by `mundilfari-discipline`;
+- invalidation when input, target, authorization, or correlation generations
+  change.
+
+Verification:
+
+- threshold boundaries, backward/post-startup refusal, saturation, stale
+  generation, revoked authority, impossible target capability, withdrawal,
+  discontinuity, and proposal replay.
+
+Exit criteria:
+
+- engine policy can propose but never directly apply a clock change;
+- `v0.134.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.135.0 - Precision Kalman-Style Estimator
 
 Status: planned.
 
@@ -3387,14 +4514,21 @@ Goal: implement high-rate phase/frequency estimation for precision clocks.
 
 Deliverables:
 
-- PTP-oriented servo and bounded fixed-point Kalman-style estimator;
-- covariance/uncertainty, outlier, delay/asymmetry, and reset behavior;
+- bounded fixed-point estimator consuming generic precision observations,
+  including but not coupled to PTP;
+- covariance as model-derived statistical uncertainty carrying confidence,
+  units, model identity/generation, outlier, delay/asymmetry, and reset
+  behavior;
+- no conversion of covariance into hard earliest/latest bounds without a
+  named policy and documented assumptions;
 - no floating-point requirement in no_std core.
 
 Verification:
 
 - recorded PHC traces, simulated oscillator/noise models, numerical extremes,
-  convergence, malicious delay, and independent estimator comparison.
+  covariance/confidence semantics, hard-bound conversion rejection/policies,
+  convergence, withdrawal/discontinuity, malicious delay, and independent
+  estimator comparison.
 
 Exit criteria:
 
@@ -3412,7 +4546,10 @@ Deliverables:
 - age/frequency/stability/temperature/aging observation model with measured
   Allan-deviation and calibration-age inputs;
 - configurable oscillator classes and conservative fallback;
-- source loss/recovery state and persisted calibration provenance.
+- source loss/recovery/withdrawal/discontinuity state and persisted calibration
+  provenance through the common secure persistence boundary;
+- systematic/random and measured/asserted error components retained; model
+  prediction covariance never presented as a guaranteed bound.
 
 Verification:
 
@@ -3439,7 +4576,10 @@ Deliverables:
   leap policy, source generation, and warnings;
 - monotonic nonrollback reads with no network I/O, plus explicit UTC/POSIX
   conversion context and policy;
-- persistence and restart bootstrap boundary.
+- common secure persistence and restart bootstrap boundary;
+- one logically consistent instant/uncertainty/scale-model/source-set/
+  generation snapshot contract, with the concurrent publication mechanism
+  completed in `v0.137.1`.
 
 Verification:
 
@@ -3451,6 +4591,38 @@ Exit criteria:
 - applications can read trusted time without a network request per event;
 - `v0.137.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.137.1 - Concurrent Snapshot Publication
+
+Status: planned.
+
+Goal: publish TrustedClock estimates and observation lifecycle changes without
+torn logical snapshots or unbounded reader latency.
+
+Deliverables:
+
+- documented memory-ordering/publication model for one internally consistent
+  snapshot across instant, hard/statistical uncertainty, scale/context model,
+  source set, validity, and generation;
+- explicit `Send`/`Sync` policy for every public engine/provider type;
+- bounded queues and cancellation/invalidation ordering with withdrawals
+  reserved from silent loss;
+- no lock held while calling user transport, crypto, persistence, provider, or
+  audit callbacks;
+- documented read guarantee: lock-free, wait-free, or bounded locking, with
+  maximum read-latency and PHC cross-timestamp benchmark targets.
+
+Verification:
+
+- Loom/Shuttle-style repository-only model tests for publication,
+  invalidation, queues, cancellation, persistence swap, and helper IPC state;
+- stress tests for readers/writers, generation consistency, callback reentry,
+  starvation, suspend/reset, and HFT-oriented maximum/p99 latency benchmarks.
+
+Exit criteria:
+
+- no reader can observe fields from different logical clock generations;
+- `v0.137.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.138.0 - Easy Blocking APIs
 
 Status: planned.
@@ -3461,6 +4633,9 @@ Deliverables:
 
 - `query_once()` acquisition distinct from `TrustedClock::now()` virtual-clock
   reads, plus strict `TrustedClock::system_defaults(...)`;
+- a named, versioned system-defaults policy profile whose report enumerates
+  selected sources, trust roots, network actions, fallbacks, platform
+  assumptions, and rejected alternatives;
 - local clock, SNTP, NTP, NTS, Roughtime, TIME, and selected source builders;
 - facade capability report replacing repository-foundation booleans with
   compiled, available, authorized, and healthy states;
@@ -3470,7 +4645,8 @@ Deliverables:
 Verification:
 
 - compile examples, error ergonomics, feature combinations, local simulators,
-  public interop, timeout/cancel, and misuse compile tests.
+  public interop, timeout/cancel, system-policy snapshot/diff, hidden-network/
+  fallback refusal, and misuse compile tests.
 
 Exit criteria:
 
@@ -3524,6 +4700,39 @@ Exit criteria:
 - Core-tier protocol use is practical and documented;
 - `v0.140.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.140.1 - Canonical External Schema
+
+Status: planned.
+
+Goal: define one versioned non-Rust-layout schema for IPC, persistence,
+bindings, logs, and evidence exchange.
+
+Deliverables:
+
+- canonical encoding for atomic instants, high/low integer limbs, durations,
+  hard/statistical uncertainty, scales/models/generations, provenance,
+  capability reports, observation events, and discontinuities;
+- deterministic field order/encoding, bounds, version negotiation, unknown
+  field/criticality rules, canonicality, and maximum message sizes;
+- schema owns no serde/Rust-memory-layout semantics and works in `no_std`
+  caller buffers;
+- explicit compatibility contracts for daemon IPC, secure persistence, C,
+  WASM, logs/evidence, and language bindings;
+- Java/Kotlin and Swift either use tested JNI/Swift shims or the documented C
+  ABI with platform integration/range fixtures.
+
+Verification:
+
+- golden cross-language vectors, noncanonical/duplicate/unknown fields,
+  version skew, truncation, integer/range extremes, schema migration,
+  deterministic re-encoding, C/WASM/JNI-or-C/Swift-or-C fixtures, and fuzzing.
+
+Exit criteria:
+
+- no external boundary depends on Rust layout or an implicit serializer data
+  model;
+- `v0.140.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.141.0 - Multi-Protocol Server Framework
 
 Status: planned.
@@ -3557,8 +4766,9 @@ Deliverables:
 - unprivileged workers/consensus, bounded `DisciplineProposal`, policy-issued
   authorization, and a dedicated minimal helper with no protocol dependencies;
 - pre-opened socketpair/fixed endpoint, OS peer credentials, fixed-version
-  maximum-length messages, sequence/monotonic expiry/source-generation replay
-  defense, and pre-opened allowlisted clock handles;
+  maximum-length canonical-schema messages, sequence/monotonic
+  expiry/source-generation replay defense, and pre-opened allowlisted clock
+  handles;
 - helper-enforced phase/frequency/slew/step bounds, privilege reduction,
   syscall sandboxing, separated raw-capture authority where possible, and an
   append-only accepted/rejected request audit;
@@ -3608,15 +4818,19 @@ Deliverables:
 
 - versioned opaque handles, caller buffers, error codes, ownership, threading,
   and panic containment;
-- explicit high/low limbs and versioned schemas for wide instants, with
+- canonical external-schema values/events with explicit high/low limbs for
+  wide instants and
   `OutOfRange` on every narrowing conversion;
 - generated header and ABI compatibility policy;
 - no unbounded allocation or Rust layout exposure.
 
 Verification:
 
-- C/C++ consumers on Linux/Windows/macOS, null/length/alias misuse, ABI layout,
-  symbol version, sanitizer, and fuzz tests.
+- C/C++ consumers on Linux/Windows/macOS, canonical golden vectors,
+  null/length/alias misuse, ABI layout, symbol version, sanitizer, and fuzz
+  tests;
+- Java/Kotlin JNI-or-C and Swift-or-C ownership/range/platform fixtures for the
+  documented binding route.
 
 Exit criteria:
 
@@ -3637,6 +4851,8 @@ Deliverables:
   application-clock API;
 - checked JavaScript integer/date conversion with `OutOfRange` rather than
   truncation, saturation, or panic;
+- canonical external-schema encoding/decoding, version, bounds, and
+  unknown-field behavior;
 - explicit lack of UDP/raw/hardware/clock-control browser capabilities.
 
 Verification:
@@ -3710,6 +4926,8 @@ Deliverables:
   runtime permission, device presence, source health, or discipline authority;
 - privilege, IPC, config, C/WASM, observability, and cross-protocol threat
   reports;
+- generic withdrawal, hard/statistical uncertainty, secure persistence,
+  concurrent snapshot, canonical external-schema, and language-binding review;
 - resolved critical/high product findings.
 
 Verification:
@@ -3834,14 +5052,18 @@ Exit criteria:
 
 Status: planned.
 
-Goal: make Navheim invalidation and discontinuity authoritative downstream.
+Goal: map Navheim invalidation and discontinuity into the already complete
+generic observation lifecycle from `v0.15.1`.
 
 Deliverables:
 
-- artifact/generation/sequence identity and explicit source withdrawal;
+- exact artifact/generation/sequence identity mapping into generic
+  upsert/withdraw/discontinuity events;
 - stale-model, receiver-reset, outage, backward-step, security-transition, and
   replacement handling;
 - bounded backpressure that cannot silently drop invalidation.
+- no Navheim-specific lifecycle queue, filter, consensus, servo, or virtual
+  clock mechanism.
 
 Verification:
 
@@ -4011,6 +5233,8 @@ Goal: re-audit every untrusted parser and operation-wide budget.
 Deliverables:
 
 - parser inventory, complexity oracle, allocation/work/response limits;
+- allocator-failure behavior and abort-on-OOM non-claims for every alloc path,
+  proving untrusted sizes are bounded before allocation;
 - full corpus minimization and panic/timeout triage;
 - Kani-style bounded proofs for selected normalization, parser, replay-window,
   budget, and state-transition properties with explicit model limits;
@@ -4018,8 +5242,8 @@ Deliverables:
 
 Verification:
 
-- continuous structure-aware fuzzing, worst-case benchmarks, memory limits, and
-  arbitrary-input runs.
+- continuous structure-aware fuzzing, allocation-failure injection, worst-case
+  benchmarks, memory limits, and arbitrary-input runs.
 
 Exit criteria:
 
@@ -4036,7 +5260,9 @@ Deliverables:
 
 - machine-readable inventory and audit of every unsafe block, invariant,
   caller obligation, and owning `mundilfari-platform-*-sys` crate;
-- ABI drift, ancillary parsing, PHC/PPS, raw socket, and clock-control review;
+- ABI drift, ancillary parsing, PHC/PPS/RTC/counters, GPIO/frequency capture,
+  oscillator/DAC/DCO, raw socket, namespace identity, and discipline-backend
+  review;
 - safe-wrapper length/alignment/discriminant/ownership/lifetime/kernel-size
   validation;
 - sanitizer/Miri coverage, MMIO volatile/alignment/order/endian/reset review,
@@ -4087,12 +5313,17 @@ Deliverables:
 
 - long-run source/servo/daemon/rotation/restart results;
 - hardware lab for PTP/White Rabbit/Navheim-derived GNSS/PPS/IRIG/oscillators;
+- persistence crash/rollback/migration campaigns and concurrent snapshot/
+  withdrawal/cancellation stress;
+- maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
+  claimed HFT-oriented configurations;
 - documented measured accuracy envelopes and failures.
 
 Verification:
 
-- environmental drift, network partitions, grandmaster/source changes, disk
-  faults, suspend/reboot, leap/rollover simulation, and hardware measurements.
+- environmental drift, network partitions, grandmaster/source withdrawals,
+  disk/torn-write/rollback faults, concurrent publication, queue pressure,
+  suspend/reboot, leap/rollover simulation, and hardware measurements.
 
 Exit criteria:
 
@@ -4140,6 +5371,9 @@ Deliverables:
 - complete implementation-evidence coverage with every production source,
   requirement, clause/erratum disposition, and test link independently
   reviewed;
+- bidirectional stable requirement-ID closure across normative/architecture
+  sources, crates/modules/items, positive/negative/property/fuzz/conformance/
+  HIL evidence, exclusions, and non-claims with no orphan edge;
 - exact-document expansion of every remaining family/bundle record, including
   current amendments, corrigenda, interpretations, profiles, and registries;
 - refreshed non-WG proposal watchlist with explicit admitted, monitored, or

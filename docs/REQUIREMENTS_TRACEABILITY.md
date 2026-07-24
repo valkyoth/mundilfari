@@ -1,12 +1,31 @@
 # Mundilfari Requirements Traceability
 
-Status: repository-baseline audit
+Status: repository-baseline audit and bidirectional-traceability contract
 
 Reviewed: 2026-07-24
 
 This document maps the project requirements to present evidence and to the
 release milestone that must close the production claim. It is an audit index,
 not a substitute for the detailed implementation or release plans.
+
+## Bidirectional Traceability Contract
+
+Before implementation, `v0.2.0` assigns stable domain-qualified IDs such as
+`TIME-ATOM-001`, `WIRE-BOUND-002`, `NTP-REPLAY-003`, or
+`DISC-HELPER-006`. Each requirement maps in both directions among:
+
+- its exact normative clause/hash/errata disposition or architecture decision;
+- owning crate, module, release milestone, and implementation source hash;
+- positive, negative, boundary, property, fuzz, simulation, conformance, and
+  hardware evidence as applicable;
+- explicit exclusions, non-claims, and inapplicability rationales.
+
+The active [implementation-evidence registry](../compliance/IMPLEMENTATION_EVIDENCE.json)
+already enforces this shape for foundation source. `v0.2.0` completes the
+protocol/standard ledger and stable ID namespace before core feature
+implementation begins. The common gate rejects orphan edges in either
+direction; a source change invalidates its reviewed hash until the documents
+and tests are rechecked.
 
 ## Repository And Language
 
@@ -40,6 +59,13 @@ not a substitute for the detailed implementation or release plans.
 | security paramount from the first commit | threat model, unsafe/secret/dependency policy, deny/audit/SBOM gates | per-version pentest plus `v0.158.0`–`v0.167.0` |
 | every behavior testable | deterministic polling, bounded providers, fixtures, simulation, fuzz and hardware plan | owning milestone plus final closure |
 | implementation cannot bypass document/test review | reviewed implementation hash plus machine-readable requirement, exact-standard, clause, errata, and test linkage | `v0.3.0`; every common gate |
+| hard versus statistical uncertainty | distinct types, confidence/model semantics, bounded error budgets | `v0.14.0`–`v0.15.0`; engine closure `v0.133.0`–`v0.136.0` |
+| generic evidence withdrawal | source-neutral upsert/withdraw/discontinuity lifecycle | `v0.15.1`; every source and engine milestone |
+| complete platform foundations | RTC, counters, MMIO, GPIO, frequency capture, actuators, namespace identity | `v0.38.1`–`v0.40.0`; `v0.161.0` |
+| one discipline authority boundary | proposal/policy API and internal applied-result backends | `v0.39.0`, helper `v0.142.0` |
+| common secure persistence | bounded versioned crash/rollback-safe state boundary | `v0.39.1`; consumers and final audits |
+| consistent concurrent reads | generation-consistent publication and latency evidence | `v0.137.1` |
+| canonical external representation | one bounded schema for IPC/persistence/C/WASM/logs/bindings | `v0.140.1` |
 | exact-commit pentest before every tag | release-plan exit sentences and readiness validator | every tag |
 | GitHub CodeQL default setup only | documented repository setting; no advanced workflow | every release review |
 | no unsafe in safe crates | workspace lint and unsafe inventory policy | `v0.161.0` |

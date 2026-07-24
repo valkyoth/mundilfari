@@ -239,20 +239,20 @@ conformance helpers. Otherwise it remains repository-only.
 ### 3.5 Dependency direction
 
 ```text
-core domains and bounded wire utilities
-                 ↓
-        protocol codecs/state
-                 ↓
- platform transports and profile adapters
-                 ↓
- consensus/servo/orchestration engine
-                 ↓
-  facade, CLI, daemon, C/WASM interfaces
+                         ┌─ protocol crates ─┐
+mundilfari-core ─────────┼─ engine ──────────┼─ facade/application composition
+                         └─ platform ─ sys ──┘
 ```
 
 Enforced rules:
 
 - core never depends on protocol, platform, or facade crates;
+- protocol crates depend on core, never platform or engine;
+- engine depends on core and consumes protocol-neutral observations, never
+  protocol or platform types;
+- safe platform depends on core and narrowly scoped sys crates, never protocol
+  or engine policy;
+- facade and application crates compose protocol, engine, and platform layers;
 - protocol wire modules never depend on OS code;
 - protocol crates never depend on the facade;
 - generic crypto adapters do not own time-protocol decisions;
@@ -265,6 +265,11 @@ Enforced rules:
 - experimental drafts cannot leak draft-only public types into stable crates;
 - profiles depend on base protocol engines, never the reverse;
 - dependency cycles and out-of-layer edges fail the local gate.
+
+All source fusion, servo, and holdover algorithms live in
+`mundilfari-engine`. Protocol and platform crates produce validated
+observations, measurement metadata, discontinuities, and invalidations; they
+never contain a protocol-specific copy of a generic discipline algorithm.
 
 ## 4. Canonical Time Model
 
@@ -311,6 +316,11 @@ flattened into `i128` attoseconds. A resolved Navheim native GNSS instant is
 mapped without truncation by the companion; it is not parsed from GNSS wire
 data here.
 
+`RationalInstant` is not arbitrary-precision public algebra. Its limb width,
+sign location, positive nonzero denominator, reduction state, comparison work,
+and conversion work are fixed and bounded. No attacker selects an unbounded
+numerator, denominator, allocation, or GCD workload.
+
 ### 4.3 Explicit scale and context
 
 UTC, TAI, UT1, POSIX, NTP, PTP, GPS, Galileo, BeiDou, GLONASS, terrestrial,
@@ -347,6 +357,9 @@ resolved evidence or rejects the observation.
 A usable reading contains:
 
 - an earliest/latest interval;
+- a typed hard-bound or statistical estimate; covariance always names
+  confidence, units, model, and generation and never becomes a hard interval
+  without explicit reviewed policy;
 - a preferred estimate only when policy permits one;
 - scale and realization identity;
 - monotonic capture correlation;
@@ -354,8 +367,19 @@ A usable reading contains:
 - resolution, precision, uncertainty, age, stability, traceability, leap, and
   holdover state;
 - authentication class separate from measured or advertised accuracy;
-- source generation, protocol, authority, path, raw-observation hash, and
-  warnings.
+- source generation, protocol, authority, path, optional typed evidence digest
+  with algorithm/assurance, and warnings;
+- an error budget separating systematic/random, measured/asserted, correlated,
+  calibration, quantization, path, capture, scale-model, and oscillator
+  components;
+- diversity assertions with provenance, assurance, expiry, and generation.
+
+Every observation participates in one generic lifecycle: uniquely identified
+upserts, withdrawals, and clock discontinuities carry source generation,
+monotonic sequence, capture time, and validity. Reserved bounded capacity
+prevents ordinary traffic from silently crowding out withdrawals. Filters,
+consensus, servos, virtual clocks, persistence, and audit state all remove or
+invalidate downstream state when evidence is withdrawn.
 
 `query_once()` performs acquisition and returns a bounded `TimeEstimate`.
 `TrustedClock::now()` performs no network I/O and reads an already
@@ -417,6 +441,10 @@ Decode modes are explicit: `Strict`, `Compatible`, and `Forensic`. Strict is
 default. Compatibility deviations are individually documented. Forensic
 values cannot enter discipline state.
 
+Preserving an unknown field for inspection does not accept, authenticate,
+forward, echo, or authorize re-encoding it. Echo occurs only where the exact
+revision mandates it and work/response budgets permit it.
+
 ### 5.3 I/O-neutral state machines
 
 Protocols consume platform-neutral datagram, stream, raw-link, serial, edge,
@@ -456,6 +484,9 @@ CPU-expensive verification, responses, logs, and evidence.
 
 Limits required by a protocol are not confused with local deployment quotas.
 Local resource exhaustion is not reported as peer cryptographic invalidity.
+Network-controlled sizes are bounded before allocation. Alloc-enabled APIs use
+fallible construction/reservation or caller storage; an unavoidable allocator
+abort is an explicit non-claim and never the only untrusted-input path.
 
 ### 6.3 Generic security dependencies
 
@@ -496,6 +527,15 @@ The engine emits a bounded `DisciplineProposal`; policy may turn it into a
 short-lived authorized request, and the helper independently enforces phase,
 frequency, slew, step, generation, and expiry bounds.
 
+Read-only safe platform APIs do not export adjustment backends. The separate
+`mundilfari-discipline` API owns proposals, authorization, requested/applied/
+residual results, target generation, and audit. Authority is rechecked at the
+actual operation because discovery is subject to TOCTOU. Direct embedded
+in-process adjustment, where supported, is a separately named expert API with
+the same safeguards. Every step, rate change, reset, suspend, namespace
+change, or device replacement publishes a discontinuity and changes affected
+generations.
+
 The helper is a dedicated executable with no protocol dependencies. It uses a
 pre-opened socketpair or fixed local endpoint, verifies peer credentials,
 accepts fixed-version and fixed-maximum-length messages, rejects replayed
@@ -520,9 +560,11 @@ Platform code is staged:
 5. ancillary-data parsing and truncation/alignment tests;
 6. raw ICMP and Ethernet;
 7. hardware timestamp configuration;
-8. PHC/PPS/RTC access;
-9. bounded system and hardware clock adjustment;
-10. per-platform interoperability and privilege tests.
+8. PHC/PPS/RTC and architectural counter access;
+9. embedded MMIO, GPIO, and frequency capture;
+10. bounded oscillator/DAC/DCO and system/hardware adjustment backends;
+11. time-namespace/container identity and discontinuity publication;
+12. per-platform interoperability and privilege tests.
 
 Accuracy is never inferred from API availability.
 
@@ -533,6 +575,24 @@ traits use HAL-like typed clock/register operations rather than Unix file
 descriptors. Linux PHC uses the kernel PTP-clock and timestamping interfaces;
 MMIO is a distinct embedded adapter with volatile, alignment, endian,
 ownership, ordering, and reset invariants.
+
+All persistent state uses one versioned bounded foundation with
+crash-consistent replacement, torn-write detection, explicit durability,
+checksum/authenticated-integrity separation, optional confidentiality,
+generation/rollback and boot/session binding, corruption/version behavior,
+migration, and maximum size. NTS, bootstrap, calibration, holdover, policy,
+and TrustedClock do not invent private state formats.
+
+All external boundaries use one canonical versioned schema rather than Rust
+layout or an implicit serde model. It defines wide integer limbs, scale/model
+identity, hard/statistical uncertainty, observation events, unknown-field
+rules, and bounds for IPC, persistence, C, WASM, logs/evidence, and language
+bindings.
+
+TrustedClock publication is one logically consistent snapshot. Its memory
+ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
+rules, and read-latency guarantee are documented and model-tested; instant,
+uncertainty, scale model, source set, and generation cannot tear.
 
 ## 8. Standards Governance
 
@@ -678,15 +738,17 @@ leak into stable surfaces.
 
 ## 11. Review Integration And Version Ownership
 
-The July 2026 gap review strengthens the existing roadmap without replacing
+The July 2026 gap reviews strengthen the existing roadmap without replacing
 its broader pre-1.0 completeness contract:
 
 | Concern | Owning versions |
 | --- | --- |
 | Floor-normalized instants, wide math, rational residuals | `v0.5.0`, `v0.7.0`, `v0.9.0`, gate `v0.17.0` |
-| Immutable scale contexts, POSIX outcomes, smear identity | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
+| Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
+| Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
+| no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
-| Runtime capability truth and safe/sys platform split | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
+| Runtime capability, RTC/counters/MMIO/GPIO/discipline/persistence | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
@@ -694,12 +756,12 @@ its broader pre-1.0 completeness contract:
 | NTS assurance, pool key establishment, and secret lifecycle | `v0.72.0`–`v0.81.0` |
 | PTP revision admission, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
-| Cross-family fault model, bounded servos, holdover | `v0.133.0`–`v0.136.0` |
-| Truthful facade, application clocks, bindings | `v0.137.0`–`v0.145.0` |
+| Cross-family fault model, split bounded servos, holdover | `v0.133.0`–`v0.136.0` |
+| Snapshot concurrency, canonical schema, facade and bindings | `v0.137.0`–`v0.145.0` |
 | Privilege-separated helper and audit evidence | `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 
-The review's proposed narrower replacement matrix is not adopted. The
-existing registry contract, Navheim-last feature order, per-milestone
-verification and pentest exits, hardware evidence, and full production
-admission sequence remain mandatory.
+No gap analysis is adopted as a replacement matrix. The existing registry
+contract, Navheim-last feature order, per-milestone verification and pentest
+exits, hardware evidence, and full production admission sequence remain
+mandatory; accepted concerns are assigned to explicit owning versions.

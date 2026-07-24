@@ -10,6 +10,7 @@ Each unit records:
 - its implementation source, kind, and owning release milestone;
 - the reviewed SHA-256 of that exact implementation source;
 - every governing requirement with a precise document locator;
+- stable uppercase requirement IDs and explicit exclusions/non-claims;
 - one or more concrete tests linked from every requirement;
 - for protocol/format/profile work, exact normative source identifiers,
   reviewed SHA-256 values, clauses, and errata dispositions.
@@ -28,6 +29,12 @@ fuzzing, and exact-commit pentesting still decide that.
 Any production-source edit changes its hash and fails the gate until the
 requirements, exact documents, clause/errata dispositions, and linked tests
 have been rechecked and the evidence hash is deliberately updated.
+
+Requirement IDs are stable and domain-qualified, for example
+`TIME-ATOM-001`, `WIRE-BOUND-002`, or `NTP-REPLAY-003`. They map
+bidirectionally from source document/clause or architecture decision through
+the owning implementation unit to positive/negative/property/fuzz/
+conformance/hardware evidence and explicit non-claims.
 
 Run:
 

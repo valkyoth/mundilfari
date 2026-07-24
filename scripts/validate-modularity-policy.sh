@@ -31,3 +31,5 @@ grep -q 'mundilfari-core.workspace = true' crates/mundilfari-platform/Cargo.toml
 grep -q 'mundilfari-engine.workspace = true' crates/mundilfari/Cargo.toml
 ! grep -q 'mundilfari-engine' crates/mundilfari-core/Cargo.toml
 ! grep -q 'mundilfari-platform' crates/mundilfari-core/Cargo.toml
+! grep -q 'mundilfari-platform' crates/mundilfari-engine/Cargo.toml
+! grep -q 'mundilfari-engine' crates/mundilfari-platform/Cargo.toml

@@ -88,7 +88,7 @@ Additional boundaries:
 | Off-path injection | unpredictable request state, origin matching, address/port policy, authentication |
 | Replay | nonces, sequence/origin matching, replay windows, monotonic state, used-cookie tracking |
 | Malicious source | diverse sources, interval consensus, Khronos, maximum offset and uncertainty |
-| Malicious majority or Sybil diversity | explicit `n`/`f` fault assumptions, operator/upstream/path/site correlation, split result, no impossible Byzantine claim |
+| Malicious majority or Sybil diversity | explicit `n`/`f` fault assumptions, provenance/assurance/expiry for operator/upstream/path/site claims, conservative unknown correlation, split result, no impossible Byzantine claim |
 | Delay/asymmetry attack | maximum delay/root distance, multi-path comparison, assumption-labeled delay history, topology policy, uncertainty growth |
 | Downgrade | pinned protocol policy; no silent NTS-to-NTP or secure-to-legacy fallback |
 | Amplification | bounded response ratio, validation before response, rate and work limits |
@@ -97,10 +97,14 @@ Additional boundaries:
 | Clock rollback | monotonic guard, default no backward step, virtual application clocks |
 | Excessive clock change | startup-only step policy, slew/frequency limits, faulted state |
 | Loss of sources | holdover state with growing uncertainty and bounded recovery |
+| Retracted or invalid evidence remains active | generic identified withdrawal/discontinuity events, reserved invalidation capacity, generation propagation through filter/consensus/servo/clock/audit |
+| Statistical confidence presented as guaranteed time | distinct hard/statistical types, named confidence/model, explicit conversion policy, error-budget provenance |
 | GNSS spoofing or bad upstream evidence | preserve Navheim health/authentication/integrity/provenance, honor invalidation, compare independent clock families |
 | Radio spoofing | source fusion, propagation checks, signal quality, independent corroboration |
 | PTP manipulation | authenticated mechanism or trusted boundary/corroboration for strict discipline, topology identity, correction/delay monitoring, redundant grandmasters and paths |
 | Timestamp misassociation | packet identity, sequence, error-queue, ancillary bounds, drop detection |
+| Torn concurrent clock snapshot | generation-consistent publication, explicit memory model, model checking, bounded read latency |
+| Persisted-state corruption or rollback | canonical bounded schema, torn-write detection, authenticated integrity where required, boot/session generation and rollback checks |
 | Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
 | Secret disclosure | redaction, bounded lifetime, controlled exposure, admitted clearing |
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |

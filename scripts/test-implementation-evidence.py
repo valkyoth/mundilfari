@@ -60,6 +60,16 @@ def main() -> None:
         evidence.write_text(json.dumps(missing_locator))
         rejected(module, evidence)
 
+        unstable_requirement_id = json.loads(json.dumps(original))
+        unstable_requirement_id["units"][0]["requirements"][0]["id"] = "core-capability"
+        evidence.write_text(json.dumps(unstable_requirement_id))
+        rejected(module, evidence)
+
+        missing_non_claims = json.loads(json.dumps(original))
+        del missing_non_claims["units"][0]["non_claims"]
+        evidence.write_text(json.dumps(missing_non_claims))
+        rejected(module, evidence)
+
         unlinked = json.loads(json.dumps(original))
         unlinked["units"][0]["requirements"][0]["tests"] = ["missing-test"]
         evidence.write_text(json.dumps(unlinked))
@@ -78,7 +88,7 @@ def main() -> None:
                 "sha256": module.rfc_hashes(ROOT)["rfc:5905"],
                 "clauses": ["7"],
                 "errata": "reviewed for fixture",
-                "requirements": ["core-capability"],
+                "requirements": ["ARCH-CORE-001"],
             }
         ]
         evidence.write_text(json.dumps(valid_protocol))
@@ -99,7 +109,7 @@ def main() -> None:
                 "sha256": "0" * 64,
                 "clauses": ["1"],
                 "errata": "reviewed",
-                "requirements": ["core-capability"],
+                "requirements": ["ARCH-CORE-001"],
             }
         ]
         evidence.write_text(json.dumps(unknown_standard))

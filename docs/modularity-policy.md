@@ -22,7 +22,15 @@ Rules:
   focused crate.
 - Wire parsing, validation, I/O, source policy, and clock discipline remain
   separate modules and dependency layers.
-- Core and protocol wire crates do not depend on platform crates.
+- Protocol crates depend only on core/shared protocol prerequisites, never
+  platform or engine.
+- Engine depends on core and protocol-neutral observations, never protocol or
+  platform crates.
+- Safe platform depends on core and narrowly scoped sys crates, never protocol
+  or engine policy.
+- Facade/application crates compose protocol, engine, and platform.
+- All generic source fusion, servo, and holdover algorithms live only in
+  engine.
 - Navheim never depends on Mundilfari, preventing an integration cycle.
 - Stable crates do not expose experimental-draft types.
 - Non-generated Rust files may not exceed 500 lines.

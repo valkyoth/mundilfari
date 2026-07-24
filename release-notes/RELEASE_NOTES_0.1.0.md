@@ -25,7 +25,7 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - Checksum-locked local reference corpus of 67 exact RFC Editor documents,
   with reviewed roles and release assignments, offline verification,
   CODEOWNERS protection, and exclusion from crates.io packages.
-- Machine-readable 52-entry external-standards source registry with a
+- Machine-readable 56-entry external-standards source registry with a
   fail-closed ignored vault for every non-RFC document byte; seven public,
   revision-pinned sources have committed SHA-256 pins and a local-only fetcher.
 - Explicit source review updates for RFC 9748, RFC 9921,
@@ -51,6 +51,14 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   conversion evidence, runtime capability truth, consensus fault assumptions,
   safe/sys platform isolation, deterministic embedded engines, hardened
   privilege separation, and signed reproducible release evidence.
+- Follow-up architecture audit integrated through explicit versions for
+  bounded fractions, split scale families, hard/statistical uncertainty,
+  generic evidence withdrawal, RTC/MMIO/GPIO/counters/actuators, discipline
+  authority, secure persistence, NTS/Roughtime edge cases, concurrent
+  snapshots, canonical external schemas, and common error classification.
+- Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
+  timestamp, and servo milestones split into smaller independently pentested
+  patch releases.
 - `no_std`, dependency layering, 500-line, unsafe, standards, supply-chain,
   threat-model, and secret-handling policies.
 - Machine-enforced implementation evidence covering every production source,

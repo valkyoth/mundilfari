@@ -16,15 +16,26 @@ REVIEW_COVERAGE = {
     "v0.2.0": ("transitive normative", "WireComplete"),
     "v0.3.0": ("per-source implementation evidence",),
     "v0.7.0": ("mathematical floor",),
-    "v0.11.0": ("ConversionContext",),
+    "v0.9.0": ("maximum limb width",),
+    "v0.11.0": ("ConversionContext", "bipm-si-brochure-9-v4.01"),
+    "v0.11.1": ("iers-conventions-2010-tn36", "non-definitive working updates"),
+    "v0.11.2": ("iau-2000-resolutions", "iau-2006-resolution-b3"),
+    "v0.15.1": ("silently dropped",),
     "v0.30.0": ("compiled, available, authorized",),
+    "v0.38.2": ("volatile access",),
+    "v0.39.0": ("AppliedAdjustment", "TOCTOU"),
+    "v0.39.1": ("torn-write",),
     "v0.53.0": ("unknown critical",),
     "v0.60.0": ("maximum faulty diversity groups",),
     "v0.78.1": ("draft-ietf-ntp-nts-keyexchange-pool-01",),
+    "v0.79.1": ("amplification",),
     "v0.91.0": ("PTPv3",),
+    "v0.101.0": ("no source fusion",),
     "v0.107.1": ("draft-ietf-ntp-over-ptp-08",),
     "v0.114.0": ("fixed-capacity Sans-I/O",),
-    "v0.133.0": ("maximum faulty diversity groups",),
+    "v0.133.0": ("maximum faulty diversity groups", "assertion provenance"),
+    "v0.137.1": ("memory-ordering", "maximum read-latency"),
+    "v0.140.1": ("canonical encoding",),
     "v0.142.0": ("OS peer credentials",),
     "v0.165.0": ("no unclassified", "family/bundle"),
     "v0.167.0": ("signed exact-commit attestation",),
@@ -84,6 +95,23 @@ def validate_review_coverage(text: str) -> list[str]:
     return errors
 
 
+def validate_version_order(text: str) -> list[str]:
+    """Require strictly increasing v0 milestone and patch ordering."""
+    errors: list[str] = []
+    previous: tuple[int, int] | None = None
+    previous_name = ""
+    for version, _ in milestones(text):
+        match = re.fullmatch(r"v0\.(\d+)\.(\d+)", version)
+        if match is None:
+            continue
+        current = (int(match.group(1)), int(match.group(2)))
+        if previous is not None and current <= previous:
+            errors.append(f"milestone {version} is not after {previous_name}")
+        previous = current
+        previous_name = version
+    return errors
+
+
 def validate_navheim_order(text: str) -> list[str]:
     """Ensure Navheim remains the final feature phase."""
     errors: list[str] = []
@@ -119,6 +147,7 @@ def main(argv: list[str]) -> int:
     path = Path(argv[1]) if len(argv) == 2 else Path("docs/RELEASE_PLAN.md")
     text = path.read_text(encoding="utf-8")
     errors = validate(text)
+    errors.extend(validate_version_order(text))
     errors.extend(validate_review_coverage(text))
     errors.extend(validate_navheim_order(text))
     if errors:

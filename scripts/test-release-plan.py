@@ -46,6 +46,16 @@ def main() -> None:
         "exact pentest" in error
         for error in checker.validate(VALID.replace("this exact commit", "some commit"))
     )
+    assert checker.validate_version_order(
+        VALID + VALID.replace("v0.1.0", "v0.1.1")
+    ) == []
+    assert any(
+        "not after" in error
+        for error in checker.validate_version_order(
+            VALID.replace("v0.1.0", "v0.2.0")
+            + VALID.replace("v0.1.0", "v0.1.1")
+        )
+    )
 
     roadmap = f"""{checker.NAVHEIM_PHASE}
 ### v0.149.0 - Navheim Upstream Admission

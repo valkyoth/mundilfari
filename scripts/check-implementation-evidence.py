@@ -34,6 +34,7 @@ TEST_KINDS = {
 }
 PROTOCOL_KINDS = {"format", "integration", "protocol"}
 SAFE_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+REQUIREMENT_ID = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+")
 SHA256 = re.compile(r"[0-9a-f]{64}")
 MILESTONE = re.compile(r"v0\.[1-9][0-9]*\.[0-9]+")
 
@@ -196,7 +197,10 @@ def validate(root: pathlib.Path, evidence: pathlib.Path) -> None:
         linked_tests: set[str] = set()
         for requirement in requirements:
             requirement_id = requirement.get("id") if isinstance(requirement, dict) else None
-            if not isinstance(requirement_id, str) or SAFE_ID.fullmatch(requirement_id) is None:
+            if (
+                not isinstance(requirement_id, str)
+                or REQUIREMENT_ID.fullmatch(requirement_id) is None
+            ):
                 fail(f"{unit_id}: invalid requirement id")
             if requirement_id in requirement_ids:
                 fail(f"{unit_id}: duplicate requirement id {requirement_id}")
@@ -215,6 +219,12 @@ def validate(root: pathlib.Path, evidence: pathlib.Path) -> None:
             linked_tests.update(linked)
         if linked_tests != test_ids:
             fail(f"{unit_id}: test evidence is not linked to a requirement")
+        non_claims = unit.get("non_claims")
+        if not isinstance(non_claims, list) or not all(
+            isinstance(non_claim, str) and non_claim.strip()
+            for non_claim in non_claims
+        ):
+            fail(f"{unit_id}: non_claims must be an explicit string list")
 
         documents = unit.get("source_documents")
         if not isinstance(documents, list):

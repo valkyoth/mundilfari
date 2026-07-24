@@ -10,12 +10,13 @@
       "milestone": "v0.1.0",
       "requirements": [
         {
-          "id": "core-capability",
+          "id": "ARCH-CORE-001",
           "document": "docs/IMPLEMENTATION_PLAN.md",
           "locator": "3.1 Shared crates",
           "tests": ["core-reports-foundation"]
         }
       ],
+      "non_claims": ["No time-protocol or clock behavior is implemented."],
       "source_documents": [],
       "tests": [
         {
@@ -34,12 +35,13 @@
       "milestone": "v0.1.0",
       "requirements": [
         {
-          "id": "engine-capability",
+          "id": "ARCH-ENGINE-001",
           "document": "docs/IMPLEMENTATION_PLAN.md",
           "locator": "3.1 Shared crates",
           "tests": ["engine-reports-foundation"]
         }
       ],
+      "non_claims": ["No consensus, servo, or holdover behavior is implemented."],
       "source_documents": [],
       "tests": [
         {
@@ -58,12 +60,13 @@
       "milestone": "v0.1.0",
       "requirements": [
         {
-          "id": "platform-capability",
+          "id": "ARCH-PLATFORM-001",
           "document": "docs/IMPLEMENTATION_PLAN.md",
           "locator": "3.1 Shared crates",
           "tests": ["platform-reports-foundation"]
         }
       ],
+      "non_claims": ["No operating-system or hardware access is implemented."],
       "source_documents": [],
       "tests": [
         {
@@ -82,12 +85,13 @@
       "milestone": "v0.1.0",
       "requirements": [
         {
-          "id": "facade-connects-foundation",
+          "id": "ARCH-FACADE-001",
           "document": "docs/IMPLEMENTATION_PLAN.md",
           "locator": "3.1 Shared crates",
           "tests": ["facade-connects-foundation"]
         }
       ],
+      "non_claims": ["No production time API is implemented."],
       "source_documents": [],
       "tests": [
         {

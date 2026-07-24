@@ -203,7 +203,7 @@
       "status": "revision-review",
       "redistribution": "restricted",
       "acquisition": "manual",
-      "milestone": "v0.104.0",
+      "milestone": "v0.104.1",
       "official_url": "https://www.smpte.org/standards",
       "local_filename": "media-ptp-profiles"
     },
@@ -214,7 +214,7 @@
       "status": "revision-review",
       "redistribution": "restricted",
       "acquisition": "manual",
-      "milestone": "v0.104.0",
+      "milestone": "v0.104.2",
       "official_url": "https://standards.ieee.org/standard/802_1CM-2018.html",
       "local_filename": "fronthaul-timing"
     },
@@ -250,6 +250,50 @@
       "milestone": "v0.157.0",
       "official_url": "https://www.bipm.org/en/time-ftp/cggtts-standard",
       "local_filename": "bipm-cggtts"
+    },
+    {
+      "id": "bipm-si-brochure-9-v4.01",
+      "publisher": "BIPM",
+      "title": "The International System of Units (SI Brochure), 9th edition, version 4.01",
+      "status": "stable",
+      "redistribution": "local-only",
+      "acquisition": "manual",
+      "milestone": "v0.11.0",
+      "official_url": "https://www.bipm.org/en/publications/si-brochure",
+      "local_filename": "bipm-si-brochure-9-v4.01.pdf"
+    },
+    {
+      "id": "iers-conventions-2010-tn36",
+      "publisher": "IERS",
+      "title": "IERS Conventions (2010), Technical Note 36, official version 1.0.0",
+      "status": "stable-with-updates",
+      "redistribution": "local-only",
+      "acquisition": "manual",
+      "milestone": "v0.11.1",
+      "official_url": "https://iers-conventions.obspm.fr/conventions_material.php",
+      "local_filename": "iers-conventions-2010-tn36.pdf"
+    },
+    {
+      "id": "iau-2000-resolutions",
+      "publisher": "IAU",
+      "title": "IAU 2000 Resolutions, official English and French assembly bundle",
+      "status": "stable",
+      "redistribution": "local-only",
+      "acquisition": "manual",
+      "milestone": "v0.11.2",
+      "official_url": "https://www.iau.org/Iau/Iau/Publications/List-of-Resolutions.aspx",
+      "local_filename": "iau-2000-resolutions.pdf"
+    },
+    {
+      "id": "iau-2006-resolution-b3",
+      "publisher": "IAU",
+      "title": "IAU 2006 Resolution B3: Re-definition of Barycentric Dynamical Time, TDB",
+      "status": "stable",
+      "redistribution": "local-only",
+      "acquisition": "manual",
+      "milestone": "v0.11.2",
+      "official_url": "https://www.iau.org/Iau/Iau/Publications/List-of-Resolutions.aspx",
+      "local_filename": "iau-2006-resolution-b3.pdf"
     },
     {
       "id": "itu-r-tf.1153",
@@ -335,7 +379,7 @@
       "status": "revision-review",
       "redistribution": "restricted",
       "acquisition": "manual",
-      "milestone": "v0.121.0",
+      "milestone": "v0.121.1",
       "official_url": "https://midi.org/specs",
       "local_filename": "midi-time-code"
     },
@@ -346,7 +390,7 @@
       "status": "identifier-review",
       "redistribution": "restricted",
       "acquisition": "manual",
-      "milestone": "v0.121.0",
+      "milestone": "v0.121.3",
       "official_url": "https://www.etsi.org/standards",
       "local_filename": "broadcast-time-signalling"
     },
@@ -357,7 +401,7 @@
       "status": "identifier-review",
       "redistribution": "restricted",
       "acquisition": "manual",
-      "milestone": "v0.122.0",
+      "milestone": "v0.122.1",
       "official_url": "https://www.iso.org/standards.html",
       "local_filename": "mpeg-dash-scte-timing"
     },
@@ -412,7 +456,7 @@
       "status": "vendor-published",
       "redistribution": "local-only",
       "acquisition": "manual",
-      "milestone": "v0.130.0",
+      "milestone": "v0.130.1",
       "official_url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/authenticode",
       "local_filename": "microsoft-authenticode"
     },
@@ -423,7 +467,7 @@
       "status": "revision-review",
       "redistribution": "local-only",
       "acquisition": "manual",
-      "milestone": "v0.130.0",
+      "milestone": "v0.130.2",
       "official_url": "https://opentimestamps.org/",
       "local_filename": "opentimestamps"
     },

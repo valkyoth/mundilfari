@@ -127,11 +127,14 @@ implementing against an intermediate provisional shape.
   and provenance as separate properties;
 - rejects unresolved, ambiguous, stale, unhealthy, or policy-disallowed
   evidence;
-- withdraws previously accepted observations after a Navheim invalidation;
+- maps every Navheim lifecycle change into Mundilfari's pre-existing generic
+  upsert/withdraw/discontinuity contract, withdrawing previously accepted
+  observations after invalidation;
 - never grants clock-discipline authority by parsing or conversion alone.
 
 It must not decode navigation frames, resolve weeks, reinterpret receiver
-quality, verify OSNMA, guess PPS labels, or rebuild a receiver protocol.
+quality, verify OSNMA, guess PPS labels, rebuild a receiver protocol, or
+introduce a Navheim-specific filter/consensus/servo/invalidation mechanism.
 
 ## PPS Flow
 
@@ -167,6 +170,9 @@ applications to participate without a mandatory GNSS dependency.
 Such providers do not gain a GNSS conformance claim. They must supply explicit
 scale, uncertainty, capture-domain, health, freshness, authentication,
 integrity, and provenance evidence required by the selected discipline policy.
+They use the same generic observation identity, generation, sequence,
+valid-until, withdrawal, and discontinuity contract as the future Navheim
+adapter.
 
 ## Verification
 

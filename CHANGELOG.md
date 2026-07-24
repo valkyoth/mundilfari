@@ -15,7 +15,7 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 - Added a Gjallarbru-style, checksum-locked corpus of 67 RFC Editor documents
   with reviewed roles, roadmap assignments, offline integrity gates, explicit
   trust-pin updates, text-normalization protection, and CODEOWNERS coverage.
-- Added a 52-entry external-standards registry and an ignored local-only vault;
+- Added a 56-entry external-standards registry and an ignored local-only vault;
   seven revision-pinned public drafts/specifications are locally downloadable
   only after committed SHA-256 verification, while restricted documents
   require legitimate manual acquisition.
@@ -44,6 +44,14 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   exact conversion residuals, capability truth, platform sys isolation,
   explicit consensus fault assumptions, stronger protocol and privilege
   boundaries, deterministic embedded evidence, and signed release assurance.
+- Incorporated the follow-up gap audit without reducing existing scope:
+  corrected dependency direction and servo ownership; added hard/statistical
+  uncertainty, generic withdrawals, complete platform/device stops, discipline
+  authority, secure persistence, concurrency, canonical schemas, stable
+  requirement IDs, NTS/Roughtime edge cases, and source-evidence semantics.
+- Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
+  broadcast, timestamp, and servo milestones into independently reviewable
+  patch releases while preserving the final Navheim feature phase.
 - Preserved the broader pre-1.0 protocol registry commitment and Navheim-last
   ordering instead of adopting the review's narrower replacement roadmap.
 
