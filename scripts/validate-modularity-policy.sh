@@ -37,7 +37,10 @@ grep -q 'mundilfari-engine.workspace = true' crates/mundilfari/Cargo.toml
 grep -q 'Foundational instant/duration interval algebra' docs/modularity-policy.md
 grep -q 'Hard-bound conditions are immutable' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
+grep -q 'Canonical condition resolution grants no runtime trust' docs/modularity-policy.md
+grep -q 'current evidence assessment and `PolicyAcceptedHardBound`' docs/modularity-policy.md
 grep -q 'Generic interval quorum, falseticker rejection' docs/modularity-policy.md
+grep -q 'Facade strict APIs require an engine-issued current accepted bound' docs/modularity-policy.md
 grep -q 'Leap-candidate structure and pure validation live in core' docs/modularity-policy.md
 grep -q 'Core raw leap-model replacement is isolated' docs/modularity-policy.md
 grep -q 'Raw EOP and scale-offset snapshots are likewise isolated' docs/modularity-policy.md

@@ -17,6 +17,10 @@ Rules:
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
+- Canonical condition resolution grants no runtime trust. Engine alone owns
+  current evidence assessment and `PolicyAcceptedHardBound` construction;
+  condition/assessment loss invalidates all downstream consumers through the
+  generic lifecycle and generation graph.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
@@ -40,6 +44,9 @@ Rules:
 - Safe platform depends on core and narrowly scoped sys crates, never protocol
   or engine policy.
 - Facade/application crates compose protocol, engine, and platform.
+- Facade strict APIs require an engine-issued current accepted bound;
+  diagnostic APIs expose the conditional claim, condition, assessment,
+  deadline, reasons, assurance, and non-claims without a trusted boolean.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
 - Leap-candidate structure and pure validation live in core; generic evidence

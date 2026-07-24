@@ -62,7 +62,15 @@ the release branch between review and tagging.
   threshold/fault predicate for consensus; simplification cannot silently
   strengthen or weaken it. External identifiers remain unresolved until exact
   canonical content or a trusted immutable registry generation is verified.
-  Statistical estimates require explicit policy before contributing a bound.
+  Canonical resolution does not prove current truth: engine assessment reports
+  supported, contradicted, indeterminate, expired, or withdrawn with exact
+  evidence/generations/deadline, and only a current policy-accepted assessment
+  creates downstream hard-bound authority. Statistical estimates require
+  explicit policy before contributing a bound.
+- Condition-assessment loss invalidates consensus, leap decisions, servo/
+  estimator/holdover state, discipline proposals, synchronized publication,
+  and strict facade results through reserved lifecycle/generation propagation;
+  stale accepted tokens and trusted booleans are rejected.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.

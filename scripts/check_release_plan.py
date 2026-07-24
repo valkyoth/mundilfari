@@ -7,6 +7,8 @@ import re
 import sys
 from pathlib import Path
 
+from release_plan_runtime_rules import extend_runtime_review_rules
+
 
 HEADING = re.compile(r"^(?:### |## )(v(?:0\.\d+\.\d+|1\.0\.0(?:-rc\.\d+)?)) -? ?(.*)$")
 NAVHEIM_PHASE = "## Phase 12: Navheim Integration As Final Feature Work"
@@ -241,7 +243,7 @@ REVIEW_COVERAGE = {
         "maximum faulty diversity groups",
         "assertion provenance",
         "ConsensusPolicyGeneration",
-        "second intersection",
+        "with no second",
         "exact `v0.7.2` threshold/fault condition",
         "engine derivation report",
     ),
@@ -259,7 +261,7 @@ REVIEW_COVERAGE = {
     ),
     "v0.137.2": ("target_has_atomic", "no silent emulation"),
     "v0.137.3": ("estimate_now()", "known-false future value"),
-    "v0.137.0": ("single-reader logical snapshot", "remain `v0.137.1`"),
+    "v0.137.0": ("single-reader logical snapshot", "completed in `v0.137.1`"),
     "v0.138.0": ("safe-facade contract", "whole-facade fuzzing"),
     "v0.140.1": (
         "compatibility/freeze ledger",
@@ -361,6 +363,8 @@ REVIEW_FORBIDDEN = {
     "v0.77.0": ("CredentialValidationContextId",),
     "v0.137.0": ("concurrent reads",),
 }
+
+extend_runtime_review_rules(REVIEW_COVERAGE, REVIEW_FORBIDDEN)
 
 
 def milestones(text: str) -> list[tuple[str, str]]:

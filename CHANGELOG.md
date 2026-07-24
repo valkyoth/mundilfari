@@ -101,6 +101,13 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   corrected `v0.52.3` so `ArtifactIntegrityEvidence` remains independent from
   configured source role/authority while non-cryptographic OS trust uses
   distinct `ConfiguredPlatformTrustEvidence`.
+- Added `v0.60.1` to separate canonical conditional bounds from current runtime
+  evidence assessment and engine policy acceptance. Opaque
+  `PolicyAcceptedHardBound` generations now gate consensus, leap admission,
+  servo/estimator/holdover state, discipline proposals, synchronized
+  publication, and strict facade results; conditional diagnostics retain the
+  condition, assessment, deadline, reasons, assurance, and non-claims without
+  a trusted boolean.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

@@ -359,11 +359,23 @@ no IPC, persistence, C, WASM, or network input directly deserializes a trusted
 condition identity or hard claim. The early core resolver accepts already-
 admitted immutable registry evidence and owns no crypto, storage, platform, or
 engine authority; later provider/persistence layers preserve the type-state.
+
+Canonical resolution still does not prove that a condition currently holds.
+The engine separately issues a bounded `ConditionAssessment` over exact
+evidence, policy, membership, source, correlation, lifecycle, and monotonic
+generations, with supported/contradicted/indeterminate/expired/withdrawn status
+and a conservative reassessment deadline. Only a current supported assessment
+accepted by policy can produce an opaque `PolicyAcceptedHardBound`; the
+conditional `HardBoundClaim` remains available for diagnostics. Assessment
+loss invalidates consensus, leap admission, servo/estimator/holdover state,
+discipline proposals, synchronized clock publication, and facade status through
+the generic withdrawal/generation machinery. No trusted boolean erases the
+condition, reasons, assurance, non-claims, or deadline.
+
 Era resolution, fractional residuals, and EOP all reuse the kernel. The later
-uncertainty phase adds asymmetric budgets,
-covariance, confidence/model evidence, richer algebra, and observation
-integration without replacing these types or implicitly promoting statistical
-ranges into guaranteed bounds.
+uncertainty phase adds asymmetric budgets, covariance, confidence/model
+evidence, richer algebra, and observation integration without replacing these
+types or implicitly promoting statistical ranges into guaranteed bounds.
 
 ### 4.3 Explicit scale and context
 
@@ -452,10 +464,14 @@ consensus, servos, virtual clocks, persistence, and audit state all remove or
 invalidate downstream state when evidence is withdrawn.
 
 `query_once()` performs acquisition and returns a bounded `TimeEstimate`.
-`TrustedClock::now()` performs no network I/O and reads an already
-synchronized virtual application clock. Mobile and browser defaults are
-application clocks, not system discipline. Every C, WASM, Java/Kotlin, Swift,
-database, `time_t`, and JavaScript boundary rejects out-of-range narrowing.
+Every estimate exposes its canonical condition and current assessment. Strict
+operations return synchronized hard bounds only with a current
+`PolicyAcceptedHardBound`; conditional diagnostics retain unresolved/
+unsupported assumptions, reasons, assurance, deadlines, and non-claims.
+`TrustedClock::now()` performs no network I/O and reads an already synchronized
+virtual application clock. Mobile and browser defaults are application clocks,
+not system discipline. Every C, WASM, Java/Kotlin, Swift, database, `time_t`,
+and JavaScript boundary rejects out-of-range narrowing.
 
 ### 4.6 Monotonic domains and lifecycle generations
 
@@ -569,9 +585,12 @@ freshness and path-delay bounds, network-adversary reach, and whether correct
 source intervals are assumed to contain true time. Source weights cannot
 override the quorum. Results encode these as the reviewed bounded threshold/
 fault condition tied to policy, membership, and correlation generations—not
-as a conjunction that assumes every source is correct. An indistinguishable
-malicious majority is an explicit residual risk, not a Byzantine-resilience
-claim.
+as a conjunction that assumes every source is correct. Runtime assessment then
+evaluates that condition against current evidence with explicit
+supported/contradicted/indeterminate/expired/withdrawn status; only a
+policy-accepted result receives downstream hard-bound authority. An
+indistinguishable malicious majority is an explicit residual risk, not a
+Byzantine-resilience claim.
 
 ### 6.2 Resource governance
 
@@ -994,7 +1013,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, engine closure `v0.60.0`–`v0.61.0`, `v0.133.0`–`v0.136.0` |
+| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.138.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |

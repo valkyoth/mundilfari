@@ -108,6 +108,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   `ArtifactIntegrityEvidence` independent from configured source authorization,
   with separate `ConfiguredPlatformTrustEvidence` for non-cryptographic OS
   trust.
+- Runtime trust hardening added `v0.60.1`: canonical conditions remain
+  conditional until current evidence is assessed and accepted by engine policy.
+  An opaque `PolicyAcceptedHardBound` gates consensus, leap admission, servo/
+  estimator/holdover state, proposals, synchronized publication, and strict
+  facade operations, while diagnostics expose status, reasons, assurance,
+  deadline, and non-claims without an `is_trusted` boolean.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.
