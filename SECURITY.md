@@ -54,8 +54,10 @@ the release branch between review and tagging.
   cannot cross domains implicitly.
 - Guaranteed hard bounds and statistical covariance/confidence are distinct;
   stable non-interchangeable interval classes exist before EOP or era
-  consumers, and statistical estimates require explicit policy before
-  contributing a bound.
+  consumers. Open/closed endpoints are exact and never simulated by adjusting
+  one quantum; trusted estimates are finite. A hard-bound claim states
+  mathematical containment, not source honesty, and statistical estimates
+  require explicit policy before contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
@@ -96,20 +98,27 @@ the release branch between review and tagging.
   authorization, cancellation, and resource failures; allocator aborts and
   internal invariant bugs are documented non-claims, not recoverable errors.
 - Strict certificate validation accepts only when the full trusted-time
-  interval lies within certificate validity; midpoint or preferred estimates
-  cannot turn partial overlap into validity, and scalar-time verifier success
-  cannot substitute for immutable whole-chain temporal/revocation evidence.
-- Retained TLS/NTS tickets, exporters, associations, cookies, and peer evidence
-  bind a stable policy generation, immutable temporal-validation evidence, and
-  relevant time/leap-model and lifecycle generations. Normal clock refinement
-  does not churn identity; expiry, rollback, trust removal, revocation, or a
-  relevant discontinuity explicitly invalidates or requires revalidation.
+  interval lies within the whole-chain validity intersection and supported
+  revocation-freshness constraints; exact endpoint inclusion is preserved,
+  midpoint/preferred estimates cannot turn partial overlap into validity, and
+  scalar-time verifier success cannot substitute for immutable evidence.
+- Retained TLS/NTS state uses separate lifetimes: a stable service credential
+  context binds policy/identity/chain/revocation/time evidence, a ticket carries
+  only bounded resumption authorization, every handshake gets a fresh TLS
+  connection generation, every connection gets a unique exporter generation,
+  and every exporter derives a distinct NTS association generation. Exporter
+  material never crosses full or resumed connections. Normal clock refinement
+  does not rotate the service context; relevant policy, expiry, revocation,
+  model, or lifecycle change still invalidates or requires revalidation.
 - Temporal evidence also binds the concrete reference identity, endpoint,
-  SNI/ALPN, chain, connection, and exporter generation. Retention never exceeds
-  the earliest conservative chain/revocation/policy/session/key horizon;
+  SNI/ALPN policy, and chain evidence. Retention never exceeds the earliest
+  conservative chain/revocation/policy/session/key horizon;
   worst-case time/correlation/holdover/suspend semantics derive the monotonic
   deadline, and failure or domain discontinuity requires per-use revalidation
   or rejection.
+- TLS 1.3 resumption revalidates the service/ticket context and creates fresh
+  connection/exporter/association generations even when the peer does not
+  resend its certificate chain; absence of a chain is never fresh evidence.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/

@@ -88,6 +88,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   authority; defined service/connection binding and worst-case monotonic
   credential-retention horizons; and corrected the remaining early activation
   and concurrent-read wording.
+- Latest contract review made interval endpoints exact across open, closed,
+  half-open, and algebraically unbounded forms while requiring finite trusted
+  estimates and honest `HardBoundClaim` naming; added `v0.75.2` to separate
+  service/ticket authorization from fresh connection/exporter/NTS association
+  generations; fixed engine ownership of admitted conversion-data constructors;
+  and moved identified EOP withdrawal into the generic lifecycle.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

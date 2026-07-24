@@ -80,6 +80,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   authentication-versus-authority separation; service/connection-bound
   credential evidence and conservative monotonic retention horizons; and
   removal of residual early activation/concurrent-reader claims.
+- Refined those contracts with exact open/closed/unbounded interval endpoints,
+  finite trusted estimates, and `HardBoundClaim` non-authority semantics;
+  split reusable service credential/ticket authorization from fresh TLS
+  connection, exporter, and NTS association generations in new `v0.75.2`;
+  assigned conversion-data admission constructors to the engine boundary; and
+  deferred EOP withdrawal events to the generic lifecycle.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

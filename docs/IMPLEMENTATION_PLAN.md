@@ -338,11 +338,16 @@ numerator, denominator, allocation, or GCD workload.
 
 Immediately after `AtomicInstant`, one stable source-neutral interval kernel
 defines bounded instant/duration intervals and non-interchangeable
-`HardBound<T>` versus non-guaranteed `StatisticalRange<T>` classes. Era
-resolution, fractional residuals, and EOP all reuse it. The later uncertainty
-phase adds asymmetric budgets, covariance, confidence/model evidence, richer
-algebra, and observation integration without replacing these foundational
-types or implicitly promoting statistical ranges into guaranteed bounds.
+`HardBoundClaim<T>` versus non-guaranteed `StatisticalRange<T>` classes.
+Included, excluded, and algebraically unbounded endpoints represent open,
+closed, and half-open sets exactly; no code simulates exclusion by adding or
+subtracting a domain quantum. Trusted estimates use only finite intervals.
+`HardBoundClaim` describes mathematical containment under named assumptions,
+not source honesty or authority. Era resolution, fractional residuals, and EOP
+all reuse the kernel. The later uncertainty phase adds asymmetric budgets,
+covariance, confidence/model evidence, richer algebra, and observation
+integration without replacing these types or implicitly promoting statistical
+ranges into guaranteed bounds.
 
 ### 4.3 Explicit scale and context
 
@@ -359,7 +364,9 @@ historical frequency-offset model is admitted.
 Early EOP records carry source-neutral model/document identity, revision/hash,
 validity, interpolation policy, generation, and the foundational uncertainty
 class. They do not manufacture authentication, retrieval, source authority, or
-the full observation provenance introduced by later layers.
+the full observation provenance introduced by later layers. Early structural
+state says missing, caller-removed, replaced, stale, or unavailable; identified
+withdrawal events and propagation start only after the generic lifecycle.
 
 Mundilfari keeps generic scale identifiers and versioned conversion context so
 GNSS-derived observations can be compared with other clocks. Navheim
@@ -702,28 +709,35 @@ zeroization, page locking, core-dump exclusion, hardware-backed/non-exportable
 keys, and externally held operations. A container type never implies these
 protections, and unsupported capabilities remain non-claims.
 
-TLS/NTS retained state is bound to a stable credential-validation context. A
-`CredentialPolicyGeneration` covers trust anchors, service identity,
-algorithms, and validation/revocation policy. Immutable
+TLS/NTS retained state uses a hierarchy rather than one credential-context
+identifier. `CredentialPolicyGeneration` covers trust anchors, service
+identity, algorithms, and validation/revocation policy. Immutable
 `TemporalValidationEvidence` records the exact interval and validation instant,
 whole-chain and revocation-evidence digest/outcome, validity horizon, and
-revalidation deadline. The context binds those identities plus relevant
-time/leap-model and execution generations; it does not embed the continuously
-refined live-clock interval. Normal refinement therefore causes no context
-churn, while expiry, rollback, trust removal, confirmed revocation, or a
-relevant model/lifecycle discontinuity invalidates or requires revalidation.
-A scalar-`UnixTime` conventional verifier cannot be promoted into strict
-whole-interval `TemporalValidity` evidence.
+revalidation deadline. `ServiceCredentialContextId` binds that evidence,
+reference identity, endpoint/SNI/ALPN policy, and relevant time/model/execution
+generations without embedding a live clock or TLS connection. A resumption
+ticket carries only this bounded service authorization and ticket limits.
+Every full or resumed handshake creates a fresh `TlsConnectionGeneration`,
+which creates a unique `ExporterGeneration`, which creates one
+`NtsAssociationGeneration`; exporter material never crosses connections.
+Normal refinement causes no service-context churn, while expiry, rollback,
+trust removal, confirmed revocation, or a relevant model/lifecycle
+discontinuity invalidates or requires revalidation. A scalar-`UnixTime`
+conventional verifier cannot be promoted into strict whole-interval
+`TemporalValidity` evidence.
 
-Temporal evidence also binds the concrete verified reference identity,
-endpoint authority, SNI/ALPN where applicable, presented-chain digest, and TLS
-connection/exporter generations. `ContinueUntil` is the earliest conservative
-chain, revocation, policy, ticket/session, exporter/key-usage, or other
-security horizon. Civil expiry is mapped to the monotonic domain using the
-worst-case upper time bound, correlation uncertainty, oscillator/holdover
-growth, and suspend semantics. If that deadline cannot be established—or a
-clock/correlation/domain discontinuity invalidates it—the state is revalidated
-before each use or rejected.
+Temporal evidence binds the presented-chain digest, while the service context
+binds concrete reference identity, endpoint authority, SNI/ALPN policy, and
+its conservative horizon. `ContinueUntil` is the earliest chain, revocation,
+policy, ticket/session, exporter/key-usage, or other security horizon. Civil
+expiry is mapped to the monotonic domain using the worst-case upper time bound,
+correlation uncertainty, oscillator/holdover growth, and suspend semantics. If
+that deadline cannot be established—or a clock/correlation/domain
+discontinuity invalidates it—the state is revalidated before each use or
+rejected. Resumption revalidates the service/ticket context before creating
+fresh connection, exporter, and NTS association generations, including when
+TLS 1.3 does not resend the certificate chain.
 
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
@@ -759,6 +773,12 @@ signature from an unconfigured signer remains authentic but unauthorized. Raw
 snapshots stay usable only in isolated expert conversion contexts. Concurrent
 TrustedClock publication accepts these proofs and the separate engine-issued
 `AdmittedLeapCandidate`, revalidating all bindings in the commit transaction.
+Core owns raw structures and the protocol-neutral retrieval/integrity evidence
+contract. Platform implementations emit that core evidence; engine admits only
+the normalized core values and never depends on platform. Engine alone owns
+admitted-wrapper constructors/revalidation, and the facade composes ergonomic
+policy/default publication. Dependencies and compile tests prevent core,
+platform, or protocol crates from acquiring admission authority.
 
 Remote time data cannot authenticate itself: a candidate never validates the
 transport or credential interval that delivered it. Artifact signatures,
@@ -941,7 +961,7 @@ its broader pre-1.0 completeness contract:
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | Generic engine quorum/diversity and NTP orchestration | `v0.60.0`–`v0.62.0`, cross-family composition `v0.133.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| Crypto/secret protection, credential-context generations, NTS/bootstrap | `v0.72.0`–`v0.81.0`, final review `v0.162.0` |
+| Crypto/secret protection, service/connection/exporter/association generations, NTS/bootstrap | `v0.72.0`–`v0.81.0`, hierarchy `v0.75.1`–`v0.75.2`, final review `v0.162.0` |
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |

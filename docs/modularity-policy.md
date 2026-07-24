@@ -6,8 +6,9 @@ Rules:
 
 - `mundilfari` is a facade, not an implementation home.
 - Shared time domains live in `mundilfari-core`.
-- Foundational bounded instant/duration intervals and hard/statistical
-  non-substitution live in core before era, fraction, or EOP consumers; later
+- Foundational instant/duration interval algebra with exact open/closed/
+  unbounded endpoints, finite trusted estimates, and hard-claim/statistical
+  non-substitution lives in core before era, fraction, or EOP consumers; later
   uncertainty algebra extends rather than duplicates these types.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
@@ -43,6 +44,10 @@ Rules:
   handoff reaches composition, where its bindings are rechecked with commit.
 - Raw EOP and scale-offset snapshots are likewise isolated; only their opaque
   policy-issued admitted proofs reach concurrent default-clock publication.
+- Core owns raw EOP/offset structures and the protocol-neutral evidence
+  contract; platform implementations emit core evidence values; engine alone
+  owns admitted constructors/revalidation and never depends on platform; facade
+  composes policy/default publication without recreating admission.
 - Generic interval quorum, falseticker rejection, clustering, combining, and
   diversity are engine primitives implemented before NTP composition; NTP
   crates own association/filter metadata but no copy of those algorithms.
