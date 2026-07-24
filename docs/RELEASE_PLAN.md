@@ -304,6 +304,65 @@ Exit criteria:
 - servo and conversion code can use typed values instead of raw integers;
 - `v0.6.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.6.1 - Canonical Identity Kernel
+
+Status: planned.
+
+Goal: define one allocation-free structural identity and content-addressing
+contract before claims, recipes, conditions, models, or origins depend on
+digests.
+
+Deliverables:
+
+- core-owned `CanonicalIdentityV1` preimage encoder with domain-separated tags
+  for claim, recipe, condition, model, and origin identities; every preimage
+  binds identity-profile and semantic-schema generation, exact type/domain,
+  units, scale, sign/normalization, endpoint inclusion/unbounded state,
+  operation/proof rule, condition/model/origin references, and bounded
+  length-delimited content;
+- canonical signed/integer/enum/sequence encoding and canonical ordering for
+  commutative operations using digest plus full structural-byte tie-breaker;
+  input permutation cannot alter identity and equal digests never decide an
+  ambiguous order without structural comparison;
+- fixed `IdentityDigestV1 = SHA-256` profile with an explicit algorithm
+  identifier, domain prefix, and first-party no_std public-data-only
+  implementation reviewed against the exact `v0.2.0`-admitted
+  `nist-fips-180-4-upd1` source. The announced future NIST revision is monitored
+  and refreshed at `v0.165.0`; no unreleased draft silently changes V1;
+  this is stable content addressing, not MAC/authentication, secret handling,
+  collision-resistance assurance for hostile authority, or a substitute for
+  `v0.24.1` generic cryptographic providers;
+- identity equality, registry lookup, interning, and cache use require digest
+  match plus canonical structural comparison; a digest collision returns a
+  typed collision/conflict result and never aliases, overwrites, selects, or
+  grants authority to different content;
+- caller-buffer/streaming encoding with fixed byte/item/depth/work limits,
+  required-length reporting, and atomic short-buffer failure;
+- Rust `Hash`, `TypeId`, memory layout/padding, pointer/address, serde output,
+  debug/display formatting, locale, platform endianness, or randomized process
+  state are forbidden identity inputs;
+- `v0.7.1`–`v0.7.3` reuse this exact identity profile, while `v0.22.1`
+  wraps its canonical value encoding without creating a second representation
+  and `v0.24.1` cannot silently change an existing identity algorithm/profile.
+
+Verification:
+
+- SHA-256 official/KAT and incremental/one-shot tests; golden preimages and
+  identities across Rust `1.90.0..=1.97.1`, endian/word-width targets, no_std,
+  and independent reference encoders;
+- exhaustive type/unit/scale/sign/normalization/open-closed-unbounded/operation/
+  condition/schema separation, commutative permutations and equal-digest
+  structural tie-breaks, forced-collision mock paths, noncanonical aliases,
+  every byte/item/depth/work limit, and short-buffer atomicity;
+- compile/static tests forbid Rust layout/hash/serde/debug identity shortcuts
+  and prove generic crypto-provider selection cannot mutate V1 identities.
+
+Exit criteria:
+
+- every later identity/digest has one stable canonical preimage and collision
+  rule before a hard claim can be constructed;
+- `v0.6.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.7.0 - Atomic Instant
 
 Status: planned.
@@ -361,13 +420,36 @@ Deliverables:
   the identifier is an opaque reference to immutable assumption content, not
   a caller-selected label, and its complete composition algebra follows in
   `v0.7.2`;
-- every root `HardBoundClaim<T>` constructor also emits a paired, core-owned,
-  immutable `UnverifiedBoundDerivation<T>` recipe binding a bounded
+- every root `HardBoundClaim<T>` constructor stores a paired, core-owned,
+  immutable `UnverifiedBoundDerivation<T>` recipe in its admitted derivation
+  arena, binding a bounded
   `ClaimOriginId`, the exact included/excluded output endpoints, claim digest,
   operation=`Root`, and condition identity. The recipe is material for later
   engine verification, not proof, source provenance, authentication, honesty,
-  authority, or current support, and no hard-claim constructor can silently
-  discard or detach it;
+  authority, or current support, and construction succeeds only when the
+  recipe is stored and its mandatory handle is attached;
+- every claim/origin/recipe digest is computed only from the exact `v0.6.1`
+  canonical identity profile; claim equality and arena interning compare full
+  canonical structure after digest match and surface collisions explicitly;
+- `HardBoundClaim<T>` contains a mandatory private typed
+  `DerivationHandle<T>` rather than returning a droppable `(claim, recipe)`
+  pair. The handle binds derivation-store identity, store generation, node
+  generation/index, output domain/type, and recipe digest; stale, evicted,
+  foreign-store, wrong-generation, or wrong-domain handles fail closed before
+  transformation, verification, serialization, or acceptance;
+- no_std uses a caller-owned fixed-capacity `DerivationArena` over supplied
+  slots/buffers; alloc-enabled use has a fallible explicitly bounded arena and
+  never unconditional growth. Canonically interned immutable DAG nodes share
+  common inputs to avoid exponential copying, and all mutation/eviction rotates
+  generations without making a live handle refer to different content;
+- heterogeneous recipe nodes and edges explicitly tag input/output domains
+  (instant, duration, rational, scale-specific, model, and condition) and
+  validate operation-specific edge signatures. Geometry-only
+  `FiniteInterval<T>` remains available, but it cannot enter hard-claim
+  transformation, verification, policy-acceptance, or strict-time APIs;
+- serialization exports the complete reachable bounded canonical derivation
+  record, never the process-local arena handle/store identity; external decode
+  remains the unverified `v0.7.3` type-state;
 - typed saturated/invalid outcomes rather than sentinel endpoints;
 - no source authority, authentication, observation provenance, covariance,
   confidence, error-budget composition, midpoint preference, or implicit
@@ -385,15 +467,20 @@ Verification:
   properties, finite-estimate enforcement, instant-versus-duration
   non-substitution, compile-fail hard/statistical mixing/promotion, no_std/MSRV,
   paired root-recipe creation, endpoint/condition/origin/digest substitution,
-  recipe-drop/detachment refusal, and dependency tests proving the opaque
-  origin identity does not introduce later provenance/observation coupling.
+  recipe-drop/detachment refusal, canonical-identity collision handling,
+  API/type size and stack-use reports, zero/full arena and allocation failure,
+  interning/DAG sharing, eviction/stale/cross-store/cross-generation handles,
+  heterogeneous/wrong-domain edges, long shared chains, complete-record export
+  without handle leakage, and dependency tests proving the opaque origin
+  identity does not introduce later provenance/observation coupling.
 
 Exit criteria:
 
 - every earlier era, fraction, and conversion model can use one stable bounded
   interval vocabulary without inventing provisional uncertainty types;
 - every root hard claim retains the bounded non-authoritative material required
-  for later exact derivation verification;
+  for later exact derivation verification through an enforceable typed handle
+  and bounded caller-controlled storage model;
 - `v0.7.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.7.2 - Bounded Hard-Bound Condition Algebra
@@ -438,6 +525,11 @@ Deliverables:
   direction/policy, model identity/generation where applicable, input and
   canonical output conditions, and rewrites; no API returns a transformed hard
   claim while omitting its recipe;
+- transformation resolves every typed handle in one explicitly selected arena,
+  validates heterogeneous edge signatures, computes condition/claim/recipe
+  identities with `v0.6.1`, interns the canonical output DAG node, and only then
+  returns a new handle-bearing claim. Cross-store composition requires explicit
+  bounded canonical import/reinterning and never trusts a foreign handle;
 - recipes have independent fixed depth, node, fan-out, input, byte/storage,
   traversal, cycle-detection, and later verification-work bounds. Internal
   construction is acyclic; overflow, attempted cycles, unavailable inputs, or
@@ -464,7 +556,10 @@ Verification:
 - recipe property tests cover every root/intersection/union/hull/widening/
   conversion/projection path, exact endpoint and digest binding, canonical
   input order, rounding/model/condition substitution, cycle attempts, and
-  every independent depth/node/fan-out/storage/traversal/work boundary.
+  every independent depth/node/fan-out/storage/traversal/work boundary;
+- arena tests cover canonical DAG reuse, cross-store import/reinterning,
+  eviction/generation races, heterogeneous edge signatures, long diamond DAGs,
+  and failure atomicity when output identity/interning exhausts capacity.
 
 Exit criteria:
 
@@ -503,6 +598,11 @@ Deliverables:
   ordering, acyclicity, and every recipe bound, then returns only the
   non-authoritative core `UnverifiedBoundDerivation<T>`; resolution never
   asserts mathematical correctness or runtime authority;
+- every record carries complete `v0.6.1` canonical structural preimages and
+  identities for the reachable DAG, not arena/store handles or digest-only
+  references. Decode/import recomputes identities, performs structural
+  collision comparison, validates heterogeneous edges, and atomically interns
+  into the caller-selected bounded arena or fails without a partial claim;
 - identifier-only encodings are accepted only when the receiver already holds
   and verifies the exact immutable registry generation and canonical content;
   otherwise the complete bounded canonical condition and required rule
@@ -531,7 +631,9 @@ Verification:
   remains unresolved until the complete bounded resolution succeeds;
 - malformed/truncated/spliced derivation records, cycles, missing inputs,
   endpoint/operation/rounding/model/condition substitution, and all recipe
-  depth/node/fan-out/storage/work limits.
+  depth/node/fan-out/storage/work limits; handle/store injection,
+  digest-without-structure, forced collisions, heterogeneous edge confusion,
+  arena import exhaustion, and partial-intern rollback.
 
 Exit criteria:
 
@@ -1102,9 +1204,11 @@ Deliverables:
   machine-instance generation, clock generation, rate, and uncertainty;
 - bounded `MonotonicReadInterval { earliest, latest }` in one exact domain;
   `latest` conservatively includes clock resolution/quantization, sampling
-  latency, rate uncertainty/drift since the measurement point, and an
-  operation-supplied completion margin. A scalar hardware/API counter reading
-  cannot by itself prove that a deadline has not passed;
+  latency, and rate uncertainty/drift through the provider's documented
+  observation/linearization point. An operation-supplied completion margin is
+  applied separately only by a consumer with a reviewed bound; the measured
+  interval alone makes no caller-return guarantee. A scalar hardware/API
+  counter reading cannot by itself prove that a deadline has not passed;
 - checked same-domain arithmetic only, with typed domain/suspend/generation
   mismatch errors;
 - stale/rollback/restart detection;
@@ -1354,6 +1458,12 @@ Deliverables:
 - one `no_std`, caller-buffer schema envelope with schema identity, version,
   criticality, canonical field order, duplicate/unknown-field rules, and
   explicit maximum record/message size;
+- schema primitive/value encoding wraps and reuses the exact `v0.6.1`
+  `CanonicalIdentityV1` integers, enums, sequences, type/domain tags,
+  normalization, and length framing for identity-bearing fields; it does not
+  introduce a parallel serde-shaped or schema-only canonical representation,
+  and compatibility extensions cannot reinterpret an existing identity
+  preimage;
 - fixed maximum nesting depth and total field/item count, with iterative
   parsing or recursion whose stack depth is statically bounded;
 - canonical bounded integers including signed high/low wide limbs, byte
@@ -1384,6 +1494,7 @@ Verification:
   identifier-reuse fixture, integer extremes, required-length/short-buffer
   atomicity, deterministic re-encoding, version skew, stack bounds,
   unverified-derivation-record encoding and direct verified-tag/decode absence,
+  byte-for-byte identity-kernel reuse/no-second-encoding fixtures,
   no-allocation, and arbitrary-byte fuzz/property tests.
 
 Exit criteria:
@@ -1465,6 +1576,21 @@ Deliverables:
 - receive/send metadata and timestamp quality;
 - monotonic providers return the full `MonotonicClockId` descriptor and reject
   deadlines/elapsed values from another suspend/rate/scope/generation domain;
+- every monotonic provider implements bounded
+  `read_interval() -> Result<MonotonicReadInterval, ClockReadError>` carrying
+  exact domain identity, earliest/latest, native resolution/quantization,
+  measurement method, sample/call latency bound or observation, rate-
+  uncertainty provenance, capture generation, and capability/non-claims;
+  scalar native counters are conservatively inflated and never mapped to
+  `[t,t]` unless the provider proves zero uncertainty;
+- separate `LinearizationReadCapability` and optional
+  `ThroughCompletionCapability { wcet }` contracts: interval measurement may
+  support authority at its documented observation/linearization point without
+  claiming a hard caller-return bound; through-completion is exposed only when
+  the platform/runtime provides a reviewed maximum completion/WCET guarantee;
+- unavailable interval bounds, migration/frequency/suspend/virtualization/
+  reset ambiguity, and unavailable completion bounds are explicit capability
+  or typed error states, never scalar fallback;
 - HAL-like device traits without Unix file descriptors in core signatures;
 - compiled/available/authorized/healthy capability discovery contracts;
 - entropy and hardware-clock traits without fallback implementations.
@@ -1472,11 +1598,16 @@ Deliverables:
 Verification:
 
 - in-memory transports, error propagation, timestamp identity, short I/O, and
-  capability compile tests.
+  capability compile tests; interval-provider contract tests cover scalar
+  inflation, zero/nonzero resolution, latency/rate uncertainty, exact domain,
+  missing provenance, migration/frequency/suspend/reset/virtualization
+  ambiguity, and linearization-only versus through-completion capability.
 
 Exit criteria:
 
 - protocol crates do not expose OS socket or file types;
+- every platform monotonic implementation must provide a conservative interval
+  or explicitly report that strict authority is unavailable;
 - `v0.24.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.24.1 - Generic Cryptographic Provider Contracts
@@ -1500,6 +1631,10 @@ Deliverables:
 - test-only versus production-approved provider provenance and constructors;
 - no protocol field semantics, TLS, certificate, storage, or clock policy in
   provider traits;
+- provider digest APIs may verify or reproduce the fixed public-data
+  `v0.6.1` identity profile but cannot replace its preimage, algorithm,
+  structural collision checks, or existing identities; configurable provider
+  algorithms are for later security/integrity protocols, not identity drift;
 - redacted diagnostics and common error-taxonomy mapping.
 
 Verification:
@@ -1508,7 +1643,8 @@ Verification:
   short output, entropy/nonce failure, usage-limit races and exhaustion,
   redaction, claimed/unavailable/failing zeroization/page-lock/core-dump/
   hardware/external-key capabilities, feature/no_std/MSRV matrices, and
-  compile-time protocol-type isolation.
+  identity-profile reproduction plus attempted provider-driven identity
+  algorithm/preimage substitution, and compile-time protocol-type isolation.
 
 Exit criteria:
 
@@ -1655,6 +1791,14 @@ Deliverables:
 - exact native mapping for each monotonic clock's suspend behavior,
   raw/frequency-adjusted rate semantics, process/system scope, boot/session,
   namespace, process/machine instance generation, and clock generation;
+- hosted `read_interval()` implementations use reviewed target-specific
+  bracketing/cross-read strategies around Linux/Android clocks, Windows
+  performance/interrupt-time counters, and BSD/macOS/iOS monotonic clocks;
+  intervals include native resolution, observed bracket/call latency, rate
+  uncertainty, migration/frequency/virtualization state, and generation.
+  General-purpose hosted adapters advertise linearization-time capability and
+  do not claim `ThroughCompletionCapability` merely from benchmarks or typical
+  scheduler latency;
 - process/container/time-namespace identity and clock generation in every
   hosted clock report;
 - fork/exec and VM/container checkpoint/restore detection where the platform
@@ -1668,7 +1812,9 @@ Verification:
 
 - host matrix, monotonic nondecrease, conversion bounds, suspend documentation,
   capability-state transitions, denied authorization, unavailable devices, and
-  mock fault tests;
+  mock fault tests; target-specific interval containment against instrumented
+  brackets, coarse clocks, preemption/latency spikes, CPU migration, frequency
+  change, virtualization, reset, and explicit no-through-completion capability;
 - cross-clock/domain arithmetic refusal, suspend/no-suspend elapsed behavior,
   raw/adjusted drift, fork/exec, VM/container restore, inherited handle, and
   process/machine generation tests;
@@ -1834,6 +1980,11 @@ Deliverables:
 
 - raw PHC timestamp, device identity/generation/reset state, timestamp origin,
   resolution, advertised precision, and supported cross-timestamp methods;
+- PHC and system/monotonic methods return bounded `MonotonicReadInterval`
+  values/correlations with exact device/domain identity, method provenance,
+  bracketing/cross-timestamp latency, quantization, driver/device uncertainty,
+  and migration/reset/hotplug generation; unsupported methods never collapse a
+  raw scalar PHC sample to a zero-width monotonic interval;
 - system/monotonic correlation with measured cross-timestamp error,
   calibration, and asymmetry inputs;
 - Linux PTP character-device/standard-ioctl implementation separated from
@@ -1844,7 +1995,9 @@ Verification:
 
 - mock ioctl corpus, live PHC tests, overflow, stale device, concurrency,
   time-namespace mismatch, cross-timestamp uncertainty and maximum-latency
-  benchmarks covering reset and clock-ID lifetime.
+  benchmarks covering reset and clock-ID lifetime; interval containment,
+  scalar-inflation, bracketing order, preemption, hotplug, and method-fallback
+  refusal.
 
 Exit criteria:
 
@@ -1888,6 +2041,11 @@ Deliverables:
   resolution, update-in-progress, device identity, generation, and uncertainty;
 - architectural monotonic/cycle counter identity, width, wrap extension,
   frequency generation, invariance, suspend/reset, and cross-correlation;
+- architectural counter `read_interval()` strategies bind CPU/core/package,
+  migration detection, serialization/barrier method, frequency/invariance
+  generation, wrap/reset state, resolution, calibration/rate uncertainty, and
+  earliest/latest bounds; an un-serialized or migration-ambiguous scalar read
+  is diagnostic rather than `[t,t]`;
 - read-only safe APIs separated from later discipline authorization;
 - platform-specific capability and non-claim reports.
 
@@ -1895,7 +2053,8 @@ Verification:
 
 - invalid/battery-low RTC, torn register reads, BCD/range faults, century
   ambiguity, counter wrap, frequency change, reset, suspend, CPU migration,
-  namespace mismatch, and mock/live platform tests.
+  namespace mismatch, serialization/barrier variants, interval containment,
+  scalar inflation, uncertainty provenance, and mock/live platform tests.
 
 Exit criteria:
 
@@ -1918,14 +2077,20 @@ Deliverables:
 - counter wrap extension, frequency changes, interrupt-versus-poll capture,
   GPIO edge identity/sequence/loss, and frequency-counter gate/calibration
   evidence;
+- caller-provided embedded monotonic clocks and MMIO/cycle counters implement
+  `read_interval()` with target-declared resolution, capture/interrupt/poll
+  latency, calibration/rate uncertainty, domain/reset generation, and optional
+  reviewed WCET-backed through-completion capability; missing bounds disable
+  strict authority without preventing diagnostic sampling;
 - target-specific mock register blocks and no Unix descriptor assumptions.
 
 Verification:
 
 - mock MMIO/register models, misalignment/endian faults, stale ownership,
   reorder/barrier cases, reset/power cycle, counter wrap/frequency change,
-  interrupt races, GPIO bounce/loss, frequency calibration, WCET, and
-  representative embedded targets.
+  interrupt races, GPIO bounce/loss, frequency calibration, interval
+  containment/scalar inflation/missing-bound refusal, claimed WCET violation,
+  and representative embedded targets.
 
 Exit criteria:
 
@@ -1991,6 +2156,8 @@ Deliverables:
 - serialized or persisted derivation material decodes only as
   `UnverifiedBoundDerivationRecord`; the opaque `VerifiedBoundDerivation<T>`
   has no direct `Deserialize`, canonical-schema decode, or restore path.
+  Persistence exports the complete bounded reachable canonical DAG and never a
+  process-local derivation handle, arena address, store identity, or generation.
   Restoration must resolve the complete bounded recipe and the later
   `v0.60.1` engine must reverify it against current input claims/observations,
   proof-rule registry, conversion models, source/provider generations, and
@@ -2026,7 +2193,8 @@ Verification:
   readers, and recovery;
 - derivation replay/rollback, cross-engine copy, direct verified-type decode,
   missing or substituted input, stale rule/model/source generation, lifecycle
-  withdrawal, malformed recipe, and complete bounded re-verification tests.
+  withdrawal, handle/store/address leakage, incomplete reachable DAG,
+  malformed recipe, and complete bounded re-verification tests.
 
 Exit criteria:
 
@@ -2889,6 +3057,12 @@ Deliverables:
   conversion operation, exact input and output endpoints, rounding direction
   and policy, conversion-model identity and generation, canonical output
   condition, and output claim digest;
+- engine verification resolves the claim's mandatory typed
+  `DerivationHandle<T>` against the exact admitted arena identity/generation,
+  walks the complete reachable canonical DAG under budget, and fails closed for
+  stale/evicted/foreign/cross-domain handles or geometry-only intervals. Import
+  from persistence/IPC must first atomically reintern the complete unverified
+  record into a bounded current arena;
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -2912,9 +3086,11 @@ Deliverables:
   `MonotonicReadInterval` in the assessment deadline's exact domain at that
   linearization point after evaluator/verification work, then compares its
   conservative `latest` edge including resolution, sampling latency, rate
-  uncertainty, and completion margin. If `latest >= valid_until`, the engine
-  emits expired/indeterminate diagnostics and never mints a current assessment
-  or accepted token;
+  uncertainty, plus only a reviewed bound for internal work that remains before
+  the issuance linearization point. It never claims coverage through caller
+  receipt. If the required upper edge reaches `valid_until`, the engine emits
+  expired/indeterminate diagnostics and never mints a current assessment or
+  accepted token;
 - opaque, non-forgeable `PolicyAcceptedHardBound<T>` is constructed only when
   a finite `HardBoundClaim<T>`, its exact `VerifiedBoundDerivation<T>` and
   resolved condition, a snapshot-consistent current `Supported` assessment,
@@ -2952,6 +3128,10 @@ Verification:
   derivations, reordered/substituted input or observation digests, wrong
   rounding direction/policy, stale or substituted conversion-model/proof-rule
   generation, output-condition mismatch, and verification-work exhaustion;
+- missing/dropped handle construction attempts, stale/evicted/foreign-store/
+  cross-generation/cross-domain handles, geometry-only acceptance attempts,
+  arena mutation during unlocked assessment work, imported-record partial
+  reinterning, and DAG node/edge/work exhaustion;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -6057,19 +6237,25 @@ Deliverables:
   revalidates under the current policy/evidence/lifecycle generations;
   conditional or diagnostic estimates remain available without synchronized
   labeling;
-- every strict `TrustedClock::now()` read obtains a `v0.16.0`
-  `MonotonicReadInterval` from the exact `MonotonicClockId` carried by the
-  accepted-bound deadline and compares its conservative `latest` edge before
-  returning synchronized authority. Resolution/quantization, sample latency,
-  rate uncertainty, and a bounded read-to-return completion margin are
-  included; `latest >= deadline` immediately returns a typed expired/
-  diagnostic result even when no writer, timer, invalidation event, or
-  republish operation has run;
-- strict authority is valid at the documented read linearization instant unless
-  a stronger API explicitly bounds validity through return/completion. If the
-  monotonic provider or operation cannot bound the sample/return interval and
-  required margin, the strict operation returns diagnostics rather than
-  comparing a scalar best-case reading;
+- default strict `TrustedClock::now()` is an explicit linearization-time
+  contract returning `LinearizedTrustedTime { estimate, observed_at:
+  MonotonicReadInterval, valid_until }`. It samples the exact
+  `MonotonicClockId` carried by the accepted-bound deadline and requires the
+  conservative `observed_at.latest < valid_until`; resolution/quantization,
+  measurement latency, and rate uncertainty are included. Authority is claimed
+  for that sampled interval/linearization point and the returned deadline, not
+  for an unknowably delayed caller-receipt instant;
+- optional `TrustedClock::now_through_completion()` requires a current
+  `ThroughCompletionCapability { wcet }`, adds the reviewed completion/WCET
+  margin to the interval's conservative upper edge, and returns a distinct
+  `CompletionBoundTrustedTime`. General-purpose platforms without a hard bound
+  report the capability unavailable; they retain linearization-time reads
+  rather than overstating scheduler guarantees;
+- either strict contract returns typed expired/diagnostic state when its
+  required upper edge reaches the deadline, even when no writer, timer,
+  invalidation event, or republish operation has run. If the provider cannot
+  bound the measurement interval itself, no strict contract compares a scalar
+  best-case reading;
 - strict authority requires a suspend-inclusive monotonic domain or a platform
   resume signal that invalidates the token before another strict read.
   Monotonic read failure, pause without reliable resume invalidation, domain
@@ -6090,8 +6276,10 @@ Verification:
   expiry/withdrawal/stale token, conditional-not-synchronized refusal, and
   monotonicity properties; exact-deadline refusal, idle expiry without a
   writer, timer starvation, suspend/resume for both monotonic-domain profiles,
-  coarse resolution, read interval straddling expiry, sampling/return latency
-  spikes, rate uncertainty/completion margin, monotonic read failure/reset/
+  coarse resolution, read interval straddling expiry, sampling latency spikes,
+  rate uncertainty, `observed_at`/`valid_until` reporting, delayed caller
+  receipt without a false through-return claim, unavailable/expired/violated
+  WCET capability, completion-margin boundaries, monotonic read failure/reset/
   domain mismatch, and fail-closed diagnostics;
   multi-reader publication/interleavings remain `v0.137.1`.
 
@@ -6119,13 +6307,16 @@ Deliverables:
   membership, source, correlation, lifecycle and monotonic-domain generations,
   per-atom support basis, status, and conservative deadline. Conditional
   estimates publish only with explicit diagnostic/non-synchronized state;
-- every concurrent strict read obtains one logical snapshot and an exact-domain
-  `MonotonicReadInterval`, then validates its conservative `latest` edge,
-  completion margin, accepted-bound deadline, and domain before returning
-  synchronized authority; a sample that may straddle expiry, reset/domain
-  mismatch, unavailable suspend coverage/resume invalidation, unbounded
-  read-to-return interval, or monotonic failure returns expired/diagnostic state
-  without waiting for a writer.
+- every concurrent linearization-time strict read obtains one logical snapshot
+  and exact-domain `MonotonicReadInterval`, validates
+  `observed_at.latest < valid_until`, and returns both values from the same
+  logical generation. Through-completion reads additionally snapshot/recheck
+  the exact current WCET capability/generation and require
+  `latest + wcet < valid_until`; unavailable or stale capability cannot affect
+  the linearization-time API;
+- a sample that may straddle expiry, reset/domain mismatch, unavailable suspend
+  coverage/resume invalidation, unbounded measurement interval, or monotonic
+  failure returns expired/diagnostic state without waiting for a writer.
   The documented read linearization/order prevents a cached pre-expiry label
   from surviving expiry or being paired with another publication generation;
 - concurrent publication consumes only an engine-issued
@@ -6185,9 +6376,11 @@ Verification:
   diagnostic snapshot interleavings across assessment/recheck/commit;
 - verified-derivation replacement/invalidation and exact-deadline, idle-expiry,
   timer-starvation, suspend/resume, coarse/straddling monotonic intervals,
-  latency/rate-uncertainty/completion-margin spikes, monotonic failure/reset/
-  domain-change interleavings across snapshot selection, monotonic sampling,
-  deadline check, writer commit, and strict return;
+  latency/rate-uncertainty spikes, observed-at/deadline pairing, delayed caller
+  receipt, WCET-capability issue/reload/withdrawal/violation and completion-
+  margin boundaries, monotonic failure/reset/domain-change interleavings across
+  snapshot selection, monotonic sampling, deadline check, writer commit, and
+  both strict return contracts;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -6214,6 +6407,10 @@ Deliverables:
   selected atomic profile cannot represent required publication state;
 - typed caller critical-section contract with maximum hold/disable time,
   nesting/reentrancy, memory-ordering, and priority rules;
+- caller-provided monotonic `read_interval()` is mandatory for strict reads;
+  optional through-completion capability binds the profile, critical-section/
+  ISR path, target/build identity, WCET evidence, and generation and is absent
+  unless the complete read path has a reviewed bound;
 - bounded ISR queues, producer/consumer ownership, overflow/invalidation
   behavior, and prohibition on allocation/blocking/user callbacks in ISR
   paths;
@@ -6227,7 +6424,8 @@ Verification:
   combinations, interrupt/preemption schedules, nested/reentrant critical
   sections, queue saturation with reserved withdrawal capacity, priority
   inversion, memory-order model tests, interrupt-latency/stack/WCET
-  measurement, and target hardware/simulator fixtures.
+  measurement, monotonic interval provider absence/refusal, WCET-capability
+  generation/withdrawal/violation, and target hardware/simulator fixtures.
 
 Exit criteria:
 
@@ -6285,6 +6483,11 @@ Deliverables:
 
 - `query_once()` acquisition distinct from `TrustedClock::now()` virtual-clock
   reads, plus strict `TrustedClock::system_defaults(...)`;
+- blocking strict facade keeps the two `v0.137.0` contracts type-distinct:
+  `now()` returns linearization-time authority with `observed_at` and
+  `valid_until`, while `now_through_completion()` exists/succeeds only with a
+  reported current WCET capability and returns the distinct completion-bound
+  result; no convenience wrapper relabels one as the other;
 - separate explicit result paths:
   strict trusted-time operations return a synchronized hard bound only with a
   current `PolicyAcceptedHardBound`, while conditional/diagnostic operations
@@ -6316,6 +6519,8 @@ Verification:
   public interop, timeout/cancel, system-policy snapshot/diff, hidden-network/
   fallback refusal, strict refusal for contradicted/indeterminate/expired/
   withdrawn/stale accepted bounds, conditional diagnostic preservation,
+  delayed hosted return with valid linearization metadata, unavailable/stale/
+  violated WCET capability and contract non-substitution,
   no-trusted-boolean misuse compile tests, and iterator/builder/callback/
   formatting/state-transition panic tests plus whole-facade fuzzing.
 
@@ -6357,6 +6562,10 @@ Deliverables:
 
 - const capacities, caller buffers, deterministic resource reports, and
   compile-time/runtime capacity errors;
+- first-class sizing/builders for the `v0.7.1` derivation arena: node/edge/
+  canonical-byte/work capacity, store identity/generation, eviction policy,
+  worst-case claim/handle size, stack usage, and fallible bounded alloc-backed
+  alternatives are visible rather than hidden inside a client builder;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6364,7 +6573,8 @@ Deliverables:
 Verification:
 
 - zero/minimum/maximum capacity, stack-size reports, no allocator link,
-  embedded targets, examples, and compile-fail overflow cases.
+  derivation-arena DAG sharing/exhaustion/eviction reports, embedded targets,
+  examples, and compile-fail overflow cases.
 
 Exit criteria:
 
@@ -6565,6 +6775,12 @@ Deliverables:
   timestamp-evidence verification;
 - caller-provided fetch/WebSocket/backend transport hooks and a trusted
   application-clock API;
+- browser/Node monotonic adapters or caller-provided clocks expose the
+  `v0.24.0` interval contract with timer-resolution reduction, event-loop/
+  worker delay, background suspension/throttling, navigation/process
+  generation, and rate uncertainty; they default to linearization-time or
+  diagnostic capability and never claim through-completion WCET from typical
+  event-loop latency;
 - checked JavaScript integer/date conversion with `OutOfRange` rather than
   truncation, saturation, or panic;
 - canonical external-schema encoding/decoding, version, bounds, and
@@ -6574,7 +6790,9 @@ Deliverables:
 Verification:
 
 - wasm32 build, browser/node tests, hostile buffers, JS exception/cancel,
-  feature size, and no native dependency leakage.
+  feature size, coarse/privacy-reduced timers, background throttle/suspend,
+  event-loop starvation, worker/process reset, scalar inflation, missing-bound
+  diagnostics, and no native dependency leakage.
 
 Exit criteria:
 
@@ -6672,7 +6890,10 @@ Deliverables:
   reports;
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   exact open/closed/unbounded interval and finite-estimate semantics,
-  non-authoritative `HardBoundClaim`, content-addressed
+  `CanonicalIdentityV1` domain separation/fixed profile/structural collision
+  handling and schema reuse, non-authoritative `HardBoundClaim` with mandatory
+  typed arena handle and bounded shared heterogeneous derivation DAG,
+  content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, bounded core `UnverifiedBoundDerivation` preservation
   across every root/transforming milestone,
@@ -6682,8 +6903,11 @@ Deliverables:
   integrity/authority/transitive-lineage axes,
   snapshot-consistent runtime `ConditionAssessment` versus opaque
   `PolicyAcceptedHardBound`, reserved derivation/assessment-loss propagation
-  through every consensus/control/publication consumer, conservative monotonic
-  upper-edge issuance/read expiry enforcement,
+  through every consensus/control/publication consumer, provider-owned
+  monotonic interval contracts across hosted/PHC/architectural/embedded/browser
+  adapters, conservative upper-edge issuance/read expiry enforcement,
+  linearization-time `observed_at`/`valid_until` authority versus type-distinct
+  reviewed-WCET through-completion capability,
   strict-versus-diagnostic facade behavior,
   process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
@@ -7139,12 +7363,18 @@ Deliverables:
   untrusted-reference/registry-rollback/cache-poisoning campaigns through
   consensus and every external schema/binding, runtime condition
   contradiction/indeterminacy/expiry/withdrawal, stale accepted-bound tokens,
+  canonical-identity cross-type/unit/scale/endpoint/operation/schema confusion,
+  forced digest collisions and schema second-representation drift,
+  derivation-arena exhaustion/eviction/stale/cross-store/wrong-domain handles,
   missing/truncated/over-budget early recipes, narrowed/spliced/substituted
   derivations, serialized-record replay/rollback/cross-engine restore and stale
   input/rule/model/lifecycle reverification, mixed-generation assessment
   issuance, origin/integrity/authority/transitive-basis laundering,
-  assessment-to-publication races, coarse/straddling/latency/rate/completion
-  monotonic upper-edge expiry and suspend/reset/domain failures,
+  assessment-to-publication races, hosted/PHC/architectural/embedded/browser
+  interval containment and missing-bound refusal, coarse/straddling/latency/
+  rate monotonic upper-edge expiry, suspend/reset/domain failures,
+  linearization metadata under delayed caller return, and WCET-capability
+  issue/reload/withdrawal/violation,
   servo/holdover/proposal invalidation, and strict-facade synchronized-label
   refusal,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
@@ -7182,13 +7412,18 @@ Deliverables:
 - single-thread, `target_has_atomic`, caller critical-section, and claimed
   ISR-safe no_std concurrency profiles with priority-inversion,
   interrupt-latency, stack, and WCET evidence;
+- every target's monotonic provider has interval-containment/resolution/
+  latency/rate/suspend/reset/migration evidence or an explicit strict-authority
+  non-claim; through-completion is advertised only where target/profile WCET
+  evidence closes the complete return path;
 - every supported feature combination and published crate package check;
 - documented unsupported privileged capabilities.
 
 Verification:
 
 - CI/cross builds, host tests, no allocator/no_std links, package dry-runs,
-  semver feature checks, and docs.rs configurations.
+  semver feature checks, monotonic interval/capability fixtures, and docs.rs
+  configurations.
 
 Exit criteria:
 
@@ -7265,17 +7500,25 @@ Deliverables:
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
   `HardBoundClaim` non-authority semantics, bounded logical conditions for
   intersection/union/conversion/consensus, unresolved external-reference
-  resolution, early non-authoritative derivation recipes and unverified record
-  restore type-state, verified root/derived claim proofs, runtime assessment
+  resolution, canonical identity preimages/algorithm/structural collision
+  checks/schema reuse, mandatory typed derivation handles and bounded no_std/
+  alloc arena sizing/DAG behavior, early non-authoritative derivation recipes
+  and complete-record export/unverified restore type-state, verified root/
+  derived claim proofs, runtime assessment
   statuses and issuance linearization, structured independent origin/
   integrity/authority/lineage support axes with transitive configured
-  assumptions, policy-accepted-bound lifetime, conservative monotonic
-  upper-edge deadline/domain enforcement, strict versus conditional facade
-  results, incompatibility, and no quantum adjustment;
+  assumptions, policy-accepted-bound lifetime, provider-owned monotonic
+  interval provenance, conservative upper-edge deadline/domain enforcement,
+  linearization-time `observed_at`/`valid_until` versus WCET-backed
+  through-completion contracts, strict versus conditional facade results,
+  incompatibility, and no quantum adjustment;
 - `TimeEstimate` and facade documentation expose condition, assessment,
   verified-derivation identity, atom support basis, evidence/policy
   generations, deadline, reasons, assurance, and non-claims; no trusted boolean
   or cached synchronized label hides missing current acceptance or expiry;
+- platform/provider documentation names each interval measurement strategy,
+  uncertainty provenance, scalar inflation, migration/frequency/suspend/reset
+  behavior, and completion capability/non-claim for every supported target;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

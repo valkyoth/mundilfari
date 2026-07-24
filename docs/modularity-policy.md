@@ -14,11 +14,17 @@ Rules:
   expressions owned by core: intersection uses `All`, union/hull uses `Any`,
   conversion preserves prerequisites, and engine consensus emits reviewed
   threshold/fault predicates rather than conjuncting every source.
+- The core `CanonicalIdentityV1` kernel exclusively defines domain-separated
+  claim/recipe/condition/model/origin preimages and fixed identity hashing;
+  schema wraps it, crypto providers may reproduce it, and neither may create a
+  second identity representation or algorithm.
 - Core hard-claim constructors and transformations own bounded, acyclic,
-  non-authoritative `UnverifiedBoundDerivation` recipes; every interval, era,
-  fraction, scale, civil, uncertainty, and observation layer preserves the
-  exact inputs/outputs/operation/rounding/model/condition/origin needed by the
-  later engine verifier.
+  non-authoritative `UnverifiedBoundDerivation` recipes. Every hard claim has a
+  mandatory typed arena handle; no_std caller-owned and fallible bounded alloc
+  arenas own canonical heterogeneous DAG nodes. Every interval, era, fraction,
+  scale, civil, uncertainty, and observation layer preserves the exact inputs/
+  outputs/operation/rounding/model/condition/origin needed by the later engine
+  verifier.
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
@@ -35,6 +41,9 @@ Rules:
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
+- Platform clock traits own `read_interval()` and capability provenance;
+  hosted, PHC, architectural, browser, and embedded implementations inflate
+  scalar counters conservatively or report strict authority unavailable.
 - `mundilfari-platform` remains safe; necessary unsafe/FFI lives only in small
   OS-family or device-specific `mundilfari-platform-*-sys` crates.
 - Clock discipline uses a separate authorization boundary and a minimal
@@ -59,9 +68,10 @@ Rules:
   diagnostic APIs expose the conditional claim, condition, assessment,
   verified-derivation status, per-atom support basis, deadline, reasons,
   assurance, and non-claims without a trusted boolean. Strict virtual-clock
-  reads enforce the exact monotonic-domain deadline using the conservative
-  upper edge of a bounded resolution/latency/rate/completion interval even
-  without a writer.
+  reads enforce the exact monotonic-domain deadline using conservative
+  intervals even without a writer. Linearization-time results expose
+  `observed_at`/`valid_until`; type-distinct through-completion results require
+  current reviewed WCET capability.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
 - Leap-candidate structure and pure validation live in core; generic evidence

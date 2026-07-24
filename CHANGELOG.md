@@ -110,16 +110,22 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   a trusted boolean.
 - Strengthened `v0.60.1` so policy acceptance additionally requires an
   engine-verified exact claim derivation, atom assessments preserve structured
-  support basis, and
-  assessment plus optional acceptance are issued from one generation-consistent
-  transaction. Strengthened `v0.137.0`–`v0.137.1` so strict reads enforce the
-  exact monotonic-domain deadline even without a writer or timer.
+  support basis, and assessment plus optional acceptance are issued from one
+  generation-consistent transaction. Strengthened `v0.137.0`–`v0.137.1` so
+  strict reads enforce the exact monotonic-domain deadline even without a
+  writer or timer.
 - Moved derivation-material preservation forward across `v0.7.1`–`v0.15.0`
   with bounded non-authoritative recipes and explicit unverified serialized/
   persisted type-state. Refined support basis into independent origin,
   integrity, authority, and transitive-lineage axes, and made `v0.60.1`/
   `v0.137.x` deadline decisions use conservative monotonic-read upper edges
-  including resolution, latency, rate uncertainty, and completion margin.
+  including resolution, latency, and rate uncertainty.
+- Added `v0.6.1` for one domain-separated canonical identity profile; made
+  `HardBoundClaim` recipe attachment enforceable through typed generation-bound
+  handles and bounded caller-owned/fallible arenas; assigned interval-producing
+  clock contracts to `v0.24.0`, hosted/PHC/counter/embedded/browser adapters;
+  and separated default linearization-time `observed_at`/`valid_until` results
+  from optional reviewed-WCET through-completion authority.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

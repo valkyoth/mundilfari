@@ -131,7 +131,15 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   integrity, authority, and direct/derived-lineage axes; derived results retain
   their complete bounded transitive bases. Deadline issuance and strict reads
   sample after evaluator work and compare conservative monotonic upper edges
-  including resolution, latency, rate uncertainty, and completion margin.
+  including resolution, latency, and rate uncertainty.
+- `v0.6.1` now defines one domain-separated canonical identity profile before
+  claims exist. `HardBoundClaim` carries a mandatory typed handle into bounded
+  caller-owned or fallible derivation arenas, with canonical shared DAGs and
+  complete-record serialization rather than detachable tuples or local handles.
+- `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
+  own conservative `read_interval()` production. Default strict reads report
+  linearization-time `observed_at`/`valid_until`; a type-distinct
+  through-completion result exists only with reviewed current WCET capability.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

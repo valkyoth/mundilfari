@@ -352,6 +352,16 @@ conversion adds model/rounding through `All`, and consensus emits the reviewed
 Simplification is sound-rule-only and all expression/evaluation work is
 bounded.
 
+Before claims exist, a `v0.6.1` allocation-free canonical identity kernel
+domain-separates claim, recipe, condition, model, and origin preimages and binds
+exact type/domain, units, scale, normalized sign/value, endpoint inclusion,
+operation, condition, and schema generation. `IdentityDigestV1` uses the fixed
+reviewed SHA-256 profile for public content addressing, but equality/interning
+also compares canonical structure and treats collisions as typed conflicts.
+Rust hash/layout/serde/debug representations are forbidden identity inputs;
+the later schema wraps this encoding and generic crypto providers cannot mutate
+existing identities.
+
 Every root hard claim and every claim-transforming interval, era, fraction,
 scale, UTC/POSIX/smear, uncertainty, or observation operation automatically
 produces or composes a core-owned `UnverifiedBoundDerivation<T>`. This bounded,
@@ -360,6 +370,15 @@ digests, origin/observation identity, operation, rounding, model generations,
 condition, and rewrites under independent depth/node/fan-out/storage/work
 limits. It is verification material, never proof or authority, and cannot be
 silently detached from a hard claim.
+
+That attachment is enforced structurally: `HardBoundClaim<T>` contains a
+private typed `DerivationHandle<T>` bound to an arena identity and generation.
+no_std callers supply fixed slots/buffers; alloc users select fallible bounded
+arenas. Canonically interned heterogeneous DAG nodes share common inputs, tag
+every input/output domain, rotate generations on eviction, and reject stale,
+foreign, or wrong-domain handles. Geometry-only intervals remain useful but
+cannot enter verification or acceptance. Serialization exports the complete
+bounded DAG, never a process-local handle.
 
 External decoding yields only unresolved references/conditions. Exact digest
 algorithm, namespace, canonical content, schema/rule/registry generation,
@@ -396,8 +415,10 @@ provider/assessor/rule/evidence/policy generation vector, evaluates callbacks
 without locks, and atomically rechecks the vector before minting the assessment
 and any accepted token at one linearization point. It resamples a conservative
 monotonic read interval there and refuses current issuance when its upper edge,
-including resolution/latency/rate uncertainty and completion margin, reaches
-the deadline. Change causes a bounded retry or indeterminate result.
+including resolution/latency/rate uncertainty and any reviewed internal margin
+needed to reach that linearization point, reaches the deadline. This does not
+claim authority through caller return. Change causes a bounded retry or
+indeterminate result.
 
 Only a verified derivation and current snapshot-consistent supported assessment
 accepted by policy can produce an opaque `PolicyAcceptedHardBound`; the
@@ -518,15 +539,26 @@ machine-instance generation, namespace, and clock generation. Deadlines,
 elapsed intervals, correlations, helper expiries, and persisted bootstrap
 anchors from different identities cannot be combined.
 
+The platform-neutral clock trait owns `read_interval()`: every implementation
+returns earliest/latest, exact domain, resolution, measurement method,
+latency/rate-uncertainty provenance, and generation or reports strict authority
+unavailable. Scalar hosted, PHC, architectural, browser, and embedded counters
+are conservatively inflated rather than mapped to singleton intervals.
+Hosted platforms normally provide linearization-time capability; a separate
+through-completion capability exists only with reviewed WCET evidence.
+
 Strict virtual-clock reads enforce accepted-bound expiry themselves: each read
 uses a bounded monotonic read interval from the deadline's exact domain and
-compares its conservative upper edge, including resolution, sampling/return
-latency, rate uncertainty, and completion margin. It refuses synchronized
-authority when that edge reaches the deadline even if no writer or timer has
-run. Suspend-inclusive time or reliable resume invalidation is mandatory;
-an unbounded read/return interval, read failure, pause without invalidation,
-reset, domain change, or incomparable identity fails closed to an expired/
-diagnostic result.
+compares its conservative upper edge. The default `TrustedClock::now()` returns
+linearization-time authority with explicit `observed_at` and `valid_until`;
+ordinary scheduler delay is not mislabeled as bounded. A distinct
+`now_through_completion()` adds a current reviewed WCET margin and is
+unavailable on general-purpose runtimes that cannot prove one. It refuses
+synchronized authority when the required edge reaches the deadline even if no
+writer or timer has run. Suspend-inclusive time or reliable resume invalidation
+is mandatory; an unbounded measurement interval, read failure, pause without
+invalidation, reset, domain change, or incomparable identity fails closed to an
+expired/diagnostic result.
 
 Fork, VM snapshot/restore, and container checkpoint/restore are generic
 execution-lifecycle discontinuities. They rotate affected process/machine
@@ -1059,7 +1091,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, verified claim derivation, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.15.1`, schema/persistence `v0.22.1`, `v0.39.1`, engine `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.140.1` |
+| Canonical structural identity, handle/arena-backed bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, verified claim derivation, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes `v0.7.1`–`v0.15.1`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers `v0.133.0`–`v0.140.1` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
@@ -1073,7 +1105,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Conservative monotonic-read intervals, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`, consumers `v0.60.1`, `v0.137.0`–`v0.145.0` |
+| Conservative provider-owned monotonic-read intervals, linearization-time versus WCET-backed completion authority, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

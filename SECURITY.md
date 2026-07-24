@@ -62,10 +62,19 @@ the release branch between review and tagging.
   threshold/fault predicate for consensus; simplification cannot silently
   strengthen or weaken it. External identifiers remain unresolved until exact
   canonical content or a trusted immutable registry generation is verified.
+  Claim/recipe/condition/model/origin identities use one early domain-separated
+  canonical preimage and fixed versioned identity-digest profile; exact type,
+  units, scale, normalization, endpoint inclusion, operation, condition, and
+  schema generation are bound. Structural comparison follows digest match,
+  collisions fail typed, and Rust hash/layout/serde/debug output is forbidden.
   Every root and transforming hard-claim operation preserves a bounded,
   acyclic, non-authoritative `UnverifiedBoundDerivation` with exact endpoints,
   inputs, operation, rounding, models, condition, and origin/observation
-  identity; absence or truncation prevents later acceptance.
+  identity; absence or truncation prevents later acceptance. A hard claim
+  contains a mandatory typed handle into a bounded generation-checked arena;
+  stale/evicted/foreign/wrong-domain handles and geometry-only intervals cannot
+  enter verification, and serialization exports the complete DAG rather than
+  the process-local handle.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,
@@ -84,7 +93,9 @@ the release branch between review and tagging.
   is minted with its assessment at the same engine linearization point. A fresh
   bounded monotonic interval is sampled there after evaluator work; its
   conservative upper edge, including resolution, latency, rate uncertainty,
-  and completion margin, must remain before the deadline.
+  and only a reviewed margin for internal work remaining before that
+  linearization point, must remain before the deadline. This is not
+  caller-return authority.
 - Derivation or condition-assessment loss invalidates consensus, leap decisions,
   servo/estimator/holdover state, discipline proposals, synchronized
   publication, and strict facade results through reserved lifecycle/generation
@@ -163,12 +174,17 @@ the release branch between review and tagging.
   fresh evidence.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
-- Every strict clock read compares the conservative upper edge of a bounded
-  interval from the accepted deadline's exact monotonic domain, including
-  resolution, sample/return latency, rate uncertainty, and completion margin.
-  A straddling/unbounded interval, idle expiry without a writer, monotonic
-  failure/reset/domain mismatch, or suspend without inclusive time or reliable
-  resume invalidation fails closed to diagnostics.
+- Every platform monotonic provider returns a conservative interval with exact
+  domain, resolution, measurement method, latency/rate-uncertainty provenance,
+  and generation or reports strict authority unavailable; scalar counters are
+  never silently singleton intervals.
+- Default strict clock reads return linearization-time authority with explicit
+  `observed_at` and `valid_until`. A distinct through-completion result requires
+  current reviewed WCET capability and adds that margin; ordinary hosted
+  scheduling latency is never claimed bounded. A straddling/unbounded
+  measurement, idle expiry without a writer, monotonic failure/reset/domain
+  mismatch, or suspend without inclusive time or reliable resume invalidation
+  fails closed to diagnostics.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/
   commit transaction and make no concurrent-reader claim; later publication
   accepts only opaque admitted leap, EOP, and scale-offset forms and exposes
