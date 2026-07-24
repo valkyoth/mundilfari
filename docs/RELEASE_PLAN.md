@@ -202,16 +202,24 @@ Deliverables:
 - manifest/metadata-driven dependency-layer, feature-authority, unsafe, and
   500-line validators that automatically cover future workspace crates;
 - protocol claim, accuracy claim, and conformance claim checks;
+- fail-closed per-source implementation evidence: reviewed implementation
+  hashes, governing documents, requirement locators, exact normative
+  hashes/clauses/errata for protocol work, and concrete tests linked from
+  every requirement;
 - security-review templates for standards and dependencies.
 
 Verification:
 
 - policy validator unit fixtures covering every accepted and rejected case;
+- mutation tests for unregistered implementation files, missing requirements,
+  unknown or changed standards, unreviewed clauses/errata, nonexistent tests,
+  and requirements without linked tests;
 - deliberate layer, file-size, feature, and unsafe violations fail closed.
 
 Exit criteria:
 
-- policy drift is detected locally before protocol implementation begins;
+- no published implementation source can enter the workspace without
+  requirement/specification review and linked test evidence;
 - `v0.3.0 implementation stop reached. Run pentest for this exact commit.`
 
 ## Phase 1: Exact Time Foundations
@@ -4129,6 +4137,9 @@ Deliverables:
 - live RFC Editor errata comparison and official-publisher revision refresh;
 - RFC source/checksum reconciliation and local-vault inventory/lock review;
 - recursive normative-reference closure with no unclassified dependency;
+- complete implementation-evidence coverage with every production source,
+  requirement, clause/erratum disposition, and test link independently
+  reviewed;
 - exact-document expansion of every remaining family/bundle record, including
   current amendments, corrigenda, interpretations, profiles, and registries;
 - refreshed non-WG proposal watchlist with explicit admitted, monitored, or

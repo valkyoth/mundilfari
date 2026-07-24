@@ -24,6 +24,15 @@ Before opening a pull request, run:
 scripts/checks.sh
 ```
 
+Any new or changed production source must update
+`compliance/IMPLEMENTATION_EVIDENCE.json`. Link every governing requirement to
+concrete tests. Protocol, profile, format, and protocol-integration code must
+also record exact reviewed source identifiers, SHA-256 values, clauses, and
+errata dispositions. The common gate rejects an unregistered source file or a
+requirement without a real test function. Any production-source edit changes
+its reviewed implementation hash and requires the evidence review to be
+performed again.
+
 ## Security-Sensitive Changes
 
 Treat these areas as high risk:

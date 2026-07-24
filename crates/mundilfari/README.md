@@ -114,6 +114,7 @@ Legend: 🟢 available for the stated scope, 🟡 foundation only, 🔴 planned.
 | Rust compatibility | 🟢 Policy active | MSRV `1.90.0`; development pinned to stable `1.97.1` |
 | Security and release controls | 🟢 Available | CI, dependency policy, release metadata, pentest handoff, SBOM tooling |
 | Standards source baseline | 🟢 Available | 67 checksum-locked RFCs; 52 external-source records; restricted bytes remain local-only |
+| Implementation evidence gate | 🟢 Available | Every production source maps governing requirements to concrete tests; protocol work also pins exact sources, clauses, and errata |
 | Time model | 🟡 Foundation only | Module and crate boundaries are reserved; semantics begin after `v0.1.0` |
 | Navheim GNSS integration | 🔴 Blocked on upstream plan | One optional companion crate after Navheim's stable timing release |
 | Protocol codecs and clients | 🔴 Planned | Implemented in small versions recorded in the release plan |
@@ -246,6 +247,7 @@ scripts/generate-sbom.sh --check
 - [Implementation Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/RELEASE_PLAN.md)
 - [Requirements Traceability](https://github.com/valkyoth/mundilfari/blob/main/docs/REQUIREMENTS_TRACEABILITY.md)
+- [Implementation Evidence Gate](https://github.com/valkyoth/mundilfari/blob/main/compliance/README.md)
 - [Protocol Registry](https://github.com/valkyoth/mundilfari/blob/main/docs/PROTOCOLS.md)
 - [Standards Provenance](https://github.com/valkyoth/mundilfari/blob/main/docs/STANDARDS.md)
 - [RFC Reference Corpus](https://github.com/valkyoth/mundilfari/blob/main/rfc/README.md)

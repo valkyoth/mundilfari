@@ -58,6 +58,9 @@ the release branch between review and tagging.
 - Delay attacks remain in scope even when a protocol is authenticated.
 - Official specifications, revisions, and verified errata precede protocol
   claims.
+- Every production source hash, governing requirement, and concrete test is
+  registered in the implementation-evidence gate; protocol work additionally
+  pins exact normative hashes, clauses, and errata dispositions.
 - Precision claims require end-to-end hardware and measurement evidence.
 
 ## Dependency Policy

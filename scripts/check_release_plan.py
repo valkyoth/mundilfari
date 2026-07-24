@@ -14,6 +14,7 @@ HARDENING_PHASE = "## Phase 13: Final Conformance Hardening And Production Admis
 NAVHEIM_VERSIONS = [f"v0.{minor}.0" for minor in range(149, 158)]
 REVIEW_COVERAGE = {
     "v0.2.0": ("transitive normative", "WireComplete"),
+    "v0.3.0": ("per-source implementation evidence",),
     "v0.7.0": ("mathematical floor",),
     "v0.11.0": ("ConversionContext",),
     "v0.30.0": ("compiled, available, authorized",),

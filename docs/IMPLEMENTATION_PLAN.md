@@ -597,6 +597,23 @@ the exact source hash before code is accepted. `identifier-review`,
 `revision-review`, missing manual acquisitions, and RFC 1119's text-only
 catalog notice are hard milestone blockers.
 
+The binding is enforced for every production Rust source file by
+`compliance/IMPLEMENTATION_EVIDENCE.json`. A source file cannot enter a
+published crate until it has exactly one implementation-unit record and the
+record pins the reviewed implementation file's SHA-256. Every record names its
+governing requirements and locators, and every requirement links to one or
+more concrete tests whose functions exist. Protocol, format, and integration
+units additionally name exact RFC/external-source identifiers, reviewed
+SHA-256 values, clauses, errata dispositions, and the requirements they
+govern. The offline common gate rejects missing or changed implementation
+files, unknown sources, changed public hashes, unlinked requirements, and
+missing tests.
+
+This mechanical gate proves traceability, not correctness. Reviewers must
+still compare behavior to every applicable normative clause, assess test
+adequacy, run negative/property/fuzz/simulation/interoperability/conformance
+work appropriate to the milestone, and complete its exact-commit pentest.
+
 Drafts use revision-specific experimental features and namespaces. A final RFC
 or standard becomes a distinct revision; stored draft packets are never
 reinterpreted silently.
@@ -605,6 +622,8 @@ reinterpreted silently.
 
 Every implemented unit has positive, boundary, malformed, state, replay,
 timeout, rollover, leap, resource, round-trip, and regression tests.
+Applicable cases are recorded as requirement-linked test evidence; an omitted
+category needs an explicit inapplicability rationale in the milestone review.
 
 Protocol completion additionally requires:
 
@@ -669,6 +688,7 @@ its broader pre-1.0 completeness contract:
 | Type-state, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability truth and safe/sys platform split | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
+| Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
 | NTS assurance, pool key establishment, and secret lifecycle | `v0.72.0`–`v0.81.0` |

@@ -39,6 +39,7 @@ not a substitute for the detailed implementation or release plans.
 | --- | --- | --- |
 | security paramount from the first commit | threat model, unsafe/secret/dependency policy, deny/audit/SBOM gates | per-version pentest plus `v0.158.0`–`v0.167.0` |
 | every behavior testable | deterministic polling, bounded providers, fixtures, simulation, fuzz and hardware plan | owning milestone plus final closure |
+| implementation cannot bypass document/test review | reviewed implementation hash plus machine-readable requirement, exact-standard, clause, errata, and test linkage | `v0.3.0`; every common gate |
 | exact-commit pentest before every tag | release-plan exit sentences and readiness validator | every tag |
 | GitHub CodeQL default setup only | documented repository setting; no advanced workflow | every release review |
 | no unsafe in safe crates | workspace lint and unsafe inventory policy | `v0.161.0` |

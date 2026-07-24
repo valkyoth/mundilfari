@@ -27,6 +27,9 @@ Rules:
 - Stable crates do not expose experimental-draft types.
 - Non-generated Rust files may not exceed 500 lines.
 - Review for a split begins near 300 lines.
+- Every production Rust source file in a published crate has exactly one
+  machine-checked implementation-evidence record with governing requirements
+  and linked tests.
 - Feature flags do not silently enable networking, insecure legacy behavior,
   a runtime, privileged operations, or system-clock modification.
 - Capability APIs distinguish code compiled, resource available, caller

@@ -8,6 +8,10 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ### Changed
 
+- Added a fail-closed implementation-evidence gate: every production Rust
+  source maps governing requirements to concrete tests, while protocol work
+  must additionally pin exact registered documents, hashes, clauses, and
+  errata dispositions.
 - Added a Gjallarbru-style, checksum-locked corpus of 67 RFC Editor documents
   with reviewed roles, roadmap assignments, offline integrity gates, explicit
   trust-pin updates, text-normalization protection, and CODEOWNERS coverage.

@@ -68,6 +68,12 @@ acquisition block their implementation milestone until the exact legitimate
 source is present and reviewed. Missing licensed documents are a planned
 blocker, not permission to guess.
 
+Every production implementation file is also covered by the offline
+`compliance/IMPLEMENTATION_EVIDENCE.json` gate. Protocol/format/integration
+entries must identify the exact registered sources, reviewed hashes, clauses,
+errata dispositions, governing requirements, and concrete linked tests.
+Adding code without that evidence fails the common repository check.
+
 ## Drafts
 
 Active drafts are revision-pinned behind experimental features. A new draft

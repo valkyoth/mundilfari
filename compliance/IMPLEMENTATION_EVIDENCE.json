@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "reviewed_at": "2026-07-24",
+  "units": [
+    {
+      "id": "core-repository-foundation",
+      "source": "crates/mundilfari-core/src/lib.rs",
+      "source_sha256": "0cb6e6027236c7861079717eb91f73a75e031047ae1c3992c88291858d1cc745",
+      "kind": "foundation",
+      "milestone": "v0.1.0",
+      "requirements": [
+        {
+          "id": "core-capability",
+          "document": "docs/IMPLEMENTATION_PLAN.md",
+          "locator": "3.1 Shared crates",
+          "tests": ["core-reports-foundation"]
+        }
+      ],
+      "source_documents": [],
+      "tests": [
+        {
+          "id": "core-reports-foundation",
+          "file": "crates/mundilfari-core/src/lib.rs",
+          "name": "reports_repository_foundation",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "id": "engine-repository-foundation",
+      "source": "crates/mundilfari-engine/src/lib.rs",
+      "source_sha256": "e083b581c93351d0692957d43f0d0a52f5a875711e11d248c589baca0531e4db",
+      "kind": "foundation",
+      "milestone": "v0.1.0",
+      "requirements": [
+        {
+          "id": "engine-capability",
+          "document": "docs/IMPLEMENTATION_PLAN.md",
+          "locator": "3.1 Shared crates",
+          "tests": ["engine-reports-foundation"]
+        }
+      ],
+      "source_documents": [],
+      "tests": [
+        {
+          "id": "engine-reports-foundation",
+          "file": "crates/mundilfari-engine/src/lib.rs",
+          "name": "reports_repository_foundation",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "id": "platform-repository-foundation",
+      "source": "crates/mundilfari-platform/src/lib.rs",
+      "source_sha256": "dc4a0be61a30a23e949f2d3b0c2067db1fe9ac769d2495a9e16ebf898a2134d0",
+      "kind": "foundation",
+      "milestone": "v0.1.0",
+      "requirements": [
+        {
+          "id": "platform-capability",
+          "document": "docs/IMPLEMENTATION_PLAN.md",
+          "locator": "3.1 Shared crates",
+          "tests": ["platform-reports-foundation"]
+        }
+      ],
+      "source_documents": [],
+      "tests": [
+        {
+          "id": "platform-reports-foundation",
+          "file": "crates/mundilfari-platform/src/lib.rs",
+          "name": "reports_repository_foundation",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "id": "facade-repository-foundation",
+      "source": "crates/mundilfari/src/lib.rs",
+      "source_sha256": "9a23e26308094482495f21934217187f5139581acaa9ec865067837a0b06143f",
+      "kind": "foundation",
+      "milestone": "v0.1.0",
+      "requirements": [
+        {
+          "id": "facade-connects-foundation",
+          "document": "docs/IMPLEMENTATION_PLAN.md",
+          "locator": "3.1 Shared crates",
+          "tests": ["facade-connects-foundation"]
+        }
+      ],
+      "source_documents": [],
+      "tests": [
+        {
+          "id": "facade-connects-foundation",
+          "file": "crates/mundilfari/src/lib.rs",
+          "name": "all_foundation_crates_are_connected",
+          "kind": "unit"
+        }
+      ]
+    }
+  ]
+}

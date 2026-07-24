@@ -53,6 +53,9 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   privilege separation, and signed reproducible release evidence.
 - `no_std`, dependency layering, 500-line, unsafe, standards, supply-chain,
   threat-model, and secret-handling policies.
+- Machine-enforced implementation evidence covering every production source,
+  its governing requirements, concrete linked tests, and exact
+  source/hash/clause/errata review for protocol work.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, pull request, and manual
   release metadata.
 - Release script, exact-commit pentest handoff, latest tool checks, package
