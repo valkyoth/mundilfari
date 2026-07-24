@@ -3,7 +3,7 @@ set -eu
 
 missing=0
 for file in README.md CHANGELOG.md SECURITY.md docs/*.md release-notes/*.md \
-    security/pentest/*.md crates/*/README.md; do
+    security/pentest/*.md crates/*/README.md rfc/*.md standards/*.md; do
     [ -f "$file" ] || continue
     sed -n 's/.*](\([^)]*\.md\)).*/\1/p' "$file" | while IFS= read -r link; do
         case "$link" in

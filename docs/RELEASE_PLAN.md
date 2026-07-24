@@ -122,6 +122,8 @@ Deliverables:
   release tooling;
 - implementation, protocol, standards, threat, modularity, unsafe, toolchain,
   supply-chain, release-note, and pentest documentation;
+- checksum-locked RFC source corpus, external-source registry, and ignored
+  local-only standards vault with offline validation;
 - Linux, Windows, BSD, macOS, Android, iOS, and future Aesynx architecture.
 
 Verification:
@@ -145,6 +147,10 @@ Goal: make protocol completeness and standards provenance machine-auditable.
 Deliverables:
 
 - versioned protocol, standard, errata, license, and document-hash registries;
+- promote the `v0.1.0` RFC and external-source acquisition baseline into
+  clause-level requirement and errata disposition ledgers;
+- retain exact RFC Editor bytes in `rfc/`, keep every non-RFC document byte in
+  ignored `standards/private/`, and prohibit network access from normal gates;
 - status classes for stable, historic, draft, licensed, partial, and
   unavailable specifications;
 - schema validation and duplicate identifier/revision rejection;
@@ -153,11 +159,16 @@ Deliverables:
 Verification:
 
 - registry round trips, malformed schema corpus, duplicate/conflict tests, and
-  comparison with `PROTOCOLS.md`.
+  comparison with `PROTOCOLS.md`;
+- corrupt/missing/extra RFC files, unauthorized URLs, checksum changes,
+  duplicate roles, unassigned milestones, local-vault tracking attempts, and
+  restricted-document publication tests.
 
 Exit criteria:
 
 - every initial registry entry has a status and roadmap assignment;
+- every source needed through the next implementation pass has an exact
+  legitimate artifact, reviewed errata state, and clause dispositions;
 - `v0.2.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.3.0 - Security And Engineering Policy
@@ -1395,7 +1406,7 @@ Goal: implement updated extension-field and legacy MAC framing.
 
 Deliverables:
 
-- applicable RFC 7821/7822/8573 registry and update behavior;
+- applicable RFC 7821/7822/8573 and RFC 9748 registry/update behavior;
 - unknown extension preservation and criticality;
 - ambiguity resolution between extensions and legacy MACs.
 
@@ -1628,7 +1639,7 @@ Goal: implement bounded NTP control and management mappings.
 
 Deliverables:
 
-- RFC 9327 mode 6 codec/state and applicable MIB/YANG mappings;
+- RFC 9327 mode 6 codec/state, RFC 5907 MIB, and RFC 9249 YANG mappings;
 - authentication/authorization boundary and remote-disabled default;
 - response fragmentation and work limits.
 
@@ -1716,6 +1727,8 @@ Goal: implement exact pinned NTPv5 and NTP-over-PTP drafts experimentally.
 
 Deliverables:
 
+- `draft-ietf-ntp-ntpv5-08` and `draft-ietf-ntp-over-ptp-08` exact source
+  hashes, with a final-RFC migration check immediately before implementation;
 - revision-named codecs/state, feature gates, and wire identity;
 - client/server scope only where the exact draft defines it;
 - no stable type leakage or automatic negotiation.
@@ -1839,6 +1852,7 @@ Deliverables:
 
 - client/server adapter behind `std` and `rustls` features;
 - application-provided crypto provider and trust configuration;
+- RFC 9325 deployment policy and RFC 9525 service-identity verification;
 - certificate-time bootstrap policy without disabling validity checks.
 
 Verification:
@@ -1929,6 +1943,8 @@ Goal: implement the exact pinned Roughtime protocol revision.
 
 Deliverables:
 
+- `draft-ietf-ntp-roughtime-19` exact source hash and final-RFC migration
+  check immediately before implementation;
 - request/server codecs, nonce linkage, Merkle path, delegation, signature,
   midpoint/radius interval, and chain evidence;
 - provider-backed signatures and pinned server identities;
@@ -2428,7 +2444,7 @@ Goal: implement PTP signaling, management, and management mappings.
 Deliverables:
 
 - complete accessible actions/TLVs, target identities, errors, and response;
-- bounded management datasets and YANG mapping;
+- bounded management datasets and RFC 8575 YANG mapping;
 - remote mutation authorization disabled by default.
 
 Verification:
@@ -3101,7 +3117,8 @@ Goal: implement timestamped-data bindings, COSE headers, and applicable ETSI pro
 
 Deliverables:
 
-- binding/coverage semantics, protected/unprotected header policy, token chains;
+- RFC 5544 timestamped-data and RFC 9921 COSE/RFC 3161 binding semantics;
+- protected/unprotected header policy and token chains using RFC 9052/9053;
 - exact licensed ETSI scope and algorithm policy;
 - unknown critical field handling.
 
@@ -3992,6 +4009,8 @@ Deliverables:
 
 - final pre-1.0 protocol registry audit;
 - draft-to-final migrations or revision pins;
+- live RFC Editor errata comparison and official-publisher revision refresh;
+- RFC source/checksum reconciliation and local-vault inventory/lock review;
 - all accessible stable entries complete and blocked entries justified.
 
 Verification:

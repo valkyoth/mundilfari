@@ -12,7 +12,10 @@ for file in \
     docs/NAVHEIM_INTEGRATION.md \
     docs/STANDARDS.md docs/threat-model.md docs/toolchain-policy.md \
     docs/modularity-policy.md docs/unsafe-policy.md \
-    docs/supply-chain-security.md docs/github-security-settings.md; do
+    docs/supply-chain-security.md docs/github-security-settings.md \
+    rfc/README.md rfc/SOURCES rfc/SHA256SUMS \
+    standards/README.md standards/SOURCES.json \
+    standards/PUBLIC_SHA256SUMS; do
     test -f "$file"
 done
 
@@ -21,6 +24,10 @@ for script in \
     scripts/check_portable_targets.sh \
     scripts/test-check-latest-tools.sh scripts/check_doc_links.sh \
     scripts/check_shell_syntax.sh scripts/generate-sbom.sh \
+    scripts/fetch-rfcs.sh scripts/lock-rfcs.sh scripts/verify-rfcs.sh \
+    scripts/test-rfc-sources.py scripts/fetch-standard-sources.py \
+    scripts/lock-standard-sources.py scripts/verify-standard-sources.py \
+    scripts/test-standard-sources.py \
     scripts/validate-modularity-policy.sh scripts/validate-security-policy.sh \
     scripts/validate-release-readiness.sh scripts/release_0_1_gate.sh \
     scripts/release_crates.py scripts/test-release-crates.py; do

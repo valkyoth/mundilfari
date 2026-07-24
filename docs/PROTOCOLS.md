@@ -8,6 +8,11 @@ This registry defines the 1.0 completeness claim. Entries are implemented only
 from official, legitimately accessible specifications and verified errata.
 Licensed text is not redistributed without permission.
 
+The corresponding acquisition and review assignments are machine-checked in
+[`rfc/SOURCES`](../rfc/SOURCES) and
+[`standards/SOURCES.json`](../standards/SOURCES.json). RFC bytes are tracked
+unchanged; every non-RFC document byte remains in the ignored local vault.
+
 ## Status Vocabulary
 
 | Status | Meaning |
@@ -40,13 +45,13 @@ level to the machine-readable registry introduced by the release plan.
 | `mundilfari-ms-sntp` | Microsoft SNTP extensions | `PlannedStable` |
 | `mundilfari-xmpp-time` | XMPP Entity Time | `PlannedStable` |
 | `mundilfari-ntp-discovery` | DHCP and configured NTP discovery | `PlannedStable` |
-| `mundilfari-ntp-management` | NTP MIB/YANG management mappings | `PlannedStable` |
+| `mundilfari-ntp-management` | RFC 5907 MIB, RFC 9249 YANG, and RFC 9327 historic control | `PlannedStable` |
 
 ## NTP Family
 
 | Crate/family | Standard or protocol | Status |
 | --- | --- | --- |
-| `mundilfari-ntp-wire` | shared NTP headers and extension fields | `PlannedStable` |
+| `mundilfari-ntp-wire` | shared NTP headers, extension fields, and RFC 9748 registry updates | `PlannedStable` |
 | `mundilfari-ntp-legacy` | NTPv0-v3 compatibility | `PlannedHistorical` |
 | `mundilfari-sntp` | historical/current SNTP behavior | `PlannedStable` |
 | `mundilfari-ntp` | full NTPv4 client/server/association engine | `PlannedStable` |
@@ -54,21 +59,22 @@ level to the machine-readable registry introduced by the release plan.
 | `mundilfari-ntp-autokey` | Autokey inspection/compatibility | `PlannedHistorical` |
 | `mundilfari-ntp-khronos` | RFC 9523 Khronos | `PlannedStable` |
 | `mundilfari-nts` | RFC 8915 Network Time Security | `PlannedStable` |
-| `mundilfari-ntpv5` | exact active NTPv5 draft | `ExperimentalPinned` |
-| `mundilfari-ntp-over-ptp` | exact IETF draft | `ExperimentalPinned` |
-| `mundilfari-nts4ptp` | exact NTS-for-PTP draft | `ExperimentalPinned` |
+| `mundilfari-ntpv5` | `draft-ietf-ntp-ntpv5-08` | `ExperimentalPinned` |
+| `mundilfari-ntp-over-ptp` | `draft-ietf-ntp-over-ptp-08` | `ExperimentalPinned` |
+| `mundilfari-nts4ptp` | `draft-ietf-ntp-nts-for-ptp-03` | `ExperimentalPinned` |
+| monitored only | `draft-ietf-ntp-nts-keyexchange-pool-00` | `ExperimentalPinned` |
 
 ## Secure Time And Timestamp Evidence
 
 | Crate/family | Standard or protocol | Status |
 | --- | --- | --- |
-| `mundilfari-roughtime` | exact IETF Roughtime revision/final RFC | `ExperimentalPinned` |
+| `mundilfari-roughtime` | `draft-ietf-ntp-roughtime-19` pending final RFC | `ExperimentalPinned` |
 | `mundilfari-rfc3161` | RFC 3161 Time-Stamp Protocol | `PlannedStable` |
 | `mundilfari-rfc5816` | RFC 5816 update | `PlannedStable` |
 | `mundilfari-ers` | Evidence Record Syntax | `PlannedStable` |
 | `mundilfari-xmlers` | XML Evidence Record Syntax | `PlannedStable` |
 | `mundilfari-timestamped-data` | timestamped-data binding | `PlannedStable` |
-| `mundilfari-cose-timestamp` | COSE timestamp headers | `PlannedStable` |
+| `mundilfari-cose-timestamp` | RFC 9921 COSE header for RFC 3161 timestamp tokens | `PlannedStable` |
 | `mundilfari-etsi-timestamp` | applicable ETSI profiles | `LicenceRequired` |
 | `mundilfari-x995` | ANSI X9.95 profile | `LicenceRequired` |
 | `mundilfari-authenticode-time` | Authenticode timestamp compatibility | `PlannedStable` |
@@ -85,6 +91,7 @@ for a continuously synchronized local clock.
 | `mundilfari-ptp-v1` | IEEE 1588-2002 | `LicenceRequired` |
 | `mundilfari-ptp` | IEEE 1588-2008/2019 | `LicenceRequired` |
 | `mundilfari-gptp` | IEEE 802.1AS-2011/2020 | `LicenceRequired` |
+| `mundilfari-ptp-management` | IEEE management plus RFC 8575 YANG mapping | `LicenceRequired` |
 | `mundilfari-ptp-enterprise` | IETF Enterprise Profile | `PlannedStable` |
 | `mundilfari-ptp-telecom` | ITU-T G.8265.1/G.8275.1/G.8275.2 | `LicenceRequired` |
 | `mundilfari-ptp-power` | IEEE C37.238, IEC/IEEE 61850-9-3 | `LicenceRequired` |

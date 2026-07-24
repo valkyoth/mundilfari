@@ -113,6 +113,7 @@ Legend: 🟢 available for the stated scope, 🟡 foundation only, 🔴 planned.
 | `no_std` default graph | 🟢 Available | No default external runtime dependencies |
 | Rust compatibility | 🟢 Policy active | MSRV `1.90.0`; development pinned to stable `1.97.1` |
 | Security and release controls | 🟢 Available | CI, dependency policy, release metadata, pentest handoff, SBOM tooling |
+| Standards source baseline | 🟢 Available | 67 checksum-locked RFCs; 52 external-source records; restricted bytes remain local-only |
 | Time model | 🟡 Foundation only | Module and crate boundaries are reserved; semantics begin after `v0.1.0` |
 | Navheim GNSS integration | 🔴 Blocked on upstream plan | One optional companion crate after Navheim's stable timing release |
 | Protocol codecs and clients | 🔴 Planned | Implemented in small versions recorded in the release plan |
@@ -245,6 +246,9 @@ scripts/generate-sbom.sh --check
 - [Implementation Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/RELEASE_PLAN.md)
 - [Protocol Registry](https://github.com/valkyoth/mundilfari/blob/main/docs/PROTOCOLS.md)
+- [Standards Provenance](https://github.com/valkyoth/mundilfari/blob/main/docs/STANDARDS.md)
+- [RFC Reference Corpus](https://github.com/valkyoth/mundilfari/blob/main/rfc/README.md)
+- [External Standards Registry](https://github.com/valkyoth/mundilfari/blob/main/standards/README.md)
 - [Threat Model](https://github.com/valkyoth/mundilfari/blob/main/docs/threat-model.md)
 - [Navheim Integration Boundary](https://github.com/valkyoth/mundilfari/blob/main/docs/NAVHEIM_INTEGRATION.md)
 - [Crate Version Matrix](https://github.com/valkyoth/mundilfari/blob/main/docs/CRATE_VERSION_MATRIX.md)

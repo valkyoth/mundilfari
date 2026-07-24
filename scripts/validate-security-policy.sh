@@ -15,6 +15,10 @@ test -f docs/threat-model.md
 test -f docs/STANDARDS.md
 test -f docs/PROTOCOLS.md
 test -f docs/NAVHEIM_INTEGRATION.md
+test -s rfc/SHA256SUMS
+test -s standards/SOURCES.json
+git check-ignore -q standards/private/probe.document
+test -z "$(git ls-files standards/private)"
 grep -q 'Navheim determines time from GNSS' docs/NAVHEIM_INTEGRATION.md
 grep -q 'mundilfari-navheim' docs/RELEASE_PLAN.md
 grep -q 'Phase 12: Navheim Integration As Final Feature Work' docs/RELEASE_PLAN.md

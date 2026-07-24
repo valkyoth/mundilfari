@@ -536,6 +536,18 @@ ownership, ordering, and reset invariants.
 
 ## 8. Standards Governance
 
+The repository begins with a checksum-locked source baseline:
+
+- exact RFC Editor bytes, URLs, review roles, and milestone assignments in
+  `rfc/`;
+- public metadata and checksum pins for every non-RFC family in `standards/`;
+- all non-RFC document bytes in ignored `standards/private/`, including public
+  drafts, so uncertain redistribution can never leak to GitHub or crates.io.
+
+The common gate validates both registries and the RFC byte set without network
+access. Fetch commands are explicit maintainer operations, use fixed HTTPS
+allowlists, verify pinned checksums, and never run from builds or tests.
+
 Before implementation, every protocol records:
 
 - publisher, identifier, title, revision, date, and status;
@@ -550,6 +562,13 @@ Before implementation, every protocol records:
 Licensed standards are not committed without redistribution permission.
 Implementation is based on legitimate normative access, not random summaries
 or reverse-engineered field guesses.
+
+Source admission alone is not semantic review. `v0.2.0` completes the
+versioned clause and errata disposition model. Thereafter, each implementation
+milestone must bind its included/excluded requirements and verified errata to
+the exact source hash before code is accepted. `identifier-review`,
+`revision-review`, missing manual acquisitions, and RFC 1119's text-only
+catalog notice are hard milestone blockers.
 
 Drafts use revision-specific experimental features and namespaces. A final RFC
 or standard becomes a distinct revision; stored draft packets are never

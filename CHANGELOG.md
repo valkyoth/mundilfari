@@ -8,6 +8,15 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ### Changed
 
+- Added a Gjallarbru-style, checksum-locked corpus of 67 RFC Editor documents
+  with reviewed roles, roadmap assignments, offline integrity gates, explicit
+  trust-pin updates, text-normalization protection, and CODEOWNERS coverage.
+- Added a 52-entry external-standards registry and an ignored local-only vault;
+  seven revision-pinned public drafts/specifications are locally downloadable
+  only after committed SHA-256 verification, while restricted documents
+  require legitimate manual acquisition.
+- Updated protocol and release planning for RFC 9748, RFC 9921, exact current
+  NTP-family draft revisions, and milestone-blocking source/errata review.
 - Moved all GNSS message, receiver, rollover, authentication, health, and PPS
   semantic interpretation to the planned Navheim project.
 - Replaced direct GNSS protocol crates with one future optional

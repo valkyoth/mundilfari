@@ -22,6 +22,15 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - Initial protocol registry spanning Internet/NTP/NTS, PTP, Navheim-derived
   GNSS observations, PPS, radio, industrial, automotive, wireless, media,
   space, formats, and trusted timestamp evidence.
+- Checksum-locked local reference corpus of 67 exact RFC Editor documents,
+  with reviewed roles and release assignments, offline verification,
+  CODEOWNERS protection, and exclusion from crates.io packages.
+- Machine-readable 52-entry external-standards source registry with a
+  fail-closed ignored vault for every non-RFC document byte; seven public,
+  revision-pinned sources have committed SHA-256 pins and a local-only fetcher.
+- Explicit source review updates for RFC 9748, RFC 9921,
+  `draft-ietf-ntp-ntpv5-08`, `draft-ietf-ntp-over-ptp-08`,
+  `draft-ietf-ntp-nts-for-ptp-03`, and `draft-ietf-ntp-roughtime-19`.
 - Strict rule that Navheim determines GNSS time while Mundilfari decides how
   validated GNSS evidence participates in a larger clock system.
 - Planned optional `mundilfari-navheim` companion crate, blocked until Navheim

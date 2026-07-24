@@ -1,2 +1,3 @@
 *.webp binary
+rfc/rfc*.txt -text -whitespace
 standards/private/** linguist-vendored
