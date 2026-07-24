@@ -30,7 +30,7 @@ REQUIRED_FIELDS = {
 }
 ACQUISITIONS = {"public-download", "manual", "metadata-only"}
 REDISTRIBUTION = {"local-only", "restricted"}
-MILESTONE = re.compile(r"v0\.[1-9][0-9]*\.0")
+MILESTONE = re.compile(r"v0\.[1-9][0-9]*\.[0-9]+")
 SAFE_NAME = re.compile(r"[a-z0-9][a-z0-9._-]*")
 
 

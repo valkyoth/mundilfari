@@ -16,7 +16,7 @@ Tags use:
 
 ```text
 v0.N.0       milestone release
-v0.N.P       scoped correction for milestone N
+v0.N.P       scoped subdivision or correction for milestone N
 v1.0.0-rc.N exact production candidate
 v1.0.0       first serious production-ready release
 ```
@@ -149,10 +149,24 @@ Deliverables:
 - versioned protocol, standard, errata, license, and document-hash registries;
 - promote the `v0.1.0` RFC and external-source acquisition baseline into
   clause-level requirement and errata disposition ledgers;
+- recursively inventory every normative reference from each admitted source
+  and classify it as implemented, provider-owned, registry/procedure-only,
+  syntax/transport support, superseded, not applicable, or blocked;
+- require every normative-reference disposition to name its consumer,
+  reviewed revision/hash, owning crate or provider boundary, milestone, and
+  rationale; unclassified transitive references block implementation;
 - retain exact RFC Editor bytes in `rfc/`, keep every non-RFC document byte in
   ignored `standards/private/`, and prohibit network access from normal gates;
-- status classes for stable, historic, draft, licensed, partial, and
-  unavailable specifications;
+- exact per-document records for every family entry, including amendments,
+  corrigenda, interpretation documents, profiles, registries, and official
+  errata; a family or bundle name is never sufficient for implementation;
+- status classes including stable, historic, active draft, monitored proposal,
+  licensed, partially documented, historical-evidence-only,
+  implementation-blocked, unavailable, and proprietary-undocumented;
+- separate `WireComplete`, `BehavioralComplete`, `OperationalComplete`, and
+  `ConformanceValidated` evidence levels without upward inference;
+- separate access, redistribution, implementation, and conformance states so
+  possession of a document cannot be mistaken for protocol completion;
 - schema validation and duplicate identifier/revision rejection;
 - public completeness and legitimate-access policy.
 
@@ -160,13 +174,17 @@ Verification:
 
 - registry round trips, malformed schema corpus, duplicate/conflict tests, and
   comparison with `PROTOCOLS.md`;
+- generated transitive-reference closure fixtures covering cycles, updates,
+  obsoletes, provider boundaries, and a newly introduced unclassified
+  normative reference;
 - corrupt/missing/extra RFC files, unauthorized URLs, checksum changes,
   duplicate roles, unassigned milestones, local-vault tracking attempts, and
   restricted-document publication tests.
 
 Exit criteria:
 
-- every initial registry entry has a status and roadmap assignment;
+- every initial registry entry and transitive normative dependency has an
+  exact status, disposition, consumer, and roadmap assignment;
 - every source needed through the next implementation pass has an exact
   legitimate artifact, reviewed errata state, and clause dispositions;
 - `v0.2.0 implementation stop reached. Run pentest for this exact commit.`
@@ -1329,27 +1347,59 @@ Exit criteria:
 - scale conversion data is versioned, inspectable, and replaceable;
 - `v0.52.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.53.0 - Legacy And Format Security Gate
+### v0.53.0 - Documented Vendor Extension Framework
 
 Status: planned.
 
-Goal: audit legacy protocols and time representations.
+Goal: admit documented non-GNSS vendor extensions without guessing proprietary
+behavior or weakening base-protocol validation.
 
 Deliverables:
 
-- downgrade/non-authority review and complete format clause maps;
+- revision-qualified vendor and extension identifiers with exact source,
+  affected base protocol, criticality, trust, and conflict metadata;
+- bounded opaque preservation for unknown non-critical extensions and
+  fail-closed rejection for unknown critical extensions;
+- separate codecs/modules or focused crates when an extension has independent
+  state or security behavior;
+- no GNSS receiver, navigation, NMEA, RTCM, RINEX, gpsd, OSNMA/QZNMA, or
+  satellite-PPS interpretation, all of which remains Navheim-owned;
+- undocumented and partially documented behavior retained as explicit
+  non-claims and disabled by default.
+
+Verification:
+
+- documented extension vectors, identifier collisions, wrong base revision,
+  malformed/oversized values, unknown criticality, downgrade, feature
+  combinations, round trips, and opaque-forwarding limits.
+
+Exit criteria:
+
+- vendor support is traceable to exact public or legitimately held normative
+  material and never inferred from captures or another implementation;
+- `v0.53.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.53.1 - Legacy Format And Extension Security Gate
+
+Status: planned.
+
+Goal: audit legacy protocols, time representations, and vendor extensions.
+
+Deliverables:
+
+- downgrade/non-authority review and complete format/extension clause maps;
 - parser/resource fuzz reports;
 - resolved critical/high findings and compatibility non-claims.
 
 Verification:
 
-- full legacy/format corpus, differential implementations, no_std/MSRV matrix,
-  and focused pentest.
+- full legacy/format/extension corpus, differential implementations,
+  no_std/MSRV matrix, and focused pentest.
 
 Exit criteria:
 
-- legacy support cannot silently authorize clock changes;
-- `v0.53.0 implementation stop reached. Run pentest for this exact commit.`
+- legacy or vendor-extension support cannot silently authorize clock changes;
+- `v0.53.1 implementation stop reached. Run pentest for this exact commit.`
 
 ## Phase 5: NTP And SNTP
 
@@ -1398,15 +1448,18 @@ Exit criteria:
 - NTP timestamps cannot be confused with POSIX or era-zero time;
 - `v0.55.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.56.0 - NTP Extensions And MAC Framing
+### v0.56.0 - NTP Extension Fields Checksum Complement And MAC
 
 Status: planned.
 
-Goal: implement updated extension-field and legacy MAC framing.
+Goal: implement the distinct updated extension-field, UDP checksum-complement,
+and legacy MAC behaviors.
 
 Deliverables:
 
-- applicable RFC 7821/7822/8573 and RFC 9748 registry/update behavior;
+- RFC 7821 UDP checksum-complement behavior;
+- RFC 7822 extension-field framing and RFC 9748 registry updates;
+- RFC 8573 AES-CMAC update using the RFC 4493 primitive boundary;
 - unknown extension preservation and criticality;
 - ambiguity resolution between extensions and legacy MACs.
 
@@ -1719,16 +1772,16 @@ Exit criteria:
 - discovery never grants identity or clock authority;
 - `v0.69.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.70.0 - Experimental NTP Revisions
+### v0.70.0 - Experimental NTPv5
 
 Status: planned.
 
-Goal: implement exact pinned NTPv5 and NTP-over-PTP drafts experimentally.
+Goal: implement the exact pinned NTPv5 draft experimentally.
 
 Deliverables:
 
-- `draft-ietf-ntp-ntpv5-08` and `draft-ietf-ntp-over-ptp-08` exact source
-  hashes, with a final-RFC migration check immediately before implementation;
+- `draft-ietf-ntp-ntpv5-09` exact source hash, with a final-RFC/new-revision
+  migration check immediately before implementation;
 - revision-named codecs/state, feature gates, and wire identity;
 - client/server scope only where the exact draft defines it;
 - no stable type leakage or automatic negotiation.
@@ -1740,7 +1793,7 @@ Verification:
 
 Exit criteria:
 
-- active drafts remain isolated and cannot change stable NTP semantics;
+- NTPv5 remains revision-isolated and cannot change stable NTP semantics;
 - `v0.70.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.71.0 - NTP Family Security Gate
@@ -1934,6 +1987,36 @@ Exit criteria:
 
 - unauthenticated traffic cannot force unbounded crypto or response work;
 - `v0.78.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.78.1 - Experimental NTS Pool Key Establishment
+
+Status: planned.
+
+Goal: implement the exact pinned NTS pool key-establishment draft without
+changing stable RFC 8915 endpoint semantics.
+
+Deliverables:
+
+- `draft-ietf-ntp-nts-keyexchange-pool-01` exact source hash and
+  final-RFC/new-revision migration check immediately before implementation;
+- revision-named records, endpoint selection, identity, retry, and failure
+  policy behind an experimental feature;
+- preservation of pool provenance and separation of discovery, TLS service
+  identity, negotiated NTS server identity, cookies, and clock authority;
+- bounded fan-out, retry, DNS, connection, and expensive-work budgets with no
+  unauthenticated downgrade to ordinary NTP.
+
+Verification:
+
+- exact draft examples, revision mismatch, pool/member churn, malicious DNS,
+  wrong certificate/service identity, redirect/confusion, replay, exhaustion,
+  malformed records, bounded retry, and available implementation interop.
+
+Exit criteria:
+
+- pool key establishment remains revision-pinned and cannot silently alter
+  stable NTS trust or endpoint policy;
+- `v0.78.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.79.0 - Roughtime
 
@@ -2603,6 +2686,8 @@ Goal: implement the exact pinned NTS-for-PTP draft experimentally.
 
 Deliverables:
 
+- `draft-ietf-ntp-nts-for-ptp-03` exact source hash and
+  final-RFC/new-revision migration check immediately before implementation;
 - revision-specific messages/state/security associations;
 - integration with NTS provider boundaries and PTP identities;
 - no stable profile leakage or silent activation.
@@ -2617,6 +2702,37 @@ Exit criteria:
 - experimental authentication never implies delay-attack immunity;
 - `v0.107.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.107.1 - Experimental NTP Over PTP
+
+Status: planned.
+
+Goal: integrate the exact pinned NTP-over-PTP transport only after both NTP
+and PTP wire, timestamp, correction, and transport foundations exist.
+
+Deliverables:
+
+- `draft-ietf-ntp-over-ptp-08` exact source hash and final-RFC/new-revision
+  migration check immediately before implementation;
+- revision-named PTP encapsulation, NTP network-correction extension field,
+  client/server and draft-defined symmetric transport behavior;
+- explicit reuse of reviewed NTP validation and PTP framing/timestamp
+  boundaries without a second NTP or PTP state engine;
+- transparent-clock correction provenance, overflow, trust, and accuracy
+  policy with experimental-only negotiation.
+
+Verification:
+
+- exact draft vectors, revision mismatch, malformed encapsulation, wrong PTP
+  message/domain, correction overflow/tamper, NTP extension conflicts,
+  one/two-step timestamp failures, transparent-clock paths, hardware captures,
+  and chrony/available implementation interop.
+
+Exit criteria:
+
+- NTP-over-PTP cannot be enabled before both protocol foundations exist and
+  never converts unauthenticated correction data into an accuracy claim;
+- `v0.107.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.108.0 - PTP Family Security And Hardware Gate
 
 Status: planned.
@@ -2626,6 +2742,7 @@ Goal: complete PTP profile conformance, hardware evidence, and security review.
 Deliverables:
 
 - revision/profile clause maps and support matrix;
+- NTS4PTP and NTP-over-PTP revision, downgrade, correction, and trust review;
 - delay/topology/threat and accuracy evidence report;
 - strict-discipline admission requiring an admitted PTP security mechanism,
   MACsec/IPsec-equivalent trusted boundary, statically trusted isolated timing
@@ -4011,16 +4128,26 @@ Deliverables:
 - draft-to-final migrations or revision pins;
 - live RFC Editor errata comparison and official-publisher revision refresh;
 - RFC source/checksum reconciliation and local-vault inventory/lock review;
+- recursive normative-reference closure with no unclassified dependency;
+- exact-document expansion of every remaining family/bundle record, including
+  current amendments, corrigenda, interpretations, profiles, and registries;
+- refreshed non-WG proposal watchlist with explicit admitted, monitored, or
+  rejected-out-of-scope dispositions;
+- independently checked wire, behavioral, operational, and conformance claims;
 - all accessible stable entries complete and blocked entries justified.
 
 Verification:
 
-- official publisher/source comparison, hashes, clause maps, and independent
-  completeness review.
+- official publisher/source comparison, hashes, clause maps, transitive
+  dependency graph, registry diff, and independent completeness review;
+- deliberate stale revision, missing amendment, unresolved erratum,
+  unclassified normative reference, family-only record, and overstated
+  conformance claim all fail closed.
 
 Exit criteria:
 
-- no known accessible stable-baseline protocol is silently omitted;
+- no known accessible stable-baseline protocol, normative dependency,
+  amendment, or erratum is silently omitted, and every non-claim is explicit;
 - `v0.165.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.166.0 - API Documentation And Semver Freeze

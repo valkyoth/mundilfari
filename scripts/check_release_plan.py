@@ -13,14 +13,19 @@ NAVHEIM_PHASE = "## Phase 12: Navheim Integration As Final Feature Work"
 HARDENING_PHASE = "## Phase 13: Final Conformance Hardening And Production Admission"
 NAVHEIM_VERSIONS = [f"v0.{minor}.0" for minor in range(149, 158)]
 REVIEW_COVERAGE = {
+    "v0.2.0": ("transitive normative", "WireComplete"),
     "v0.7.0": ("mathematical floor",),
     "v0.11.0": ("ConversionContext",),
     "v0.30.0": ("compiled, available, authorized",),
+    "v0.53.0": ("unknown critical",),
     "v0.60.0": ("maximum faulty diversity groups",),
+    "v0.78.1": ("draft-ietf-ntp-nts-keyexchange-pool-01",),
     "v0.91.0": ("PTPv3",),
+    "v0.107.1": ("draft-ietf-ntp-over-ptp-08",),
     "v0.114.0": ("fixed-capacity Sans-I/O",),
     "v0.133.0": ("maximum faulty diversity groups",),
     "v0.142.0": ("OS peer credentials",),
+    "v0.165.0": ("no unclassified", "family/bundle"),
     "v0.167.0": ("signed exact-commit attestation",),
 }
 

@@ -17,6 +17,18 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   require legitimate manual acquisition.
 - Updated protocol and release planning for RFC 9748, RFC 9921, exact current
   NTP-family draft revisions, and milestone-blocking source/errata review.
+- Refreshed NTPv5 to `draft-ietf-ntp-ntpv5-09` and admitted
+  `draft-ietf-ntp-nts-keyexchange-pool-01` as a separate revision-pinned
+  experimental milestone.
+- Added recursive normative-reference closure, exact family-document
+  expansion, independent conformance levels, and requirements traceability to
+  the pre-1.0 gates.
+- Added a fail-closed framework milestone for documented non-GNSS vendor
+  extensions and corrected the distinct NTP extension-field,
+  checksum-complement, and AES-CMAC roadmap responsibilities.
+- Moved NTP-over-PTP into its own post-PTP-foundation milestone so the adapter
+  cannot precede the PTP wire, transport, timestamp, and correction layers it
+  requires.
 - Moved all GNSS message, receiver, rollover, authentication, health, and PPS
   semantic interpretation to the planned Navheim project.
 - Replaced direct GNSS protocol crates with one future optional

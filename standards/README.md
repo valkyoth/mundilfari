@@ -10,6 +10,9 @@ RFC's tracked text artifact is only a catalog notice, not the NTPv2 body.
 family, official source, access state, redistribution decision, implementation
 milestone, and acquisition method. `PUBLIC_SHA256SUMS` pins public artifacts
 that the project downloads for local review but does not redistribute.
+Family entries are discovery placeholders only. They must be split into exact
+revision, amendment, corrigendum, interpretation, profile, and registry
+records before their implementation milestone.
 
 All acquired non-RFC artifacts live below `standards/private/`. That directory
 is ignored in full, regardless of whether a particular document is free to
@@ -43,12 +46,15 @@ release milestone may begin protocol implementation, it must:
 2. inspect it and explicitly pin its local SHA-256 with
    `scripts/lock-standard-sources.py --accept-local`;
 3. review normative clauses, amendments, corrigenda, and official errata;
-4. record included and excluded behavior in the milestone requirement ledger;
+4. recursively classify every normative reference and record included and
+   excluded behavior in the milestone requirement ledger;
 5. derive tests independently or use vectors whose provenance permits it.
 
-Entries marked `identifier-review` block implementation until the exact
-revision and official access route are resolved. Mundilfari does not infer
-normative behavior from summaries, vendor code, or random websites.
+Entries marked `identifier-review`, `revision-review`, partially documented,
+or otherwise unresolved block implementation until the exact revision,
+transitive normative dependencies, and official access route are resolved.
+Mundilfari does not infer normative behavior from summaries, vendor code, or
+random websites.
 
 GNSS navigation and receiver standards remain Navheim's responsibility. This
 registry contains only the Navheim interface contract needed by the future

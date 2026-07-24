@@ -29,8 +29,16 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   fail-closed ignored vault for every non-RFC document byte; seven public,
   revision-pinned sources have committed SHA-256 pins and a local-only fetcher.
 - Explicit source review updates for RFC 9748, RFC 9921,
-  `draft-ietf-ntp-ntpv5-08`, `draft-ietf-ntp-over-ptp-08`,
+  `draft-ietf-ntp-ntpv5-09`, `draft-ietf-ntp-over-ptp-08`,
   `draft-ietf-ntp-nts-for-ptp-03`, and `draft-ietf-ntp-roughtime-19`.
+- Separate revision-pinned experimental planning for
+  `draft-ietf-ntp-nts-keyexchange-pool-01`.
+- Explicit pre-implementation closure for transitive normative references,
+  family/bundle expansion, conformance levels, and documented non-GNSS vendor
+  extensions.
+- Dependency-correct experimental ordering: NTPv5 remains in the NTP phase,
+  while NTP-over-PTP receives a separate pass after the complete PTP
+  foundations.
 - Strict rule that Navheim determines GNSS time while Mundilfari decides how
   validated GNSS evidence participates in a larger clock system.
 - Planned optional `mundilfari-navheim` companion crate, blocked until Navheim

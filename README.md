@@ -245,6 +245,7 @@ scripts/generate-sbom.sh --check
 
 - [Implementation Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/RELEASE_PLAN.md)
+- [Requirements Traceability](https://github.com/valkyoth/mundilfari/blob/main/docs/REQUIREMENTS_TRACEABILITY.md)
 - [Protocol Registry](https://github.com/valkyoth/mundilfari/blob/main/docs/PROTOCOLS.md)
 - [Standards Provenance](https://github.com/valkyoth/mundilfari/blob/main/docs/STANDARDS.md)
 - [RFC Reference Corpus](https://github.com/valkyoth/mundilfari/blob/main/rfc/README.md)

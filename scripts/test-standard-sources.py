@@ -74,6 +74,8 @@ def main() -> None:
         checksums.write_text(f"{'0' * 64}  example-standard.txt\n")
         assert len(module.validate_registry()) == 1
         assert module.public_checksums() == {"example-standard.txt": "0" * 64}
+        write_sources([source(milestone="v0.78.1")])
+        assert len(module.validate_registry()) == 1
 
         write_sources([source(), source()])
         rejected(module.validate_registry)

@@ -22,14 +22,21 @@ unchanged; every non-RFC document byte remains in the ignored local vault.
 | `ExperimentalPinned` | active draft with revision-specific experimental API |
 | `LicenceRequired` | known normative standard requires legitimate licensed access |
 | `SpecificationRequested` | official text/access still being located |
+| `ImplementationBlocked` | normative text is known but an unresolved prerequisite forbids implementation |
+| `HistoricalEvidenceOnly` | evidence is sufficient only for inspection; no interoperable implementation claim |
+| `PartiallyDocumented` | some behavior is public; only explicitly documented behavior may be claimed |
+| `MonitoredProposal` | proposal is watched but is not yet admitted to the implementation baseline |
 | `KnownUnavailable` | known but inaccessible; no implementation claim |
 | `ProprietaryUndocumented` | no public normative specification; not guessed |
 | `TimingOnly` | only time-related services are in scope |
 | `ExternalNavheim` | owned by Navheim and consumed only through the companion adapter |
 
 Every implementation adds exact identifiers, revisions, publication dates,
-official URLs, errata, clause maps, test-vector provenance, and conformance
-level to the machine-readable registry introduced by the release plan.
+official URLs, errata, transitive normative-reference dispositions, clause
+maps, test-vector provenance, and one of the independently evidenced
+`WireComplete`, `BehavioralComplete`, `OperationalComplete`, or
+`ConformanceValidated` levels to the machine-readable registry introduced by
+the release plan. A higher level never follows automatically from a lower one.
 
 ## Internet Time And Discovery
 
@@ -59,10 +66,10 @@ level to the machine-readable registry introduced by the release plan.
 | `mundilfari-ntp-autokey` | Autokey inspection/compatibility | `PlannedHistorical` |
 | `mundilfari-ntp-khronos` | RFC 9523 Khronos | `PlannedStable` |
 | `mundilfari-nts` | RFC 8915 Network Time Security | `PlannedStable` |
-| `mundilfari-ntpv5` | `draft-ietf-ntp-ntpv5-08` | `ExperimentalPinned` |
+| `mundilfari-ntpv5` | `draft-ietf-ntp-ntpv5-09` | `ExperimentalPinned` |
 | `mundilfari-ntp-over-ptp` | `draft-ietf-ntp-over-ptp-08` | `ExperimentalPinned` |
 | `mundilfari-nts4ptp` | `draft-ietf-ntp-nts-for-ptp-03` | `ExperimentalPinned` |
-| monitored only | `draft-ietf-ntp-nts-keyexchange-pool-00` | `ExperimentalPinned` |
+| `mundilfari-nts-pool` | `draft-ietf-ntp-nts-keyexchange-pool-01` | `ExperimentalPinned` |
 
 ## Secure Time And Timestamp Evidence
 

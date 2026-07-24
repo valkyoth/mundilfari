@@ -77,11 +77,11 @@ silently reinterprets stored messages or cryptographic transcripts.
 
 The 2026-07-24 local baseline pins:
 
-- `draft-ietf-ntp-ntpv5-08`;
+- `draft-ietf-ntp-ntpv5-09`;
 - `draft-ietf-ntp-over-ptp-08`;
 - `draft-ietf-ntp-nts-for-ptp-03`;
 - `draft-ietf-ntp-roughtime-19`;
-- monitored `draft-ietf-ntp-nts-keyexchange-pool-00`; and
+- `draft-ietf-ntp-nts-keyexchange-pool-01`; and
 - XEP-0202 Entity Time.
 
 The standards-closure milestone refreshes every draft and official publisher

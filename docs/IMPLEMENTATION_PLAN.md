@@ -559,6 +559,33 @@ Before implementation, every protocol records:
 - official vectors and conformance source;
 - last review date and draft pin.
 
+Every admitted normative reference is followed recursively. Its ledger record
+names the consuming requirement, exact reviewed revision/hash, disposition,
+owning crate or external provider boundary, milestone, and rationale.
+References used only for registries, procedures, syntax, or transports remain
+explicit; updates and obsoletes do not disappear from the audit trail. An
+unclassified transitive reference blocks the consuming implementation.
+
+Specification and implementation state are independent. The registry
+distinguishes stable, historic, active-draft, monitored-proposal, licensed,
+partially documented, historical-evidence-only, implementation-blocked,
+unavailable, and proprietary-undocumented sources. It separately records
+access, redistribution, implementation, and conformance state.
+
+Conformance claims use independently evidenced levels:
+
+- `WireComplete`: exact bounded encode/decode and field validation;
+- `BehavioralComplete`: required protocol state and error behavior;
+- `OperationalComplete`: required transports, deployment behavior, and
+  interoperability;
+- `ConformanceValidated`: applicable official or recognized conformance suite
+  has passed.
+
+No level is inferred from another. Acquiring a standard proves none of them.
+Family/bundle entries are discovery aids only: before implementation they are
+expanded into exact documents, revisions, amendments, corrigenda,
+interpretations, profiles, registries, and verified errata.
+
 Licensed standards are not committed without redistribution permission.
 Implementation is based on legitimate normative access, not random summaries
 or reverse-engineered field guesses.
@@ -641,8 +668,10 @@ its broader pre-1.0 completeness contract:
 | Immutable scale contexts, POSIX outcomes, smear identity | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Type-state, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability truth and safe/sys platform split | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
+| Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
+| Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| NTS assurance provenance and secret lifecycle | `v0.72.0`–`v0.81.0` |
+| NTS assurance, pool key establishment, and secret lifecycle | `v0.72.0`–`v0.81.0` |
 | PTP revision admission, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family fault model, bounded servos, holdover | `v0.133.0`–`v0.136.0` |

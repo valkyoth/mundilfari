@@ -3,7 +3,7 @@
   "reviewed_at": "2026-07-24",
   "sources": [
     {
-      "id": "draft-ietf-ntp-ntpv5-08",
+      "id": "draft-ietf-ntp-ntpv5-09",
       "publisher": "IETF",
       "title": "Network Time Protocol Version 5",
       "status": "active-draft",
@@ -11,8 +11,8 @@
       "acquisition": "public-download",
       "milestone": "v0.70.0",
       "official_url": "https://datatracker.ietf.org/doc/draft-ietf-ntp-ntpv5/",
-      "artifact_url": "https://www.ietf.org/archive/id/draft-ietf-ntp-ntpv5-08.txt",
-      "local_filename": "draft-ietf-ntp-ntpv5-08.txt"
+      "artifact_url": "https://www.ietf.org/archive/id/draft-ietf-ntp-ntpv5-09.txt",
+      "local_filename": "draft-ietf-ntp-ntpv5-09.txt"
     },
     {
       "id": "draft-ietf-ntp-over-ptp-08",
@@ -21,7 +21,7 @@
       "status": "rfc-editor-queue",
       "redistribution": "local-only",
       "acquisition": "public-download",
-      "milestone": "v0.70.0",
+      "milestone": "v0.107.1",
       "official_url": "https://datatracker.ietf.org/doc/draft-ietf-ntp-over-ptp/",
       "artifact_url": "https://www.ietf.org/archive/id/draft-ietf-ntp-over-ptp-08.txt",
       "local_filename": "draft-ietf-ntp-over-ptp-08.txt"
@@ -51,16 +51,16 @@
       "local_filename": "draft-ietf-ntp-roughtime-19.txt"
     },
     {
-      "id": "draft-ietf-ntp-nts-keyexchange-pool-00",
+      "id": "draft-ietf-ntp-nts-keyexchange-pool-01",
       "publisher": "IETF",
-      "title": "NTS Key Establishment for Pools",
-      "status": "monitored-draft",
+      "title": "NTS extensions for enabling pools",
+      "status": "active-draft",
       "redistribution": "local-only",
       "acquisition": "public-download",
-      "milestone": "v0.165.0",
+      "milestone": "v0.78.1",
       "official_url": "https://datatracker.ietf.org/doc/draft-ietf-ntp-nts-keyexchange-pool/",
-      "artifact_url": "https://www.ietf.org/archive/id/draft-ietf-ntp-nts-keyexchange-pool-00.txt",
-      "local_filename": "draft-ietf-ntp-nts-keyexchange-pool-00.txt"
+      "artifact_url": "https://www.ietf.org/archive/id/draft-ietf-ntp-nts-keyexchange-pool-01.txt",
+      "local_filename": "draft-ietf-ntp-nts-keyexchange-pool-01.txt"
     },
     {
       "id": "rfc1119-complete",
