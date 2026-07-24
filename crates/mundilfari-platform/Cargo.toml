@@ -1,0 +1,23 @@
+[package]
+name = "mundilfari-platform"
+description = "platform, transport, timestamp, PPS, and clock adapters for Mundilfari"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["time", "clock", "timestamp", "ptp"]
+categories = ["date-and-time", "network-programming", "embedded"]
+
+[features]
+default = []
+alloc = ["mundilfari-core/alloc"]
+std = ["alloc", "mundilfari-core/std"]
+
+[dependencies]
+mundilfari-core.workspace = true
+
+[lints]
+workspace = true

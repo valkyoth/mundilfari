@@ -1,0 +1,180 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-07-24T07:50:03Z",
+    "creators": [
+      "Tool: cargo-sbom-v0.10.0"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://spdx.org/spdxdocs/mundilfari-7e27bfc9-619d-4ff3-b74a-076c3aad4d49",
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-mundilfari",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e58bf08647bb144e40234c6809261e7757bd8c6f"
+        }
+      ],
+      "fileName": "./Cargo.lock",
+      "fileTypes": [
+        "SOURCE",
+        "TEXT"
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-File-mundilfari_core",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e58bf08647bb144e40234c6809261e7757bd8c6f"
+        }
+      ],
+      "fileName": "./Cargo.lock",
+      "fileTypes": [
+        "SOURCE",
+        "TEXT"
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-File-mundilfari_engine",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e58bf08647bb144e40234c6809261e7757bd8c6f"
+        }
+      ],
+      "fileName": "./Cargo.lock",
+      "fileTypes": [
+        "SOURCE",
+        "TEXT"
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-File-mundilfari_platform",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e58bf08647bb144e40234c6809261e7757bd8c6f"
+        }
+      ],
+      "fileName": "./Cargo.lock",
+      "fileTypes": [
+        "SOURCE",
+        "TEXT"
+      ]
+    }
+  ],
+  "name": "mundilfari",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-mundilfari-core-0.1.0",
+      "description": "no_std time domains and protocol foundations for Mundilfari",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/mundilfari",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "mundilfari-core",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-mundilfari-platform-0.1.0",
+      "description": "platform, transport, timestamp, PPS, and clock adapters for Mundilfari",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/mundilfari",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "mundilfari-platform",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-mundilfari-engine-0.1.0",
+      "description": "no_std clock consensus, servo, and holdover engine for Mundilfari",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/mundilfari",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "mundilfari-engine",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-mundilfari-0.1.0",
+      "description": "security-first no_std-first time protocol framework",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/mundilfari",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "mundilfari",
+      "versionInfo": "0.1.0"
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-core-0.1.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-mundilfari-platform-0.1.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-engine-0.1.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-mundilfari-0.1.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-0.1.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-mundilfari"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-mundilfari_engine",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-platform-0.1.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-mundilfari_platform"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-core-0.1.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-mundilfari-engine-0.1.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-mundilfari_platform",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-core-0.1.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-mundilfari-0.1.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-mundilfari_core",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-platform-0.1.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-mundilfari-0.1.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-mundilfari",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-core-0.1.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-mundilfari_core"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mundilfari-engine-0.1.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-mundilfari_engine"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

@@ -1,0 +1,34 @@
+[package]
+name = "mundilfari"
+description = "security-first no_std-first time protocol framework"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["time", "ntp", "ptp", "clock", "no-std"]
+categories = ["date-and-time", "network-programming", "no-std", "embedded"]
+
+[features]
+default = []
+alloc = [
+    "mundilfari-core/alloc",
+    "mundilfari-engine/alloc",
+    "mundilfari-platform/alloc",
+]
+std = [
+    "alloc",
+    "mundilfari-core/std",
+    "mundilfari-engine/std",
+    "mundilfari-platform/std",
+]
+
+[dependencies]
+mundilfari-core.workspace = true
+mundilfari-engine.workspace = true
+mundilfari-platform.workspace = true
+
+[lints]
+workspace = true

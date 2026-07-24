@@ -1,0 +1,22 @@
+[release]
+version = "0.1.0"
+
+[crates."mundilfari-core"]
+version = "0.1.0"
+publish = true
+reason = "Initial no_std foundation crate boundary."
+
+[crates."mundilfari-engine"]
+version = "0.1.0"
+publish = true
+reason = "Initial no_std consensus, servo, and holdover crate boundary."
+
+[crates."mundilfari-platform"]
+version = "0.1.0"
+publish = true
+reason = "Initial opt-in platform adapter crate boundary."
+
+[crates.mundilfari]
+version = "0.1.0"
+publish = true
+reason = "Initial facade and repository foundation release."

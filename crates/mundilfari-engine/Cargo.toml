@@ -1,0 +1,23 @@
+[package]
+name = "mundilfari-engine"
+description = "no_std clock consensus, servo, and holdover engine for Mundilfari"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["time", "clock", "synchronization", "no-std"]
+categories = ["date-and-time", "no-std", "embedded"]
+
+[features]
+default = []
+alloc = ["mundilfari-core/alloc"]
+std = ["alloc", "mundilfari-core/std"]
+
+[dependencies]
+mundilfari-core.workspace = true
+
+[lints]
+workspace = true
