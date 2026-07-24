@@ -62,9 +62,16 @@ grep -q 'retained/invalidated/absent prior-state' docs/modularity-policy.md
 grep -q '`CompleteMemberStatus` and `AbortMemberDiagnostic` are disjoint' docs/modularity-policy.md
 grep -q 'cannot enter quorum' docs/modularity-policy.md
 grep -q '`BatchAdmissionState`, exact-support `ConsensusAuthority`' docs/modularity-policy.md
-grep -q 'conservative validity, and admitted monotonic-correlation' docs/modularity-policy.md
-grep -q 'version reservation plus strict-reader revalidation' docs/modularity-policy.md
-grep -q '`CommitCoveredRefresh` adds the reviewed remaining-work bound' docs/modularity-policy.md
+grep -q 'conservative validity, and proof-bearing admitted monotonic-correlation' docs/modularity-policy.md
+grep -q 'Provider registration alone grants no proof' docs/modularity-policy.md
+grep -q 'immutable paired capture anchors' docs/modularity-policy.md
+grep -q 'engine-owned RAII `RefreshReservationGuard`' docs/modularity-policy.md
+grep -q 'timeout-independent supersession' docs/modularity-policy.md
+grep -q '`SupersededNoInstall`' docs/modularity-policy.md
+grep -q 'Async wrappers finish' docs/modularity-policy.md
+grep -q 'guard across `Poll::Pending`' docs/modularity-policy.md
+grep -q '`CommitCoveredRefresh` adds the' docs/modularity-policy.md
+grep -q 'reviewed remaining-work bound' docs/modularity-policy.md
 grep -q '`UntrustedMonotonicCorrelationCandidate` structure' docs/modularity-policy.md
 grep -q '`AdmittedMonotonicDomainCorrelation`' docs/modularity-policy.md
 grep -q '`PublishedAuthoritySnapshotId`' docs/modularity-policy.md

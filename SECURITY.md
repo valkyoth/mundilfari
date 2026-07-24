@@ -121,13 +121,24 @@ the release branch between review and tagging.
   used by its proof, separately from unused eligible membership. Aggregate
   validity is the conservative minimum of every required deadline in one
   monotonic domain; mixed domains reject unless translated through current
-  engine-admitted directed correlations whose identity, generation,
-  uncertainty, provider/lifecycle, and expiry become dependencies. Platform
-  providers emit only untrusted candidates. Translation is outward-rounded and
-  a mapped deadline uses the target interval's earliest edge; reverse use,
-  implicit composition, provider self-admission, and stale/forged/high-
-  uncertainty candidates fail closed. Loss of any used support invalidates the
-  old authority even if another quorum could be recomputed.
+  engine-admitted directed correlations. Every candidate expresses its
+  offset, rate ratio, and drift as hard-bound claims with complete bounded
+  derivation recipes and logical conditions, retains immutable paired
+  source/target capture intervals, and grows uncertainty outward from those
+  anchors. Engine admission verifies those numerical derivations, assesses
+  their conditions in one current generation snapshot, and retains their
+  independent evidence-origin, integrity, authority, lineage, and transitive
+  support axes. Provider registration or a narrow numeric assertion is never
+  proof. Initial correlation validity requires independently checked source-
+  and target-domain deadlines; the correlation cannot validate either
+  deadline through itself. Identity, generation, verified derivations,
+  assessments, support, anchors, endpoint validity, provider/lifecycle, and
+  expiry all become dependencies. Platform providers emit only untrusted
+  candidates. Translation is outward-rounded and a mapped deadline uses the
+  target interval's earliest edge; reverse use, implicit composition, provider
+  self-admission, circular validity, and stale/forged/high-uncertainty
+  candidates fail closed. Loss of any used support invalidates the old
+  authority even if another quorum could be recomputed.
   Aborted refreshes report prior state as retained, invalidated, or absent.
   Operational failure cannot clear or extend an otherwise still-current prior
   batch; genuine dependency invalidation revokes it even without replacement.
@@ -137,11 +148,25 @@ the release branch between review and tagging.
   publication subject, disposition, prior identity/generation, measured
   monotonic coverage or typed unavailability, unchanged deadline or
   invalidation generation/reason, and engine/publication generation.
-  Portable `LinearizationRefresh` uses a nonwrapping version reservation and
-  makes the exact-domain sample its logical point. Readers never observe an in-
-  progress generation, arbitrary post-sample preemption is allowed, delayed
-  installation cannot overwrite a newer invalidation/version, and every strict
-  reader revalidates current generations/deadline. Optional
+  Portable `LinearizationRefresh` uses an engine-only
+  `RefreshReservationGuard` binding a reservation ID, owner operation,
+  process/session/machine generations, captured invalidation watermark, and
+  nonwrapping fencing generation; the exact-domain sample is its logical
+  point. Every mutation of an admission, proof, condition assessment, support,
+  membership, policy, correlation, endpoint-validity, provider, execution, or
+  publication dependency advances the watermark atomically before exposure.
+  Explicit cancellation, unwind, panic, early return, or guard drop tombstones
+  the reservation. No external callback, fallible work, or async
+  `Poll::Pending` is permitted after acquisition. A higher fencing generation
+  may supersede only a tombstoned reservation or an invalidated owner/process/
+  session; timeout alone never permits stealing, and an old writer returns
+  `SupersededNoInstall`. Process/session restart invalidates inherited
+  reservations. Tombstones are reclaimed only behind a bounded reader
+  generation floor; table or fencing exhaustion faults closed. Readers
+  boundedly return current state, `RefreshInProgress`, or a typed fault,
+  including when safe code leaks a writer. Arbitrary post-sample preemption is
+  allowed, delayed installation cannot overwrite a newer invalidation/version,
+  and every strict reader revalidates current generations/deadline. Optional
   `CommitCoveredRefresh` adds a reviewed bound for all remaining work through
   physical commit. Missing WCET disables only that stronger profile; sampling,
   domain, or reservation failure cannot report `Retained` or install new

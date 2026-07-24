@@ -8,6 +8,16 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ### Changed
 
+- Strengthened the monotonic-correlation roadmap so offset, rate, and drift
+  claims carry verifiable bounded derivations, logical conditions, immutable
+  paired capture anchors, structured support, and independently checked
+  endpoint validity; provider registration and circular validation cannot
+  create proof.
+- Specified an engine-only RAII refresh reservation protocol with complete
+  invalidation-watermark ownership, nonwrapping fencing, cancel/drop/unwind
+  tombstones, timeout-independent supersession, restart invalidation, bounded
+  reclamation/read behavior, stale-writer `SupersededNoInstall`, and an async
+  rule forbidding callbacks, fallible work, or `Poll::Pending` after acquire.
 - Added a fail-closed implementation-evidence gate: every production Rust
   source maps governing requirements to concrete tests, while protocol work
   must additionally pin exact registered documents, hashes, clauses, and

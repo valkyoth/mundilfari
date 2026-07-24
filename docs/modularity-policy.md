@@ -64,15 +64,26 @@ Rules:
   retained/invalidated/absent prior-state refresh transaction. A complete
   witness is not aggregate authority: engine separately owns non-authoritative
   `BatchAdmissionState`, exact-support `ConsensusAuthority`, one-domain
-  conservative validity, and admitted monotonic-correlation dependencies.
+  conservative validity, and proof-bearing admitted monotonic-correlation
+  dependencies. Correlation admission reuses the canonical hard-bound
+  derivation and condition machinery: engine verifies every offset/rate/drift
+  recipe, snapshot-consistently assesses it, preserves structured support
+  axes and immutable paired capture anchors, and independently checks both
+  endpoint validity domains. Provider registration alone grants no proof.
   Batch admission cannot enter servo, discipline, publication, or trusted-time
   APIs; only consensus constructs time authority.
   Losing used proof support invalidates that authority; an unused alternative
   requires a new decision/identity. The fixed-size observation tags batch
   admission, consensus, or published authority and records measured coverage
-  profile or typed unavailability. Portable `LinearizationRefresh` uses
-  version reservation plus strict-reader revalidation without WCET; optional
-  `CommitCoveredRefresh` adds the reviewed remaining-work bound. Concurrent
+  profile or typed unavailability. Portable `LinearizationRefresh` uses an
+  engine-owned RAII `RefreshReservationGuard`, invalidation watermark, and
+  nonwrapping fencing generation plus strict-reader revalidation without WCET.
+  Engine owns cancellation/drop tombstoning, timeout-independent supersession,
+  `SupersededNoInstall`, restart invalidation, bounded reader generation floors,
+  tombstone reclamation, and capacity/fencing exhaustion. Async wrappers finish
+  all pending/fallible/external work before acquisition and cannot retain the
+  guard across `Poll::Pending`. Optional `CommitCoveredRefresh` adds the
+  reviewed remaining-work bound. Concurrent
   publication owns `PublishedAuthoritySnapshotId`, its generation, and
   replacement ordering, but cannot redefine admission/consensus identities or
   the observation as authority through receipt.
@@ -82,12 +93,15 @@ Rules:
 - Platform clock traits own `read_interval()` and capability provenance;
   hosted, PHC, architectural, browser, and embedded implementations inflate
   scalar counters conservatively or report strict authority unavailable.
-- Core owns directed `UntrustedMonotonicCorrelationCandidate` structure and
+- Core owns directed `UntrustedMonotonicCorrelationCandidate` structure,
+  offset/rate/drift hard-bound claim and recipe/condition fields, immutable
+  paired capture anchors, independently sourced endpoint-validity fields, and
   outward-rounded direct translation only. Platform may measure/withdraw
-  candidates but cannot admit them. Engine alone constructs opaque
-  `AdmittedMonotonicDomainCorrelation` after provider, domain-generation,
-  method, uncertainty, validity, suspend/reset/migration, and lifecycle policy
-  checks; facade and protocol crates cannot bypass or duplicate admission.
+  candidates but cannot admit them or turn registration into proof. Engine
+  alone verifies the numerical derivations, snapshot-consistently assesses
+  their conditions/support, independently checks both endpoint domains, and
+  constructs opaque `AdmittedMonotonicDomainCorrelation`; facade and protocol
+  crates cannot bypass or duplicate admission.
 - `mundilfari-platform` remains safe; necessary unsafe/FFI lives only in small
   OS-family or device-specific `mundilfari-platform-*-sys` crates.
 - Clock discipline uses a separate authorization boundary and a minimal

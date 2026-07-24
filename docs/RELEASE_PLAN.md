@@ -1354,10 +1354,25 @@ Deliverables:
   only the bounded candidate, canonical identity/preimage, translation
   arithmetic, and diagnostic views; it has no constructor for admitted state;
 - every candidate is directed from one exact source `MonotonicClockId`/
-  generation to one exact target domain/generation and binds a measured offset
-  interval, bounded rate ratio/drift, observation method, uncertainty
-  provenance, capture interval, validity horizon, suspend/reset/migration
+  generation to one exact target domain/generation. Its offset interval,
+  bounded rate ratio, and drift bound are typed
+  `BorrowedHardBoundClaim`/`OwnedHardBoundClaim` values with mandatory
+  `UnverifiedBoundDerivation` recipes and canonical `BoundCondition`/
+  `BoundAssumptionsId`, never privileged scalar fields. The candidate also
+  binds observation method, uncertainty provenance, suspend/reset/migration
   compatibility, provider identity/generation, and lifecycle generation;
+- each numerical claim binds exact paired capture anchors: conservative source
+  and target `MonotonicReadInterval` values, capture ordering/bracketing method,
+  pairing generation, and elapsed origin. Translation grows rate/drift
+  uncertainty outward from the worst-case elapsed distance to those anchors;
+  a provider cannot reset the growth origin by repackaging the same evidence;
+- structural `CorrelationValidityCandidate` is non-circular and initially has
+  only `IndependentEndpointDeadlines { source, target }`. Each deadline is
+  checked by reading its own exact endpoint domain without using the
+  correlation under admission or any value derived from it. A separate
+  supervision-domain form is deferred until a reviewed dependency-DAG proof
+  can exclude self/indirect cycles; one translated aggregate deadline cannot
+  validate the correlation that performs the translation;
 - translating a source instant or deadline produces an outward-rounded target
   interval with accumulated offset/rate/drift/elapsed/quantization uncertainty.
   For a source `valid_until` mapped to target `[earliest, latest]`, the only
@@ -1387,7 +1402,13 @@ Verification:
   invalidation, forged provider identity, high/overflowing uncertainty, exact
   outward-rounding vectors, and source-deadline-to-target-earliest-edge
   properties. Attempts to chain, cycle, choose a path, self-assert admission,
-  or use a candidate where admitted state is required fail typed.
+  or use a candidate where admitted state is required fail typed;
+- missing/truncated/substituted offset/rate/drift recipes, forged narrow
+  endpoints, changed capture anchors/pairing generation, elapsed-growth reset,
+  missing/circular/same-correlation-translated validity, and source/target
+  endpoint deadline/reset cases fail. Property tests grow uncertainty
+  monotonically from both anchors and independently check each endpoint
+  deadline.
 
 Exit criteria:
 
@@ -1486,6 +1507,11 @@ Deliverables:
 - leap-candidate validation/transaction and evidence-provenance/lifecycle
   boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
   authority/diversity admission remains deferred to `v0.61.1`;
+- monotonic-correlation candidate audit proving offset/rate/drift claims carry
+  complete bounded recipes/conditions and immutable paired capture anchors,
+  uncertainty grows outward from those anchors, endpoint validity is
+  independently checkable without self-translation, and no core/platform value
+  can construct engine-admitted correlation state;
 - hard/statistical uncertainty, error-budget, observation-lifecycle,
   formatting, and error-taxonomy audit;
 - Kani-style reduced-state proofs for handle resolution, brand/generation
@@ -1504,7 +1530,8 @@ Verification:
   vectors, arena ABA/wraparound/concurrency state machines, equality/collision
   cases, borrowed/owned promotion and source-drop/owner-drop state machines,
   compile-fail lifetime-escape corpus, multi-root shared-DAG/retention/
-  compaction state machines, and reduced-state proof artifacts are mandatory.
+  compaction state machines, forged correlation bounds/anchors, circular
+  validity cases, and reduced-state proof artifacts are mandatory.
 
 Exit criteria:
 
@@ -1737,7 +1764,8 @@ Deliverables:
   checkpoint/restore, clone, and explicit reinitialization;
 - one invalidation fan-out contract covering outstanding requests/transmit
   identities, entropy/nonces, sockets, timers/deadlines, rate limits, helper
-  sessions, persistent bootstrap anchors, and TrustedClock publication state;
+  sessions, persistent bootstrap anchors, refresh reservations/fencing
+  generations/tombstones, and TrustedClock publication state;
 - inherited state is unusable until explicit child/restored-instance
   reinitialization establishes new generations;
 - hosted handle policy for non-inheritance, close-on-exec, pre-opened helper
@@ -1751,7 +1779,8 @@ Verification:
 - fork-before/after request, multithreaded fork boundary, exec, duplicate
   entropy/request state, VM snapshot replay, container checkpoint restore,
   inherited sockets/timers/rate limits/helper session, CLOEXEC/non-inherited
-  handles, queue saturation, child reinitialization, and deterministic
+  handles, inherited live/tombstoned refresh reservations, stale delayed-writer
+  install attempts, queue saturation, child reinitialization, and deterministic
   simulator schedules.
 
 Exit criteria:
@@ -1787,8 +1816,11 @@ Deliverables:
 - platform-neutral correlation providers may emit only
   `UntrustedMonotonicCorrelationCandidate` values using the complete `v0.16.0`
   directed-domain, method, uncertainty, validity, suspend/reset, provider, and
-  lifecycle contract. The trait has no admission method and no provider may
-  construct or claim `AdmittedMonotonicDomainCorrelation`;
+  lifecycle contract. Provider methods must supply the exact paired capture
+  anchors plus bounded derivation recipes/conditions for offset, rate, and
+  drift claims; registration or a narrow numeric assertion is not evidence.
+  The trait has no admission method and no provider may construct or claim
+  `AdmittedMonotonicDomainCorrelation`;
 - unavailable interval bounds, migration/frequency/suspend/virtualization/
   reset ambiguity, and unavailable completion bounds are explicit capability
   or typed error states, never scalar fallback;
@@ -1804,7 +1836,8 @@ Verification:
   missing provenance, migration/frequency/suspend/reset/virtualization
   ambiguity, and linearization-only versus through-completion capability;
   correlation-provider tests cover complete candidate metadata, withdrawal,
-  provider generation changes, and compile-time refusal of engine admission.
+  provider generation changes, root-recipe/condition/anchor preservation,
+  forged narrow scalar output, and compile-time refusal of engine admission.
 
 Exit criteria:
 
@@ -2005,7 +2038,9 @@ Deliverables:
 - hosted cross-clock methods emit untrusted directed correlation candidates,
   never admitted correlations. Candidate validity ends on reset, suspend/
   resume incompatibility, rate-semantics or namespace/process/machine
-  generation change, migration beyond the measured scope, or provider loss;
+  generation change, migration beyond the measured scope, or provider loss.
+  The candidate preserves exact cross-read anchors and measured/configured/
+  asserted condition/recipe evidence for every offset/rate/drift bound;
 - process/container/time-namespace identity and clock generation in every
   hosted clock report;
 - fork/exec and VM/container checkpoint/restore detection where the platform
@@ -2023,7 +2058,8 @@ Verification:
   brackets, coarse clocks, preemption/latency spikes, CPU migration, frequency
   change, virtualization, reset, and explicit no-through-completion capability;
 - directed correlation-candidate offset/rate/uncertainty containment,
-  lifecycle withdrawal, reversed-domain and provider-forgery refusal;
+  anchor-based uncertainty growth, lifecycle withdrawal, missing/forged
+  derivation evidence, reversed-domain and provider-forgery refusal;
 - cross-clock/domain arithmetic refusal, suspend/no-suspend elapsed behavior,
   raw/adjusted drift, fork/exec, VM/container restore, inherited handle, and
   process/machine generation tests;
@@ -2196,7 +2232,8 @@ Deliverables:
   and migration/reset/hotplug generation; unsupported methods never collapse a
   raw scalar PHC sample to a zero-width monotonic interval;
 - system/monotonic correlation candidates with measured cross-timestamp error,
-  calibration, rate/drift, and asymmetry inputs; platform never admits a
+  exact paired capture anchors, bounded offset/rate/drift derivation roots and
+  conditions, calibration, and asymmetry inputs; platform never admits a
   candidate or assigns clock authority;
 - Linux PTP character-device/standard-ioctl implementation separated from
   embedded device-specific MMIO;
@@ -2209,7 +2246,8 @@ Verification:
   benchmarks covering reset and clock-ID lifetime; interval containment,
   scalar-inflation, bracketing order, preemption, hotplug, and method-fallback
   refusal; outward-rounded directed-candidate fixtures, stale provider/device
-  generation, excessive uncertainty, and candidate/admitted type separation.
+  generation, anchor substitution, forged narrow bound/recipe, excessive
+  uncertainty, and candidate/admitted type separation.
 
 Exit criteria:
 
@@ -3265,14 +3303,34 @@ Deliverables:
   provider callbacks return structured evidence, not `is_true`;
 - engine is the sole owner of
   `AdmittedMonotonicDomainCorrelation` construction. Admission verifies the
-  complete `v0.16.0` untrusted candidate, provider registration/identity and
-  generation, directed source/target domains, offset/rate/drift bounds,
-  observation method and uncertainty provenance, validity, suspend/reset/
-  migration compatibility, lifecycle state, and policy uncertainty ceiling.
-  The opaque result retains every dependency and exposes only direct outward-
-  rounded translation; platform/provider self-assertion, forged identity,
-  excessive uncertainty, reverse use, implicit composition, and stale
-  candidates fail closed;
+  complete `v0.16.0` untrusted candidate, but provider registration is only an
+  identity/authorization input and never proves its numerical claims. The
+  existing bounded derivation verifier must independently produce current
+  `VerifiedBoundDerivation` and `PolicyAcceptedHardBound` values for the exact
+  offset, rate-ratio, and drift claims/anchors. Their canonical conditions are
+  composed with `All`; snapshot-consistent `ConditionAssessment` preserves
+  every atom's measured/configured/asserted `EvidenceOrigin`,
+  `IntegrityBasis`, `AuthorityBasis`, direct/derived lineage, and complete
+  transitive `SupportBasis`;
+- correlation admission captures and rechecks one generation vector spanning
+  provider registration/identity, directed endpoint domains, exact paired
+  anchors/pairing generation, observation method, all derivation/condition/
+  assessment/evidence/policy/model generations, suspend/reset/migration
+  compatibility, lifecycle, and uncertainty ceiling. The admitted value binds
+  those verified derivations, accepted tokens, assessments/support bases, and
+  anchors; rate/drift uncertainty grows outward from the anchors at every
+  translation rather than trusting a provider-supplied final number;
+- admitted `CorrelationValidity` initially accepts only independently checked
+  source and target endpoint deadlines. Admission and every strict use read
+  both exact domains independently and require each conservative latest edge
+  to precede its own deadline. Neither deadline may be translated by the
+  candidate/correlation under admission, by a dependent authority, or by an
+  indirect cycle. No single aggregate deadline substitutes for this pair;
+- the opaque result exposes only direct outward-rounded translation. Missing/
+  invalid derivation, unsupported/expired/withdrawn assumptions, provider
+  registration without adequate evidence, forged narrow bounds or anchors,
+  circular validity, excessive uncertainty, reverse use, implicit composition,
+  and stale candidates fail closed;
 - either domain/provider reset, suspend incompatibility, rate-semantics or
   scope/migration change, expiry, withdrawal, or generation change invalidates
   the admitted correlation through reserved lifecycle propagation and every
@@ -3390,8 +3448,11 @@ Deliverables:
   `IncompatibleMonotonicDomains` or each deadline is conservatively translated
   into the selected domain through a current engine-issued
   `AdmittedMonotonicDomainCorrelation`; its identity/generation, uncertainty
-  bound, expiry, provider, and lifecycle become dependencies. Mundilfari does
-  not compare raw mixed-domain deadlines or silently discard a vector entry;
+  bound, proof/condition/assessment/support/anchor generations, provider, and
+  lifecycle become dependencies. Its independently checked source/target
+  `CorrelationValidity` deadlines remain mandatory side conditions and are
+  never translated through that same correlation. Mundilfari does not compare
+  raw mixed-domain deadlines or silently discard a vector entry;
 - every refresh result carries a fixed-size `PriorStateObservation` sampled for
   one explicit tagged `PriorStateSubject`—`BatchAdmissionState`,
   `ConsensusAuthority`, or
@@ -3428,6 +3489,29 @@ Deliverables:
   a newer generation. Every later strict use independently revalidates all
   dependencies and `observed_at.latest < valid_until`. This profile grants no
   validity through physical commit, publication, completion, or caller return;
+- reservation ownership is concrete: engine alone creates a non-forgeable
+  `RefreshReservationGuard` binding reservation ID, owner operation, process/
+  session/machine generations, captured `RefreshInvalidationWatermark`, and a
+  nonwrapping `RefreshFencingGeneration`. Every dependency mutation capable of
+  invalidating staged state—evidence/assessment/accepted-token, policy,
+  membership, source, correlation/proof/model/anchor/validity, lifecycle,
+  clock-domain/reset, publication, or configuration change—atomically advances
+  the watermark before exposing that mutation;
+- `RefreshReservationGuard` tombstones its reservation on explicit
+  cancellation, unwind/panic where supported, normal early return, and `Drop`;
+  no external callback or fallible/Pending-producing work is permitted after
+  acquisition. A leaked/stalled live guard cannot be stolen because a timeout
+  elapsed. Engine cancellation, owner/process/session invalidation, or an
+  already published tombstone may authorize a new writer to atomically
+  supersede it with a strictly higher fencing generation; the delayed old
+  writer then returns typed `SupersededNoInstall`;
+- process/session restart invalidates every inherited reservation before state
+  use. Tombstones use bounded storage and are reclaimed only after the reader
+  generation floor proves no observer can accept the old fence; fencing
+  generations are never reused, and counter or reclamation-capacity exhaustion
+  faults closed rather than risking ABA. Readers remain bounded: they return a
+  current revalidated state, `RefreshInProgress`, or a typed fault and never
+  wait for a leaked/stalled writer;
 - `CommitCoveredRefresh` is optional. It uses the same reservation and sample,
   then expands the conservative latest edge by a current reviewed bound
   covering every remaining generation comparison, write, atomic swap,
@@ -3599,10 +3683,15 @@ Verification:
   model/lifecycle deadlines. Every dependency expires or withdraws in turn;
   mixed-domain inputs are rejected unless an
   `AdmittedMonotonicDomainCorrelation` translates them conservatively.
-  Candidate/admitted confusion, platform/provider self-admission, wrong
-  direction, forged identity, stale/expired/high-uncertainty candidates,
-  reset/suspend/rate/migration/provider withdrawal, exact earliest-edge
-  deadline translation, and attempted composition all fail closed;
+  Candidate/admitted confusion, platform/provider self-admission, registration
+  without evidence, wrong direction, forged identity/narrow offset/rate/drift
+  claim or capture anchor, missing/substituted derivation/condition/assessment/
+  support basis, stale/expired/high-uncertainty candidates, assumption
+  withdrawal, reset/suspend/rate/migration/provider withdrawal, anchor-based
+  uncertainty growth, exact earliest-edge deadline translation, and attempted
+  composition all fail closed. Endpoint validity tests independently sample
+  both domains and reject self/indirect translation, circular supervision,
+  either deadline expiry, and either domain reset;
 - prior-observation tests bind identity/generation, exact-domain
   `PriorStateSubject`, `LinearizationObservationStamp`, unchanged
   `valid_until`, invalidation generation/reason, and engine/publication
@@ -3619,7 +3708,12 @@ Verification:
   receipt without retroactively changing its measured disposition. Reservation
   abandonment/supersession, invalidation watermark changes, delayed-writer ABA,
   generation exhaustion, and newer-writer ordering cannot overwrite newer
-  state;
+  state. Every invalidating dependency class advances the watermark before
+  visibility. Panic/unwind, explicit cancellation, guard drop/early return,
+  future drop, leaked/stalled owner, engine cancellation, process/session
+  restart, timeout-only steal attempts, higher-fence supersession,
+  `SupersededNoInstall`, bounded tombstone reclamation, reader-generation
+  floors, capacity exhaustion, and bounded reader availability are covered;
 - `CommitCoveredRefresh` injects preemption after the sample and each remaining
   generation comparison, write, swap, critical-section edge, and observation-
   record step. Tests hit one tick below/at/above the reviewed remaining-work
@@ -3716,8 +3810,12 @@ Deliverables:
   domains fail as `IncompatibleMonotonicDomains` unless each deadline is
   conservatively translated through a current
   `AdmittedMonotonicDomainCorrelation`; each correlation identity/generation,
-  uncertainty, and expiry then enters the proof-support set and aggregate
-  deadline. Raw cross-domain deadline comparison is forbidden;
+  verified offset/rate/drift derivations, canonical condition/assessment,
+  transitive support bases, capture anchors, provider/lifecycle, and uncertainty
+  then enter the proof-support set. The authority retains and independently
+  checks both endpoint `CorrelationValidity` deadlines; neither is translated
+  through the correlation itself. Raw cross-domain deadline comparison is
+  forbidden;
 - expiry, withdrawal, replacement, or generation change of any used
   contributor or correlation invalidates that exact consensus authority even
   when unused members could form another quorum. Alternative support requires
@@ -3742,8 +3840,10 @@ Verification:
   simulator campaigns;
 - same-domain aggregate-minimum tests expire each required dependency in turn;
   mixed-domain tests cover rejection, conservative correlation translation,
-  correlation uncertainty/expiry/generation change, and prohibit raw numeric
-  comparison. Exact-support tests distinguish used from unused eligible
+  forged narrow correlation proof/anchor, correlation assumption/support/
+  endpoint-validity expiry or withdrawal, generation change, circular
+  validation, and prohibit raw numeric comparison. Exact-support tests
+  distinguish used from unused eligible
   members and prove that loss of one used member invalidates the old authority
   even when an unused alternative quorum exists, requiring a new identity.
 
@@ -6522,7 +6622,9 @@ Deliverables:
   results remain diagnostic and have no servo or clock-publication authority;
 - orchestration preserves the exact `ConsensusAuthorityId`, canonical bounded
   `ProofSupportSet`, single `AuthorityValidity` domain, and every admitted
-  monotonic-correlation dependency produced by the generic engine. It cannot
+  monotonic-correlation dependency produced by the generic engine, including
+  verified offset/rate/drift derivations, conditions/assessments/support bases,
+  capture anchors, and independently checked endpoint validity. It cannot
   replace used contributors with unused survivors or recompute only a deadline
   while retaining the old authority identity;
 - multi-root orchestration claiming one admitted source set consumes the exact
@@ -6566,7 +6668,8 @@ Verification:
   cover every non-contributor status, duplicate/correlated memberships, and
   atomic membership-generation replacement; separate type-state tests reject
   every aborted/unprocessed outcome. Cross-family cases also cover same-domain
-  minimum validity, mixed-domain rejection/translation, correlation expiry,
+  minimum validity, mixed-domain rejection/translation, forged correlation
+  proof/anchor, either endpoint-validity expiry/reset, circular validity,
   used-support withdrawal while an alternative quorum remains, and mandatory
   new-authority recomputation. Navheim is represented only by protocol-neutral
   fixtures here.
@@ -6898,7 +7001,10 @@ Deliverables:
   `AdmittedMonotonicDomainCorrelation`, conservatively translates the deadline
   to the target interval's earliest edge with outward rounding, takes the
   minimum of all publication dependencies, and binds that correlation
-  identity/generation/provider/lifecycle/expiry into the snapshot.
+  identity/generation, verified numerical derivations, condition/assessment/
+  support bases, capture anchors, independent endpoint validity, provider/
+  lifecycle/expiry into the snapshot. Publication independently rechecks both
+  endpoint deadlines and never uses the correlation to validate itself.
   Otherwise publication fails typed; raw cross-domain comparison is forbidden;
 - concurrent batch refresh publishes a new `CompleteBatchVerification` and
   retires the prior batch/snapshot at one linearization point after rechecking
@@ -6925,6 +7031,14 @@ Deliverables:
   be delivered but can never return synchronized authority. Reservation
   generation and invalidation watermark prevent a delayed writer from
   overwriting any newer publication/invalidation;
+- concurrent publication owns the atomic `RefreshInvalidationWatermark` and
+  `RefreshFencingGeneration` storage plus `RefreshReservationGuard` install/
+  tombstone/supersession operations. Every invalidating dependency update
+  advances the watermark in the same ordered mutation that makes its new
+  generation visible. Only explicit cancellation/guard tombstone or owner/
+  process/session invalidation permits a higher-fence writer to supersede;
+  elapsed time alone never does. Superseded writers publish nothing and return
+  `SupersededNoInstall`;
 - optional `CommitCoveredRefresh` expands the sample's latest edge by a current
   reviewed remaining-work capability covering checks, writes, swap,
   preemption/critical-section allowance, and observation-record publication,
@@ -6989,7 +7103,8 @@ Deliverables:
 Verification:
 
 - Loom/Shuttle-style repository-only model tests for publication,
-  invalidation, queues, cancellation, persistence swap, and helper IPC state;
+  invalidation, fencing/watermarks/reservation guards/tombstone reclamation,
+  queues, cancellation, persistence swap, and helper IPC state;
 - old/new admitted/raw leap candidate, EOP and scale-offset component proof,
   evidence/policy/membership/conversion generation, retrieval claim, artifact-
   integrity or configured-platform-trust assurance, verifier/provider versus
@@ -7010,12 +7125,19 @@ Verification:
   correlation in turn, including the case where an unused alternative quorum
   remains. Mixed-domain publication either translates through the exact
   admitted correlation or fails without publication;
+- admitted-correlation publication schedules substitute numerical proofs,
+  conditions, assessments, support bases, capture anchors, endpoint deadlines,
+  and provider/lifecycle generations one at a time; either endpoint reset/
+  expiry or circular self-validation prevents synchronized publication;
 - preemption is injected after every post-sample step and at the exact
   remaining-work/deadline margin for `CommitCoveredRefresh`. Separate
   `LinearizationRefresh` schedules inject unbounded preemption immediately
-  after the logical sample, reservation abandonment, invalidation and newer
+  after the logical sample, guard cancellation/drop/unwind, reservation
+  abandonment, every watermark-advancing invalidation and newer
   publication during delay, delayed historical install/receipt, reader retry
-  exhaustion, and strict-read expiry/revalidation. Capability absence leaves
+  exhaustion, higher-fence supersession/`SupersededNoInstall`, process/session
+  restart, bounded tombstone reclamation/exhaustion, and strict-read expiry/
+  revalidation. Timeout-only theft is refused. Capability absence leaves
   this hosted profile functional. Monotonic sample failure, no comparable
   domain, or reservation failure proves
   `LinearizationObservationStamp::Unavailable` can accompany absence or known
@@ -7237,6 +7359,13 @@ Deliverables:
   coverage, preserves the exact tagged subject and unavailable reason, and
   delayed waking/polling/return never turns `Retained` into authority through
   receipt;
+- async acquisition performs every transport/provider/callback/fallible action
+  before requesting `RefreshReservationGuard`. The final poll that acquires the
+  guard contains no await, wake registration, external callback, or operation
+  that can return `Poll::Pending`; it must complete with `Poll::Ready` after
+  install, typed no-install, or tombstone. Async state cannot store a live guard
+  across polls. Future drop before acquisition owns no reservation; unwind/drop
+  during the final poll runs the guard tombstone path;
 - no Tokio or runtime dependency.
 
 Verification:
@@ -7248,7 +7377,10 @@ Verification:
   witness escape, retained-versus-concurrently-invalidated prior-batch
   outcomes, expiry/invalidation immediately after the observation point,
   unavailable sampling/capability/domain outcomes, arbitrarily delayed result
-  polling/receipt, wake discipline, and feature matrix.
+  polling/receipt, compile/model checks that no `Poll::Pending` or wake
+  registration occurs with a live reservation, future drop before acquisition,
+  panic/unwind/drop during the final poll, superseded no-install, wake
+  discipline, and feature matrix.
 
 Exit criteria:
 
@@ -7285,10 +7417,13 @@ Deliverables:
   `PriorStateObservation`; insufficient capacity aborts without a
   proof/token prefix or prior-state mutation;
 - engine/fusion builders separately size bounded `BatchAdmissionState`,
-  canonical `ProofSupportSet`, admitted monotonic-domain correlations, and
-  authority dependency vectors. Observation storage always reserves the fixed-
-  size measured/unavailable stamp plus refresh-profile evidence. Hosted
-  builders require a bounded version/reservation strategy for
+  canonical `ProofSupportSet`, correlation numerical derivations/conditions/
+  assessments/transitive support bases/capture anchors/independent endpoint
+  validity, admitted monotonic-domain correlations, and authority dependency
+  vectors. Observation storage always reserves the fixed-size measured/
+  unavailable stamp plus refresh-profile evidence. Hosted builders size
+  reservation slots, fencing/watermark generations, owner/cancellation state,
+  tombstones, reader-generation tracking, and reclamation metadata for
   `LinearizationRefresh`; a remaining-work capability is required only when
   enabling `CommitCoveredRefresh`;
 - documented allocation behavior per operation for every `alloc` builder;
@@ -7307,7 +7442,9 @@ Verification:
   zero/minimum/exact/short capacity for every batch membership, result,
   canonical-order, snapshot, accounting, and cancellation-checkpoint buffer;
   compile-fail cross-status construction plus exact size/stack evidence for
-  proof-support/correlation capacities and both observation-stamp variants;
+  proof-support/correlation proof/anchor/endpoint-validity capacities, zero/
+  exact/short reservation/tombstone/reader-floor capacity, generation
+  exhaustion and bounded reclamation, and both observation-stamp variants;
   every prior-observation variant.
 
 Exit criteria:
@@ -7351,11 +7488,18 @@ Deliverables:
   reject mixed-domain raw deadlines, omitted support, and batch/consensus/
   publication identity substitution;
 - correlation candidates encode directed domain/generation identities,
-  offset/rate/drift intervals, method/provenance, validity, suspend/reset/
+  typed offset/rate/drift claim/condition identities and bounded unverified
+  derivation records, exact paired capture anchors/pairing generation,
+  independent endpoint-validity deadlines, method/provenance, suspend/reset/
   migration/provider/lifecycle metadata, and canonical identity. External
   boundaries can decode only the untrusted candidate or a historical admitted-
-  correlation reference; no schema directly constructs the opaque current
-  engine-admitted type;
+  correlation reference with historical assessment/support metadata; no schema
+  directly constructs verified correlation derivations, accepted numerical
+  claims, or the opaque current engine-admitted type;
+- reservation/fencing/watermark/tombstone encodings are diagnostic historical
+  records only. No persisted/IPC/schema value recreates a live
+  `RefreshReservationGuard`, authorizes supersession, or survives process/
+  session generation change as a current reservation;
 - every IPC, persistence, C, WASM, log/evidence, and language-binding encoding
   of a bound condition preserves the `v0.7.3` unresolved/resolved type-state;
   identifier-only forms require the exact verified registry generation and no
@@ -7395,7 +7539,9 @@ Verification:
   complete witness, prior-observation field/variant substitution and
   current-authority misuse, measured/unavailable stamp substitution,
   authority-subject confusion, omitted/reordered support dependencies,
-  mixed-domain deadline forgery, C/WASM/JNI-or-C/Swift-or-C fixtures, context-first/child-first/
+  mixed-domain deadline forgery, forged correlation derivation/anchor/endpoint-
+  validity records, live-reservation decode/supersession attempts,
+  C/WASM/JNI-or-C/Swift-or-C fixtures, context-first/child-first/
   arbitrary destruction order, double release, use after context close, shared
   frozen-owner threads, allocation/promotion failure without leaked or
   partially initialized handles, and fuzzing.
@@ -7690,9 +7836,12 @@ Deliverables:
   receipt; distinct batch/consensus/publication authority identities,
   exact bounded proof-support sets, one-domain conservative minimum validity,
   untrusted-versus-engine-admitted directed correlation lifecycle and outward-
-  rounded earliest-edge deadline translation, admitted dependencies for every
-  translation, used-support invalidation despite an available alternative
-  quorum, portable version-reserved `LinearizationRefresh`, and optional
+  rounded earliest-edge deadline translation, proof-bearing offset/rate/drift
+  claims with exact anchors/conditions/assessments/transitive support bases and
+  independently checked non-circular endpoint validity, admitted dependencies
+  for every translation, used-support invalidation despite an available
+  alternative quorum, portable version-reserved `LinearizationRefresh` with
+  RAII guard/watermark/fencing/tombstone/restart recovery, and optional
   remaining-work-bounded `CommitCoveredRefresh`,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
@@ -8059,6 +8208,12 @@ Deliverables:
   truncate a support set, retain old authority, mint new authority, or
   accumulate failed-refresh state; hosted linearization refresh remains
   available without a commit-coverage capability;
+- correlation claim/recipe/condition/assessment/support/anchor/endpoint-
+  validity storage and verification/uncertainty-growth work are included in
+  operation-wide limits. Refresh reservation/tombstone/reader-generation
+  tables have fixed capacities and bounded reclamation; leaked/stalled writers,
+  tombstone saturation, and fencing exhaustion return bounded typed failure and
+  cannot trigger timeout-based stealing, unbounded scanning, or ABA reuse;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -8070,7 +8225,9 @@ Deliverables:
 Verification:
 
 - continuous structure-aware fuzzing, allocation-failure injection, worst-case
-  benchmarks, memory limits, and arbitrary-input runs.
+  benchmarks, correlation proof/anchor worst cases, reservation/tombstone
+  saturation and reclamation schedules, memory limits, and arbitrary-input
+  runs.
 
 Exit criteria:
 
@@ -8095,9 +8252,11 @@ Deliverables:
   review;
 - platform correlation audit proving PHC/hosted/architectural/embedded
   providers emit only complete directed
-  `UntrustedMonotonicCorrelationCandidate` values, withdraw on every declared
-  reset/suspend/rate/migration/provider transition, and have no constructor or
-  dependency path to engine-admitted correlation state;
+  `UntrustedMonotonicCorrelationCandidate` values with exact capture anchors
+  and bounded numerical claim recipes/conditions, withdraw on every declared
+  reset/suspend/rate/migration/provider transition, and have no constructor,
+  numerical-proof bypass, or dependency path to engine-admitted correlation
+  state;
 - safe-wrapper length/alignment/discriminant/ownership/lifetime/kernel-size
   validation;
 - C/JNI/Swift context/child ownership, retain/close/destruction order,
@@ -8215,15 +8374,21 @@ Deliverables:
   complete-new/prior-retirement races; non-authoritative batch admission versus
   consensus/publication subject identity, exact used `ProofSupportSet`, same-
   domain minimum deadline, untrusted/admitted correlation type confusion,
-  provider self-admission/forgery, directed outward-rounded earliest-edge
-  translation, mixed-domain rejection, each domain/provider/lifecycle
-  reset/suspend/rate/migration/expiry/change,
+  provider registration without evidence/self-admission, forged narrow
+  offset/rate/drift proof or capture anchor, condition/assessment/support-basis
+  substitution/withdrawal, elapsed uncertainty growth, directed outward-
+  rounded earliest-edge translation, independently checked endpoint deadlines,
+  circular self/indirect validity, mixed-domain rejection, each domain/
+  provider/lifecycle reset/suspend/rate/migration/expiry/change,
   used-contributor withdrawal while an unused alternative quorum remains, and
   mandatory new-authority identity; prior identity/generation,
   measured/unavailable stamp, deadline, invalidation generation/reason,
   engine/publication generation, unbounded post-sample hosted preemption,
-  reservation abandonment/ABA/supersession/invalidation watermark and delayed
-  historical install, bounded reader retry/`RefreshInProgress`, strict
+  guard panic/unwind/drop/cancellation, reservation abandonment/leak/stall/ABA/
+  higher-fence supersession, every invalidation-watermark dependency class,
+  process/session restart, delayed old-writer `SupersededNoInstall`, bounded
+  tombstone/reader-floor reclamation and exhaustion, timeout-steal refusal,
+  delayed historical install, bounded reader retry/`RefreshInProgress`, strict
   revalidation after receipt, plus commit-covered preemption after every
   bounded step, exact remaining-work margin, missing/stale capability,
   sample/domain failure, immediate post-linearization expiry/invalidation, and
@@ -8386,10 +8551,16 @@ Deliverables:
   assumptions, policy-accepted-bound lifetime, provider-owned monotonic
   interval provenance, conservative upper-edge deadline/domain enforcement,
   untrusted directed versus opaque engine-admitted monotonic correlation,
-  outward-rounded earliest-edge deadline mapping and lifecycle invalidation,
+  proof-bearing offset/rate/drift claims, exact capture anchors/uncertainty
+  growth, condition/assessment/transitive support basis, independently checked
+  non-circular endpoint validity, outward-rounded earliest-edge deadline
+  mapping and lifecycle invalidation,
   non-authoritative `BatchAdmissionState`,
   version-reserved `LinearizationRefresh` versus remaining-work-bounded
-  `CommitCoveredRefresh`,
+  `CommitCoveredRefresh`, `RefreshReservationGuard` ownership/drop/cancel/
+  unwind, watermark mutation rules, fencing supersession/no-install, process/
+  session invalidation, bounded tombstone reclamation, timeout-steal refusal,
+  and async no-`Poll::Pending` rule after reservation,
   linearization-time `observed_at`/`valid_until` versus WCET-backed
   through-completion contracts, strict versus conditional facade results,
   incompatibility, and no quantum adjustment;

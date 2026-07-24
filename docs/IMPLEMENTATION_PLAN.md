@@ -501,7 +501,10 @@ Aggregate validity is the conservative minimum of every required deadline in
 one explicit `MonotonicClockId`. Mixed domains are rejected unless each
 deadline is conservatively translated through a current admitted
 `AdmittedMonotonicDomainCorrelation`, whose identity, generation, uncertainty,
-provider/lifecycle, and expiry become dependencies. Raw cross-domain numeric
+verified numerical derivations, condition/assessment/transitive support bases,
+capture anchors, independent endpoint validity, provider/lifecycle, and expiry
+become dependencies. Both endpoint deadlines are checked in their own domains
+without translating them through that correlation. Raw cross-domain numeric
 comparison is forbidden.
 Expiry, withdrawal, replacement, or generation change of any used support
 invalidates the exact authority even if other members could form a quorum; a
@@ -525,6 +528,18 @@ generation. Arbitrary preemption may follow. Physical installation succeeds
 only if reservation/version and invalidation watermark remain current, and
 every later strict use revalidates all generations and the deadline at its own
 sample. It claims nothing through physical commit or return.
+
+Engine-owned `RefreshReservationGuard` binds owner operation, process/session/
+machine generations, captured invalidation watermark, and a nonwrapping fencing
+generation. Every dependency mutation that can invalidate staged state advances
+the watermark before becoming visible. Explicit cancellation, unwind, early
+return, or drop tombstones the guard; no callback, fallible operation, or async
+`Poll::Pending` is permitted after acquisition. A new writer may supersede only
+an explicit tombstone or invalidated owner/session using a higher fence—never a
+timeout alone—and the delayed writer returns `SupersededNoInstall`. Restart
+invalidates inherited guards. Tombstones are bounded and reclaimed only behind
+the reader-generation floor; capacity/fencing exhaustion faults closed while
+readers boundedly return current state, `RefreshInProgress`, or a typed fault.
 
 Optional `CommitCoveredRefresh` additionally expands the sample's latest edge
 by a current reviewed bound covering all remaining checks, writes, swap,
@@ -677,18 +692,27 @@ through-completion capability exists only with reviewed WCET evidence.
 
 Cross-domain correlation follows an explicit type-state boundary. Core defines
 directed `UntrustedMonotonicCorrelationCandidate` values and outward-rounded
-translation: exact source/target domain generations, offset interval,
-rate/drift bound, observation method, uncertainty provenance, validity,
-suspend/reset/migration compatibility, provider, and lifecycle are mandatory.
+translation: exact source/target domain generations and paired capture anchors
+are mandatory. Offset, rate-ratio, and drift bounds are typed hard-bound claims
+with complete bounded derivation recipes and canonical conditions, not trusted
+numeric fields. Their uncertainty grows outward from the immutable anchors.
 Mapping a source deadline to a target interval uses the conservative earliest
 edge. Platform providers may measure and withdraw candidates but cannot admit
-them. Engine alone verifies provider registration, policy uncertainty limits,
-all domain/lifecycle bindings, and creates opaque
-`AdmittedMonotonicDomainCorrelation`. Direct translation is the only initial
-mode; implicit chaining, graph search, reverse use, cycles, and provider self-
-assertion are refused. Reset, incompatible suspend/rate/scope/migration,
-provider loss, expiry, withdrawal, or generation change invalidates every
-dependent admission, consensus, and publication state.
+them.
+
+Engine admission independently verifies every numerical derivation and performs
+one snapshot-consistent condition assessment retaining measured/configured/
+asserted origin, integrity, authority, lineage, and complete transitive support
+bases. Provider registration alone proves no bound. Initial
+`CorrelationValidity` contains independently read source and target deadlines;
+neither may be translated by the correlation being admitted or an indirect
+cycle. The opaque admitted value binds proofs, assessments, accepted tokens,
+anchors, validity, provider, and lifecycle. Direct translation is the only
+initial mode; implicit chaining, graph search, reverse use, cycles, circular
+validity, forged narrow bounds, and provider self-assertion are refused. Reset,
+incompatible suspend/rate/scope/migration, assumption/provider loss, endpoint
+expiry, withdrawal, or generation change invalidates every dependent admission,
+consensus, and publication state.
 
 Strict virtual-clock reads enforce accepted-bound expiry themselves: each read
 uses a bounded monotonic read interval from the deadline's exact domain and
@@ -1232,9 +1256,9 @@ its broader pre-1.0 completeness contract:
 | --- | --- |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
-| Typed monotonic domains, directed untrusted correlation candidates, outward-rounded direct translation, platform measurement, opaque engine admission, and execution lifecycle generations | kernel `v0.16.0`; lifecycle `v0.23.1`; traits/platform `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; admission `v0.60.1`; consumers `v0.61.0`, `v0.133.0`, `v0.137.1` |
+| Typed monotonic domains, proof-bearing directed correlation candidates with immutable capture anchors, outward-rounded direct translation, independently checked endpoint validity, platform measurement, opaque snapshot-consistent engine admission, and execution lifecycle generations | kernel `v0.16.0`; audit `v0.17.0`; lifecycle `v0.23.1`; traits/platform `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; admission `v0.60.1`; consumers `v0.61.0`, `v0.133.0`, `v0.137.1` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, disjoint complete-versus-aborted batch status type-state, non-authoritative batch admission versus consensus authority, original-membership versus exact proof-support quorum accounting, version-reserved linearization versus commit-covered prior-state refresh, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers/publication `v0.133.0`–`v0.144.0` |
+| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, disjoint complete-versus-aborted batch status type-state, non-authoritative batch admission versus consensus authority, original-membership versus exact proof-support quorum accounting, fenced RAII version-reserved linearization versus commit-covered prior-state refresh, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; lifecycle `v0.23.1`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers/publication `v0.133.0`–`v0.144.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
@@ -1248,7 +1272,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Conservative provider-owned monotonic-read intervals, WCET-free version-reserved refresh linearization versus optional commit-covered refresh, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0` |
+| Conservative provider-owned monotonic-read intervals, WCET-free fenced/RAII version-reserved refresh linearization with explicit watermark/supersession/restart/reclamation and async no-Pending rules versus optional commit-covered refresh, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; lifecycle `v0.23.1`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

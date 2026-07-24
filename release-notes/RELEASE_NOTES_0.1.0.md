@@ -190,6 +190,19 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   candidates and outward-rounded earliest-edge deadline translation, platforms
   measure candidates, and engine alone admits opaque correlations with full
   reset/suspend/rate/migration/provider/lifecycle invalidation.
+- Correlation admission is now proof-bearing rather than registration-bearing:
+  offset/rate/drift use the existing bounded derivation and condition system,
+  exact paired capture anchors grow uncertainty outward, structured support is
+  retained, and source/target validity is independently checked without using
+  the correlation to prove itself. Forged narrow bounds, missing recipes, and
+  circular validity fail closed.
+- `LinearizationRefresh` now has a complete RAII concurrency contract:
+  engine-only guards bind invalidation watermarks, execution generations, and
+  nonwrapping fences; cancel/drop/unwind/panic tombstone reservations; timeout
+  never permits stealing; stale writers return `SupersededNoInstall`; restart,
+  bounded reader progress, tombstone reclamation, and exhaustion are explicit.
+  Async code completes every pending/fallible/external operation before guard
+  acquisition and cannot return `Poll::Pending` while holding it.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct
