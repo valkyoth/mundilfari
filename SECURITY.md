@@ -93,7 +93,18 @@ the release branch between review and tagging.
   retain all invalidating generation dependencies. Hosted forms own bounded
   engine state;
   no_std forms are inline or expose a checked engine-store lifetime/brand/
-  generation, never an undocumented pointer into caller storage.
+  generation, never an undocumented pointer into caller storage. The one
+  `EngineProofHandle<'engine, K, T>` mechanism uses a sealed storage-kind
+  parameter; `VerifiedBoundDerivationRef` and
+  `PolicyAcceptedHardBoundRef` are checked semantic projections over it, not
+  parallel stores or lifetime models.
+  Multi-root engine verification canonicalizes root/member order and captures
+  one bounded generation snapshot. Shared structural work runs once and its
+  failure reaches every dependent root; root-local evidence failure remains
+  local. Only a complete all-member outcome can represent the admitted set.
+  Cancellation, global work exhaustion, snapshot invalidation, or invariant
+  failure mints no proof/token prefix and explicitly reports every member as
+  indeterminate or unprocessed with stable complete resource accounting.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,

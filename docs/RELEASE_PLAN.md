@@ -732,10 +732,16 @@ Deliverables:
   the required canonical identities and lifecycle/generation dependencies,
   never a borrow or handle into the unverified source arena;
 - “source-arena-independent” is exact: hosted forms own all bounded engine
-  state; no_std forms either contain it inline or expose a checked
-  `EngineProofHandle<'engine, T>` whose engine-storage lifetime, brand,
-  nonwrapping generation, destruction, and stale-handle rules are public. It
-  never means undocumented `'static` or a hidden pointer into caller storage;
+  state; no_std forms either contain it inline or use the one checked storage
+  reference `EngineProofHandle<'engine, K, T>`, where sealed `K` distinguishes
+  verified-derivation from policy-accepted storage. The public semantic
+  projections `VerifiedBoundDerivationRef<'engine, T>` and
+  `PolicyAcceptedHardBoundRef<'engine, T>` each contain the corresponding
+  kind-specific handle and resolve it only through the matching checked engine
+  store/read lease. They allocate no parallel store, identity, generation, or
+  ownership mechanism. Engine-storage lifetime, brand, nonwrapping generation,
+  destruction, kind mismatch, and stale-handle rules are public; none of these
+  names means undocumented `'static` or a hidden pointer into caller storage;
 - dropping a borrowed or owned source arena after successful engine promotion
   does not itself invalidate the engine-owned proof/token; evidence, model,
   policy, source, lifecycle, assessment, and deadline generation changes still
@@ -3223,10 +3229,12 @@ Deliverables:
   `VerifiedBoundDerivation<T>` containing the canonical proof/claim identities,
   verified operation/model/rule inputs, and every lifecycle/generation
   dependency needed for revalidation. Hosted forms own the bounded state;
-  no_std forms store it inline or return
-  `VerifiedBoundDerivationRef<'engine, T>` through a checked branded,
-  nonwrapping-generation engine-store handle. Neither form contains an
-  undocumented pointer or owner reference to caller/source-arena storage;
+  no_std forms store it inline or return the semantic
+  `VerifiedBoundDerivationRef<'engine, T>` projection over
+  `EngineProofHandle<'engine, VerifiedDerivationKind, T>` from `v0.7.4`.
+  Resolution uses the checked branded, nonwrapping-generation engine store;
+  neither form contains an undocumented pointer or owner reference to
+  caller/source-arena storage;
 - engine verification resolves the claim's mandatory typed
   `DerivationHandle<'arena, T>` against the exact admitted arena brand/
   generation. It obtains an immutable read lease or frozen pinned snapshot,
@@ -3240,10 +3248,45 @@ Deliverables:
   from persistence/IPC must first atomically reintern the complete unverified
   record into a bounded current arena;
 - one owned multi-root set may supply several verification inputs through
-  independent root views while sharing immutable source DAG storage. Each root
-  is verified and accepted independently with its exact canonical identity;
-  failure/withdrawal of one root cannot partially mint, invalidate, or
-  substitute another root's proof/token, and batch iteration/work is bounded;
+  independent root views while sharing immutable source DAG storage. A bounded
+  admission list maps each policy-visible `BatchMemberId` to a canonical root
+  identity. Duplicate canonical roots share structural computation but retain
+  distinct source/lifecycle memberships when policy requires them, and never
+  alias accepted-token identity;
+- multi-root verification returns a bounded `BatchVerificationOutcome<T>`.
+  Before verification work it canonicalizes admitted membership and processes
+  roots by canonical root identity then `BatchMemberId`, never caller order.
+  Results bind the complete admitted membership identity/generation and use
+  stable ordering, so input permutations have identical outcome identities,
+  result order, and resource-accounting rules;
+- one batch transaction captures a single global policy/membership/evidence/
+  provider/rule/model/lifecycle generation snapshot plus bounded root-specific
+  evidence vectors. Each shared derivation node is verified once under that
+  snapshot. Structural failure propagates to every transitively dependent root,
+  while root-specific evidence or condition failure affects only that
+  membership; independent roots continue so a completed batch reports every
+  member;
+- `BatchVerificationOutcome<T>` is explicitly `Complete` or `Aborted`. A
+  `Complete` outcome has a terminal result for every admitted member and may
+  convert to non-forgeable `CompleteBatchVerification<T>`. Successful per-root
+  proof/token identities equal independent verification under the same
+  snapshot. Consensus or any API claiming the full admitted membership set
+  requires that complete witness, never an iterator or prefix of successes;
+- cancellation, shared work-budget exhaustion, snapshot invalidation, or
+  internal invariant failure globally aborts the transaction and mints no
+  externally consumable `VerifiedBoundDerivation` or
+  `PolicyAcceptedHardBound`, including work completed before the abort.
+  Already visited affected members report explicit `Indeterminate` diagnostics
+  and unvisited members report `Unprocessed`; snapshot invalidation may
+  deterministically mark every member `Indeterminate`. The abort reason,
+  canonical stopping checkpoint, unique shared work, per-root work, and
+  consumed/unused budget are reported, and an aborted outcome cannot convert
+  to `CompleteBatchVerification`;
+- resource accounting is complete and stable: shared-node work is charged once
+  to the unique total and attributed to reachable roots by one documented
+  deterministic rule; root/evidence work remains per member. Capacity checks
+  cover result slots and accounting metadata as well as DAG work, and no
+  partial outcome can be consumed as the full admitted membership set;
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -3283,8 +3326,10 @@ Deliverables:
   conservative expiry/re-evaluation deadline;
 - `PolicyAcceptedHardBound<T>` is likewise source-arena-independent. Hosted
   forms own their bounded state; no_std forms store bounded state inline or
-  return `PolicyAcceptedHardBoundRef<'engine, T>` through a checked branded,
-  nonwrapping-generation engine-store handle. Completed promotion permits the
+  return the semantic `PolicyAcceptedHardBoundRef<'engine, T>` projection over
+  `EngineProofHandle<'engine, PolicyAcceptedKind, T>` through that same checked
+  branded, nonwrapping-generation engine store. This is not a second handle or
+  storage abstraction. Completed promotion permits the
   unverified source arena/owner to drop without revoking the token, while every
   bound evidence/model/policy/source/lifecycle/assessment/deadline generation
   remains revalidated and can revoke it; failed or interrupted promotion mints
@@ -3335,8 +3380,17 @@ Verification:
   source drop, canonical-identity/generation dependency preservation, and
   proof that engine-owned results contain no source brand/handle/owner;
 - shared-set roots verified in permutation, duplicate-root coalescing without
-  token aliasing, one-root failure/withdrawal independence, bounded batch work,
-  and batch-versus-individual proof identity equivalence;
+  token aliasing, canonical root/member ordering, one-root evidence failure
+  independence, shared-node failure fan-out, one-snapshot generation capture,
+  bounded batch work, complete-member witness enforcement, and batch-versus-
+  individual proof/token identity equivalence;
+- cancellation and global work exhaustion after every unique DAG node and
+  member, generation change after every verified prefix, result/accounting
+  capacity exhaustion, and internal-invariant abort injection prove global
+  aborts mint no authoritative artifact, classify every member as
+  `Indeterminate` or `Unprocessed`, return stable complete accounting, and
+  cannot convert to `CompleteBatchVerification`; every root permutation
+  produces the same canonical outcome;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -3363,6 +3417,9 @@ Exit criteria:
   currently trusted without a verified exact derivation and fresh,
   snapshot-consistent engine-issued policy-accepted assessment whose support
   bases remain visible;
+- no attacker-controlled root order or global abort can select an authoritative
+  prefix, and no full-membership consumer accepts anything except the exact
+  complete batch witness;
 - `v0.60.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.61.0 - Generic Clustering Combining And Diversity
@@ -3382,6 +3439,11 @@ Deliverables:
   derivation identity, condition/assessment generation, and support-basis
   report; conditional claims remain available only through explicit diagnostic
   results;
+- when inputs come from multi-root admission, an operation claiming the full
+  configured membership consumes `CompleteBatchVerification`, checks its exact
+  membership generation, and includes terminal failed members in quorum
+  eligibility; a successful prefix or aborted diagnostic outcome is never
+  treated as the admitted set;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
@@ -3394,7 +3456,8 @@ Verification:
 
 - correlated hostnames, tie/order invariance, malicious majority, source loss,
   diversity thresholds, stale/lost assessment, conditional-claim rejection,
-  and simulator campaigns.
+  complete batches containing terminal failed members, aborted/prefix outcome
+  refusal, membership-generation substitution, and simulator campaigns.
 
 Exit criteria:
 
@@ -6169,6 +6232,10 @@ Deliverables:
   generations, and unmodified per-atom `SupportBasis`; conditional,
   indeterminate, expired, withdrawn, policy-rejected, or unverified-derivation
   results remain diagnostic and have no servo or clock-publication authority;
+- multi-root orchestration claiming one admitted source set consumes the exact
+  `v0.60.1` `CompleteBatchVerification` membership witness. Aborted batches,
+  successful prefixes, and caller-filtered result iterators cannot silently
+  shrink `n`, remove a failed member, or enter consensus as a complete set;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
   claims with assertion provenance, configured/measured/authenticated/inferred/
   unknown assurance, expiry, and generation;
@@ -6196,7 +6263,9 @@ Verification:
   policy/membership reload during
   withdrawals, in-flight crypto, pending servo proposals, and helper
   authorization, stale-result rejection, atomic replacement, and interval
-  properties. Navheim is represented only by protocol-neutral fixtures here.
+  properties; aborted-batch and caller-filtered successful-prefix attempts
+  cannot shrink the admitted source set. Navheim is represented only by
+  protocol-neutral fixtures here.
 
 Exit criteria:
 
@@ -6762,6 +6831,11 @@ Deliverables:
   derivation nodes are shared; queue/root count, retained unique bytes/nodes,
   and work remain explicit, and removal compacts only through the fallible new-
   owner operation;
+- cancelling a queued `v0.60.1` verification batch uses its global-abort
+  contract: no authoritative prefix escapes through an already-ready future or
+  wake race, every member remains diagnosable as `Indeterminate` or
+  `Unprocessed`, and only `CompleteBatchVerification` may enter
+  full-membership consensus;
 - no Tokio or runtime dependency.
 
 Verification:
@@ -6769,7 +6843,8 @@ Verification:
 - custom executor, embedded-style polling, Tokio adapter example outside the
   graph, `'static` spawn with owned claims, compile-fail borrowed-claim spawn,
   multi-root shared queue equivalence/retention/exhaustion, cancellation/drop
-  races, wake discipline, and feature matrix.
+  races at pending/wake/ready boundaries with no proof/token or complete-
+  witness escape, wake discipline, and feature matrix.
 
 Exit criteria:
 
@@ -6798,6 +6873,11 @@ Deliverables:
 - multi-root builders expose maximum roots plus unique/per-root node, edge,
   canonical-byte, and work budgets and report deduplicated storage; individual
   promotion is the one-root specialization of the same canonical path;
+- batch-verification builders additionally size membership/result slots,
+  canonical-order scratch state, global/per-root generation snapshots,
+  unique/per-root work accounting, cancellation checkpoints, and the
+  `CompleteBatchVerification` witness; insufficient capacity aborts without a
+  proof/token prefix;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6810,7 +6890,9 @@ Verification:
   targets, examples, and compile-fail overflow cases; allocation/import
   exhaustion, partial-promotion rollback, returned-owner drop order, and
   compile-fail borrowed-result escape; multi-root sharing, duplicate roots,
-  removal retention, bounded re-compaction, and batch/individual equivalence.
+  removal retention, bounded re-compaction, batch/individual equivalence, and
+  zero/minimum/exact/short capacity for every batch membership, result,
+  canonical-order, snapshot, accounting, and cancellation-checkpoint buffer.
 
 Exit criteria:
 
@@ -7149,7 +7231,10 @@ Deliverables:
   lifetime extension/storage leaking, multi-root shared-DAG promotion with
   bounded retention/compaction, and source-arena-independent engine proof/token
   state with explicit hosted-owned or no_std inline/checked-engine-store
-  representation and complete invalidation generations,
+  representation, one kind-parameterized handle backing its two semantic
+  views, complete invalidation generations, and deterministic
+  `BatchVerificationOutcome` complete/abort semantics with no authoritative
+  prefix,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, bounded core `UnverifiedBoundDerivation` preservation
@@ -7500,6 +7585,10 @@ Deliverables:
 - multi-root count/per-root/unique-total budgets, shared-DAG worst cases,
   retained unreachable-node bounds, new-owner compaction failure, and proof
   that an untrusted batch cannot pin unbounded memory or work;
+- batch-verification membership/result/snapshot/accounting capacities,
+  canonical ordering cost, shared-node-once charging, deterministic per-root
+  attribution, and abort at every work/cancellation checkpoint with no
+  proof/token prefix;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -7636,9 +7725,14 @@ Deliverables:
   allocation/import exhaustion and rollback, source drop before/during/after
   engine promotion, `'static` owned-task cancellation/drop, returned-clock
   ownership, and FFI arbitrary/concurrent context-child destruction,
-  multi-root long-chain/diamond/duplicate-root sharing, partial failure,
-  root-removal retention, compaction rollback, accounting, batch-work
-  exhaustion, and batch/individual identity equivalence,
+  multi-root long-chain/diamond/duplicate-root sharing, root-removal retention,
+  compaction rollback, canonical root/member permutation invariance,
+  shared-node failure fan-out versus root-specific evidence independence,
+  cancellation/work exhaustion after every node/root, snapshot invalidation
+  after every verified prefix, no-token global abort, complete
+  `Indeterminate`/`Unprocessed` classification, stable unique/per-root
+  accounting, complete-membership witness enforcement, and batch/individual
+  proof/token identity equivalence,
   missing/truncated/over-budget early recipes, narrowed/spliced/substituted
   derivations, serialized-record replay/rollback/cross-engine restore and stale
   input/rule/model/lifecycle reverification, mixed-generation assessment
@@ -7797,6 +7891,15 @@ Deliverables:
 - single-root and `OwnedHardBoundClaimSet` multi-root promotion examples cover
   shared DAGs, per-root/unique-total accounting, duplicate roots, immutable
   retention, bounded compaction, atomic failure, and untrusted batch limits;
+- multi-root engine examples distinguish promotion atomicity from
+  `BatchVerificationOutcome`, show canonical member ordering, shared-node
+  failure fan-out, root-specific failure isolation, duplicate policy
+  memberships, cancellation/work/snapshot aborts with no token prefix, and the
+  `CompleteBatchVerification` requirement for full-membership consensus;
+- no_std examples define `EngineProofHandle<'engine, K, T>` as the sole
+  checked engine-store reference and
+  `VerifiedBoundDerivationRef`/`PolicyAcceptedHardBoundRef` as its two
+  kind-safe semantic projections, not parallel storage abstractions;
 - `TimeEstimate` and facade documentation expose condition, assessment,
   verified-derivation identity, atom support basis, evidence/policy
   generations, deadline, reasons, assurance, and non-claims; no trusted boolean

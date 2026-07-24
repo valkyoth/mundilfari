@@ -449,12 +449,30 @@ engine proof/token identities and generation dependencies, with no source-
 arena borrow/brand/handle. Here source-arena-independent does not mean
 unqualified `'static`: hosted forms own their bounded engine state, while
 no_std forms either store it inline or expose a checked
-`EngineProofHandle<'engine, T>` and engine-storage lifetime/nonwrapping
-generation. No undocumented pointer into caller storage is permitted. The
-source owner may drop afterward without revoking the result solely because of
-storage loss; evidence, model, policy, lifecycle, assessment, and deadline
-changes still invalidate it. Failure or interruption creates neither proof nor
-token.
+`EngineProofHandle<'engine, K, T>` and engine-storage lifetime/nonwrapping
+generation. The sealed kind `K` distinguishes verified-derivation and accepted-
+bound slots. `VerifiedBoundDerivationRef` and `PolicyAcceptedHardBoundRef` are
+the corresponding checked semantic projections over that one handle/store
+mechanism, not parallel storage abstractions. No undocumented pointer into
+caller storage is permitted. The source owner may drop afterward without
+revoking the result solely because of storage loss; evidence, model, policy,
+lifecycle, assessment, and deadline changes still invalidate it. Failure or
+interruption creates neither proof nor token.
+
+Multi-root engine verification is a separate transaction from atomic
+multi-root storage promotion. A bounded `BatchVerificationOutcome` first
+canonicalizes the admitted `BatchMemberId`-to-root mapping, then verifies
+shared nodes once in canonical identity order under one global and bounded
+per-root generation snapshot. Shared structural failure fans out to every
+dependent root; root-specific evidence failure remains local. A complete
+outcome reports every admitted member and alone can produce a
+`CompleteBatchVerification` witness for full-membership consensus. Cancellation,
+global work exhaustion, snapshot invalidation, or an internal invariant abort
+mints no proof/token prefix; all members remain explicitly `Indeterminate` or
+`Unprocessed`, with stable unique/per-root accounting. Duplicate roots share
+computation without collapsing policy-distinct memberships, and input
+permutations cannot change outcome identity or successful per-root proof/token
+identity.
 Assessment captures one complete provider/assessor/rule/evidence/policy/arena
 generation vector, evaluates callbacks without locks, and atomically rechecks
 the vector before minting the assessment and any accepted token at one
@@ -1137,7 +1155,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with explicit engine storage, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers `v0.133.0`–`v0.144.0` |
+| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, canonical snapshot-consistent batch verification with no authoritative partial result, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers `v0.133.0`–`v0.144.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |

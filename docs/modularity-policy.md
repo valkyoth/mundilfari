@@ -37,7 +37,9 @@ Rules:
   `VerifiedBoundDerivation`/`PolicyAcceptedHardBound` state; facade/async/FFI
   layers only own or borrow these contracts and cannot extend arena lifetimes.
   no_std engine-backed forms expose their exact engine-storage lifetime,
-  brand, and nonwrapping generation rather than hiding a caller pointer.
+  brand, and nonwrapping generation rather than hiding a caller pointer. One
+  kind-parameterized engine handle backs the verified-derivation and accepted-
+  bound semantic reference views; neither view creates another storage model.
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
@@ -51,6 +53,10 @@ Rules:
   axes—including derived transitive leaves—remain visible; derivation/
   condition/assessment loss invalidates all downstream consumers through the
   generic lifecycle and generation graph.
+- Engine alone owns canonical multi-root verification order, shared-node work,
+  batch generation snapshots, complete/aborted outcomes, and the non-forgeable
+  complete-membership witness. Facade, async, and consensus layers cannot
+  extract an authoritative successful prefix from an aborted batch.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.

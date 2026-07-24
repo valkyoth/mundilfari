@@ -150,6 +150,13 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   storage remains explicit and checked. Returned clocks, `'static` tasks, and
   C/JNI/Swift contexts receive explicit non-self-referential ownership and
   destruction tests.
+- `v0.60.1` now defines deterministic multi-root verification rather than
+  leaving partial failure to implementations. Canonical member order, one
+  bounded snapshot, shared-node failure fan-out, root-local evidence isolation,
+  complete accounting, and a typed complete-membership witness prevent
+  attacker-selected successful prefixes. Global aborts mint no proof/token,
+  and the no_std proof/accepted references share one kind-safe checked engine-
+  handle abstraction.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

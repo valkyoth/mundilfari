@@ -138,6 +138,13 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   multi-root shared-DAG promotion plus explicit
   ownership into returned clocks, `'static` async tasks, builders, schemas, and
   C/JNI/Swift context destruction.
+- Closed the multi-root engine partial-failure ambiguity in `v0.60.1`:
+  verification now has canonical member order, one bounded snapshot, shared-
+  node failure fan-out, root-local evidence isolation, complete accounting,
+  and typed complete-versus-aborted outcomes. Global cancellation, exhaustion,
+  invalidation, or invariant failure mints no proof/token prefix. The no_std
+  engine handle is now the single kind-safe backing for both semantic proof and
+  accepted-bound reference views.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

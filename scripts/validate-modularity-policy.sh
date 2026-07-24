@@ -53,6 +53,9 @@ grep -q 'new-owner compaction' docs/modularity-policy.md
 grep -q 'Promotion adds no authority' docs/modularity-policy.md
 grep -q 'source-arena-independent' docs/modularity-policy.md
 grep -q 'engine-storage lifetime' docs/modularity-policy.md
+grep -q 'kind-parameterized engine handle' docs/modularity-policy.md
+grep -q 'canonical multi-root verification order' docs/modularity-policy.md
+grep -q 'authoritative successful prefix' docs/modularity-policy.md
 grep -q 'cannot extend arena lifetimes' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
 grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md
