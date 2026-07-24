@@ -10,6 +10,10 @@ Rules:
   unbounded endpoints, finite trusted estimates, and hard-claim/statistical
   non-substitution lives in core before era, fraction, or EOP consumers; later
   uncertainty algebra extends rather than duplicates these types.
+- Hard-bound assumption content is immutable, bounded, content-addressed, and
+  composition-owned by core; engine consensus consumes the exact shared
+  identities and reports incompatibility/exhaustion instead of reconstructing
+  or replacing assumptions.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
@@ -44,10 +48,12 @@ Rules:
   handoff reaches composition, where its bindings are rechecked with commit.
 - Raw EOP and scale-offset snapshots are likewise isolated; only their opaque
   policy-issued admitted proofs reach concurrent default-clock publication.
-- Core owns raw EOP/offset structures and the protocol-neutral evidence
-  contract; platform implementations emit core evidence values; engine alone
-  owns admitted constructors/revalidation and never depends on platform; facade
-  composes policy/default publication without recreating admission.
+- Core owns raw EOP/offset structures and the protocol-neutral untrusted
+  `RetrievalClaim`; platform implementations emit only those claims. Engine's
+  provider-neutral verifier alone creates opaque `VerifiedArtifactEvidence`
+  and admitted values after configured provider/authority checks, and never
+  depends on platform; facade composes policy/default publication without
+  recreating verification or admission.
 - Generic interval quorum, falseticker rejection, clustering, combining, and
   diversity are engine primitives implemented before NTP composition; NTP
   crates own association/filter metadata but no copy of those algorithms.

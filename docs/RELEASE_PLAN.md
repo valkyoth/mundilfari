@@ -358,6 +358,9 @@ Deliverables:
   `HardBoundClaim` states mathematical containment under a source-neutral
   `BoundAssumptionsId`, not proof that a source is honest or authoritative,
   while an early `StatisticalRange` is non-guaranteed and cannot be promoted;
+  the identifier is an opaque reference to immutable assumption content, not
+  a caller-selected label, and its complete composition algebra follows in
+  `v0.7.2`;
 - typed saturated/invalid outcomes rather than sentinel endpoints;
 - no source authority, authentication, observation provenance, covariance,
   confidence, error-budget composition, midpoint preference, or implicit
@@ -382,6 +385,59 @@ Exit criteria:
   interval vocabulary without inventing provisional uncertainty types;
 - `v0.7.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.7.2 - Hard-Bound Assumption Identity And Composition
+
+Status: planned.
+
+Goal: make the assumptions behind every hard containment claim immutable,
+bounded, composable, and impossible to replace silently before downstream
+interval consumers exist.
+
+Deliverables:
+
+- bounded immutable `BoundAssumptionSet` values with canonical content,
+  content-addressed `BoundAssumptionsId`, semantic-schema generation, collision
+  detection, and engine/policy provenance where applicable; callers cannot
+  select an identifier that aliases different meanings;
+- exact assumption identity is part of `HardBoundClaim<T>` equality,
+  serialization, evidence, and cache keys, while geometric interval equality
+  remains separately queryable;
+- intersection and consensus conjunct every contributing assumption set;
+  union and convex expansion conservatively preserve every input assumption,
+  and conversion/projection adds its model and rounding assumptions without
+  replacing those already present;
+- canonical deduplication and bounded set/expression capacity, with typed
+  `AssumptionCapacityExceeded`, `IncompatibleAssumptions`, generation/schema
+  mismatch, and digest-collision outcomes rather than truncation, relabeling,
+  or fallback to geometry alone;
+- explicit incompatibility rules for mutually exclusive source, model,
+  correlation, containment, and generation assertions; no operation silently
+  treats a conjunction as an alternative or drops a conflicting member;
+- a protocol-neutral composition report records exact input identifiers,
+  canonical result identifier, operation, added assumptions, incompatibility,
+  and non-claims for later uncertainty, quorum, and consensus evidence;
+- `v0.14.0` may enrich assumption content and statistical conversion policy,
+  but it reuses this identity/composition contract rather than reconstructing
+  assumption sets.
+
+Verification:
+
+- canonical ordering/deduplication, identifier stability and collision
+  handling, caller-selected/substituted identifiers, assumption loss through
+  intersection/union/expansion/conversion, mutually incompatible assumptions,
+  conflicting semantic generations, bounded-set/expression exhaustion,
+  serialization/cache round trips, and compile-fail construction tests;
+- property tests prove that every resulting hard claim names at least all
+  assumptions required by its soundness rule and that consensus cannot
+  reconstruct or weaken the contributing assumption identities.
+
+Exit criteria:
+
+- no hard-bound operation can produce a geometrically plausible claim while
+  losing, substituting, or silently reconciling the assumptions required for
+  containment;
+- `v0.7.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.8.0 - Epoch And Era Framework
 
 Status: planned.
@@ -392,7 +448,8 @@ Deliverables:
 
 - typed epochs, custom epoch identifiers, and bounded `EraContext` carrying an
   admissible finite `v0.7.1` `HardBoundClaim<AtomicInstant>` with explicit
-  endpoint semantics and maximum-distance policy;
+  endpoint semantics, the `v0.7.2` immutable assumption identity, and
+  maximum-distance policy;
 - resolver traits for RFC 868, NTP, PTP, broadcast, and device counters;
 - a resolved-external-instant boundary for Navheim and other providers;
 - ambiguity and missing-context errors.
@@ -418,7 +475,8 @@ Deliverables:
 - binary, decimal, scaled-nanosecond, and bounded exact-fraction adapters;
 - caller-selected rounding, exact rational quantum, and lower/upper residual
   `v0.7.1` `HardBoundClaim<Duration>` whose open/closed endpoints follow
-  directed rounding without quantum adjustment;
+  directed rounding without quantum adjustment and whose `v0.7.2` assumption
+  set preserves every conversion and rounding precondition;
 - fixed maximum limb width, canonical sign location, positive nonzero
   denominator, and explicit reduced/unreduced invariants;
 - bounded comparison, reduction, and conversion algorithms without
@@ -739,8 +797,9 @@ Exit criteria:
 
 Status: planned.
 
-Goal: extend the `v0.7.1` interval foundation into complete uncertainty
-algebra and evidence for observations and algorithms.
+Goal: extend the `v0.7.1` interval foundation and `v0.7.2` hard-bound
+assumption contract into complete uncertainty algebra and evidence for
+observations and algorithms.
 
 Deliverables:
 
@@ -750,9 +809,12 @@ Deliverables:
   and model generation while preserving the foundational hard/statistical
   non-substitution;
 - explicit, policy-named statistical-to-hard-bound conversion only where its
-  assumptions and confidence are supplied; no implicit covariance promotion;
+  assumptions and confidence are supplied; the conversion adds them to the
+  immutable `v0.7.2` assumption set and never replaces prior containment
+  assumptions, with no implicit covariance promotion;
 - richer checked union, expansion, error-budget composition, projection, and
-  midpoint policy reusing the foundational containment/intersection semantics;
+  midpoint policy reusing the foundational containment/intersection and
+  assumption-composition semantics;
 - empty/disjoint/saturated results.
 
 Verification:
@@ -782,8 +844,9 @@ Deliverables:
   `EvidenceDigest { algorithm, value, assurance }`, monotonic capture,
   warnings, integrity, and reading;
 - observation earliest/latest and duration-error bounds reuse `v0.7.1`
-  interval/hard-bound types; statistical fields use the enriched `v0.14.0`
-  evidence without a parallel interval representation;
+  interval/hard-bound types and `v0.7.2` assumption identities; statistical
+  fields use the enriched `v0.14.0` evidence without a parallel interval
+  representation;
 - bounded error-budget components separating systematic/random,
   measured/asserted, correlation identity, calibration, quantization, path,
   capture, scale-model, and oscillator contributions;
@@ -2264,25 +2327,45 @@ that can alter trusted conversions.
 
 Deliverables:
 
+- two non-substitutable pre-admission levels:
+  `RetrievalClaim` contains the retrieved bytes/content digest, claimed source
+  and provider identity, provider generation, platform metadata, claimed
+  capability, and supplied signature/attestation material but is explicitly
+  untrusted; opaque `VerifiedArtifactEvidence` is constructed only after the
+  engine's provider-neutral verifier validates the applicable signature or
+  attestation, configured authority/role, registered provider identity and
+  generation, content digest, freshness, capability, and anti-rollback
+  evidence;
+- platform implementations may return only `RetrievalClaim`; neither a custom
+  adapter, a claimed privileged evidence variant, cloned provider identity, nor
+  an `integrity: true`-style field can construct `VerifiedArtifactEvidence` or
+  obtain admission;
+- `VerifiedArtifactEvidence` records its assurance basis without equivalence:
+  cryptographic signature/attestation proof is distinct from configured
+  platform trust. OS-managed data that lacks cryptographic verification names
+  the exact configured platform authority, provider registration/generation,
+  capability, and non-claim instead of being described as proven;
 - opaque, engine-policy-constructed `AdmittedEopSnapshot` and
   `AdmittedScaleOffsetSnapshot`, plus bounded `AdmittedTimeDataSnapshot`
   aggregation for coherent non-leap conversion-data candidates; component
   types cannot be substituted;
 - crate ownership and dependency direction are fixed:
   `mundilfari-core` owns raw/structurally validated EOP and offset snapshots
-  plus the protocol-neutral retrieval/integrity evidence contract,
+  plus the protocol-neutral untrusted `RetrievalClaim` contract,
   `mundilfari-platform` owns platform retrieval/attestation implementations
-  that emit those core evidence values,
-  `mundilfari-engine` owns admission policy, private constructors, opaque
-  wrappers, and revalidation, while the `mundilfari` facade owns ergonomic
-  policy builders/default orchestration and consumes engine-issued proofs for
-  `TrustedClock` publication;
+  that emit those claims,
+  `mundilfari-engine` owns provider-neutral verification, configured provider
+  registration/authority policy, private `VerifiedArtifactEvidence` and
+  admission constructors, opaque wrappers, and revalidation, while the
+  `mundilfari` facade owns ergonomic policy builders/default orchestration and
+  consumes engine-issued proofs for `TrustedClock` publication;
 - core and platform never depend on engine/facade admission authority; engine
-  consumes only protocol-neutral core snapshots/evidence and never depends on
-  platform, while facade composes the layers without adding a second admission
-  implementation;
+  consumes only protocol-neutral core snapshots/claims and never depends on
+  platform, while facade composes the layers without adding a second
+  verification or admission implementation;
 - each proof binds content hash and model generation, artifact/source
-  identity and configured authority, integrity and retrieval evidence,
+  identity and configured authority, the exact retrieval claim and opaque
+  verified-evidence identity/assurance basis, registered provider generation,
   admission-policy generation, validity and expiry with monotonic domain,
   rollback evidence/capability, applicable conversion-context generation, and
   current withdrawal state;
@@ -2300,18 +2383,25 @@ Deliverables:
 
 Verification:
 
-- forged/private construction, correct signature with absent/wrong authority,
+- forged/private construction, forged custom adapters, claimed privileged
+  variants or integrity booleans, cloned/unregistered provider identities,
+  stale attestations, unsupported verification capabilities, valid integrity
+  from an unauthorized source, configured-platform-trust versus cryptographic
+  assurance separation, correct signature with absent/wrong authority,
   hash/model/source/retrieval/policy/context mismatch, expiry/withdrawal/
-  rollback/replacement between admission and revalidation, mixed EOP/offset
-  generations, raw-snapshot default publication compile failures, bounded
-  aggregate capacity, caller-owned expert-context behavior, crate dependency/
-  feature matrices, and compile-fail tests proving core, platform, and protocol
-  crates cannot construct admitted values.
+  rollback/replacement between verification, admission, and revalidation,
+  mixed EOP/offset generations, raw-snapshot default publication compile
+  failures, bounded aggregate capacity, caller-owned expert-context behavior,
+  crate dependency/feature matrices, and compile-fail tests proving core,
+  platform, protocol, and custom adapter crates cannot construct verified or
+  admitted values.
 
 Exit criteria:
 
-- no raw or merely authenticated EOP/scale-offset artifact can change the
-  default trusted conversion context;
+- every conversion-data update crosses untrusted retrieval, independent
+  verification, configured-authority admission, and later revalidation; no raw
+  or merely authenticated EOP/scale-offset artifact can change the default
+  trusted conversion context;
 - `v0.52.3 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.53.0 - Documented Vendor Extension Framework
@@ -2529,6 +2619,10 @@ Deliverables:
   count, and
   falseticker evidence under explicit `n`, maximum faulty diversity groups
   `f`, required overlap, freshness, and path-delay assumptions;
+- every candidate and result carries the exact immutable `v0.7.2`
+  `BoundAssumptionsId`; intersection conjuncts the contributing sets through
+  the shared bounded composition API, and incompatible/exhausted combinations
+  return an explicit unsafe/insufficient outcome rather than a narrower claim;
 - generic validated-observation inputs with no NTP packet, association,
   transport, poll, or wire type dependency;
 - bounded source cardinality and tie behavior;
@@ -2538,7 +2632,8 @@ Verification:
 
 - published algorithm examples, Byzantine groups, disjoint/split intervals,
   malicious majorities, impossible-guarantee cases, identical endpoints,
-  permutations, and property tests.
+  permutations, assumption loss/substitution/incompatibility/capacity, and
+  property tests.
 
 Exit criteria:
 
@@ -2556,7 +2651,8 @@ diversity policy.
 Deliverables:
 
 - engine-owned clustering, combining, preferred-source choice, and uncertainty
-  output over generic observations;
+  output over generic observations, preserving the exact hard-bound assumption
+  composition from `v0.60.0`;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
@@ -2930,7 +3026,7 @@ Deliverables:
   with no key reuse across an invalid generation;
 - TLS-neutral state keeps ticket, connection, exporter, and NTS association
   identities distinct; the concrete typed hierarchy and resumption transition
-  are completed at `v0.75.2`;
+  are completed at `v0.75.2`–`v0.75.3`;
 - endpoint, algorithm, cookie, shutdown, transcript, and TLS-channel evidence
   policy without an arbitrary authenticated boolean.
 
@@ -3015,19 +3111,22 @@ Deliverables:
 - stable `ServiceCredentialContextId` binds the concrete verified reference
   identity, endpoint authority, SNI where applicable, ALPN policy,
   credential-policy generation, presented-chain and temporal/revocation
-  evidence identity/digest, conservative horizon, relevant conversion/leap-
-  model generation, and process/machine generation, never a TLS connection,
-  exporter, NTS association, or continuously refined live clock interval;
-- resumption tickets carry only the service context plus ticket identity,
-  issuance/age/usage limits, endpoint/SNI/ALPN constraints, and their own
-  expiry; they never carry reusable connection/exporter state;
+  evidence identity/digest, service-level conservative horizon, relevant
+  conversion/leap-model generation, and process/machine generation, never a
+  resumption credential, TLS connection, exporter, NTS association, or
+  continuously refined live clock interval;
+- the service-context horizon covers only the certificate chain, supported
+  revocation evidence/freshness, reference identity, configured trust/policy,
+  relevant time-model validity, and lifecycle validity; ticket/PSK,
+  connection, exporter/key-usage, association, and cookie horizons belong to
+  their later typed layers;
 - each context change has an explicit action:
   `InvalidateImmediately`, `RevalidateBeforeUse`, or policy-bounded
   `ContinueUntil`, with strict defaults for trust removal, revocation,
   identity-policy tightening, time-model rollback, or definite expiry;
-- `ContinueUntil` never exceeds the earliest conservative certificate-chain,
-  revocation-freshness, policy, ticket/session, exporter/key-usage, or other
-  applicable security horizon;
+- service-context `ContinueUntil` never exceeds the earliest conservative
+  certificate-chain, revocation-freshness, reference-identity, trust/policy,
+  time-model, lifecycle, or other service-level security horizon;
 - civil horizons convert to a monotonic revalidation deadline using the
   worst-case upper trusted-time bound, correlation uncertainty, conservative
   oscillator/holdover growth, and exact suspend semantics; holdover growth may
@@ -3053,12 +3152,14 @@ Verification:
 - trust-root add/remove/rotation, service-identity policy change, validation-
   policy tightening/loosening, revocation configuration change and newly
   received revocation, CRL/OCSP before/inside/partial/expired/future intervals,
-  chain member expiry, resumption after context change, certificate expiry
-  during cookie retention, time/leap-model rollback/replacement, process/
+  chain member expiry, service context change before later resumption,
+  certificate expiry during retained-state use, time/leap-model rollback/
+  replacement, process/
   machine generation change, repeated normal clock refinements without
   context churn, reference identity/endpoint/SNI/ALPN/chain substitution,
-  ticket service-context/age/usage/expiry mismatch, every competing chain/
-  revocation/policy/key horizon,
+  every competing chain/revocation/identity/trust/policy/time-model/lifecycle
+  horizon and proof that ticket/connection/exporter/association limits do not
+  alter service-context identity,
   upper-bound/correlation/oscillator/holdover/suspend deadline calculations,
   earlier deadline movement, missing conservative deadline, discontinuity,
   revalidation-horizon expiry, and every invalidation/revalidation/continued-
@@ -3066,34 +3167,94 @@ Verification:
 
 Exit criteria:
 
-- no retained service credential or ticket outlives, changes identity from, or
-  bypasses the service context and temporal/revocation evidence that authorized
-  it;
+- no service credential context outlives, changes identity from, or bypasses
+  the service-level policy and temporal/revocation evidence that authorized it;
 - `v0.75.1 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.75.2 - TLS Connection Exporter And NTS Association Generations
+### v0.75.2 - TLS Resumption Credential Generation
 
 Status: planned.
 
-Goal: separate reusable service/ticket authorization from per-handshake,
-per-exporter, and per-NTS-association lifetimes.
+Goal: model every TLS 1.3 resumption ticket/PSK as a bounded cryptographic
+credential between its originating service context and a resumed connection.
+
+Deliverables:
+
+- opaque `ResumptionCredentialGeneration` binds exactly one
+  `ServiceCredentialContextId`, opaque provider-held PSK/ticket handle and
+  provider generation, TLS version and cipher-suite/hash compatibility, ticket
+  nonce/identity, and server ticket-key generation where the provider exposes
+  it; Mundilfari never requires exporting provider-held secret bytes;
+- issuance, monotonic age basis, use count, expiry, single-use/replay policy,
+  endpoint/SNI/ALPN constraints, process/machine generation, and server/client
+  role are carried as credential state rather than service-context or
+  connection state;
+- secret-memory and persistence capabilities remain independent explicit
+  claims for the opaque handle, ticket bytes, provider state, and any stored
+  metadata; persistence never implies rollback protection, non-exportability,
+  page locking, or secure deletion;
+- the resumption-credential horizon is the earliest still-valid service
+  context horizon plus ticket/PSK age, usage, expiry, provider generation,
+  ticket-key generation, replay, lifecycle, and persistence constraints; it
+  includes no future connection, exporter, key-usage, association, or cookie
+  lifetime;
+- creation and every attempted use revalidate all bound fields and the
+  originating service context. If the TLS/provider adapter cannot expose or
+  enforce a policy-required identity, generation, compatibility, replay,
+  lifetime, or secret/persistence binding, resumption is disabled rather than
+  reported as fully verified;
+- private constructors and one-way state transitions prevent caller-forged
+  credentials, service/role/provider substitution, use after consumption or
+  expiry, and conversion of an opaque ticket into reusable connection/exporter
+  authority.
+
+Verification:
+
+- full-handshake ticket issuance, opaque provider handles, wrong service/
+  endpoint/SNI/ALPN/role/provider/TLS/cipher-suite/hash/ticket-key generation,
+  nonce/identity collision, stale/rotated provider, age/usage/expiry/replay,
+  process/machine restore, persistence rollback, unavailable secret-memory
+  capability, adapter omission of each required binding, strict resumption
+  disablement, and compile-fail construction/substitution tests;
+- horizon tests prove the result is the earliest service-plus-credential
+  limit, never includes later exporter/association objects, and moves earlier
+  or invalidates when any constituent becomes unsafe.
+
+Exit criteria:
+
+- no resumed handshake can treat an opaque ticket/PSK as an unmodeled copy of
+  service authorization or as reusable connection/exporter authority;
+- `v0.75.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.75.3 - TLS Connection Exporter And NTS Association Generations
+
+Status: planned.
+
+Goal: separate reusable service/resumption-credential authorization from
+per-handshake, per-exporter, and per-NTS-association lifetimes.
 
 Deliverables:
 
 - `TlsConnectionGeneration` is fresh for every full or resumed handshake and
-  binds `ServiceCredentialContextId`, transcript digest, negotiated ALPN,
-  endpoint/SNI, connection state, peer-evidence disposition, and process/
-  machine generation;
+  binds `ServiceCredentialContextId` directly for a full handshake or both it
+  and the consumed `ResumptionCredentialGeneration` for a resumed handshake,
+  plus transcript digest, negotiated TLS/cipher suite/ALPN, endpoint/SNI,
+  connection state, peer-evidence disposition, process/machine generation,
+  and an explicit connection-lifetime horizon;
 - `ExporterGeneration` is unique to and cannot outlive one
   `TlsConnectionGeneration`; exporter material, direction, label/context, and
-  key-usage accounting never cross connections;
+  key-usage accounting never cross connections, and its horizon is the earlier
+  of connection lifetime and exporter/key-usage limits;
 - `NtsAssociationGeneration` derives from exactly one exporter generation and
   binds the negotiated NTS algorithms, endpoints, directional key identities,
-  cookies, and association lifecycle;
-- resumption first revalidates the ticket's service context, identity,
-  endpoint/SNI/ALPN policy, age/usage, trust-policy generation, temporal/
-  revocation horizon, and lifecycle generation; it then creates a fresh
-  connection, exporter, and NTS association generation in that order;
+  cookies, and association lifecycle, with a horizon no later than its exporter
+  plus association/cookie policy;
+- resumption first revalidates and consumes the `v0.75.2` credential, including
+  its service context, ticket/PSK identity, endpoint/SNI/ALPN policy,
+  compatibility, age/usage/replay, provider/ticket-key/trust-policy
+  generations, temporal/revocation horizon, and lifecycle generation; it then
+  creates a fresh connection, exporter, and NTS association generation in that
+  order;
 - TLS 1.3 resumption without a resent certificate chain uses the retained
   immutable service-context evidence only under its conservative horizon and
   revalidation policy; absence of a new chain never becomes fresh evidence;
@@ -3106,17 +3267,20 @@ Verification:
 
 - full versus resumed handshake generation trees, ticket from wrong service/
   identity/endpoint/SNI/ALPN/policy/horizon/lifecycle, absent certificate on
-  resumption, stale/removed trust or revocation update, replayed ticket,
+  resumption, stale/removed trust or revocation update, missing or substituted
+  `ResumptionCredentialGeneration`, replayed ticket,
   connection generation reuse, old exporter reuse after resumption, exporter
-  label/context/direction mismatch, association/cookie rebinding, process/
-  machine restore, exhaustion/rekey, and compile-fail cross-generation
-  substitution/construction tests.
+  label/context/direction mismatch, association/cookie rebinding, each layered
+  horizon expiring before/after its parent, process/machine restore,
+  exhaustion/rekey, and compile-fail cross-generation substitution/
+  construction tests.
 
 Exit criteria:
 
 - every handshake creates fresh connection/exporter/association generations,
-  while a ticket authorizes only revalidation of its bounded service context;
-- `v0.75.2 implementation stop reached. Run pentest for this exact commit.`
+  while a typed resumption credential authorizes only one policy-permitted
+  transition from its bounded service context;
+- `v0.75.3 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.76.0 - NTS AEAD And Extension Protection
 
@@ -3158,7 +3322,8 @@ Deliverables:
 
 - NTS-KE plus protected NTP orchestration;
 - fixed-capacity cookie jar, generation, endpoint, local discard policy, use,
-  replenish, `ServiceCredentialContextId`, and
+  replenish, `ServiceCredentialContextId`,
+  `ResumptionCredentialGeneration` where applicable, and
   `NtsAssociationGeneration`;
 - local discard deadline/policy age clearly distinguished from any
   authenticated server expiration supplied by a future protocol revision;
@@ -3173,7 +3338,7 @@ Deliverables:
   without overstated guarantees;
 - service-context invalidation/revalidation propagates to tickets and retained
   cookie state; connection/exporter/association generation invalidation follows
-  the `v0.75.2` hierarchy before further use.
+  the `v0.75.2`–`v0.75.3` hierarchy before further use.
 
 Verification:
 
@@ -3349,14 +3514,15 @@ Goal: audit dependency, NTS, Roughtime, cookie, and bootstrap boundaries.
 Deliverables:
 
 - complete RFC/draft clause maps and dependency admission reports;
-- NTS early-data, resumption/exporter generation, cookie
+- NTS early-data, resumption-credential/provider/ticket-key and exporter
+  generation, cookie
   privacy/unlinkability, logging, cluster-key rollback/compromise, certificate
   revocation capability, interval-valued temporal validity, and generic
   process/machine lifecycle-generation audit;
 - service credential context binding across trust anchors, identity policy,
   chain/revocation intervals, conservative horizon, and trusted-time/leap-model
-  generations, plus distinct ticket, TLS connection, exporter, NTS association,
-  and cookie generation lifetimes;
+  generations, plus distinct resumption credential, TLS connection, exporter,
+  NTS association, and cookie generation lifetimes and layer-owned horizons;
 - provider assurance and secret lifecycle/redaction/rollback/clearing review;
 - fixed-capacity codec, machine, AEAD provider, cookie jar, and Rustls adapter
   boundary audit;
@@ -3366,8 +3532,9 @@ Verification:
 
 - independent interop, fuzzing, malformed TLS/application records, long
   rotation/restart simulations, full/resumed generation-tree and chainless-
-  resumption campaigns, old-exporter/cross-association reuse attempts, cargo
-  evidence, and focused pentest.
+  resumption campaigns, unavailable provider bindings with resumption disabled,
+  old-exporter/cross-association reuse attempts, cargo evidence, and focused
+  pentest.
 
 Exit criteria:
 
@@ -5255,7 +5422,10 @@ Deliverables:
   mix only through an explicit reviewed conversion policy;
 - explicit `n` admitted sources, maximum faulty diversity groups `f`, required
   overlap, freshness/path-delay bounds, network-adversary scope, and
-  correct-interval assumptions in every result;
+  the exact contributing `v0.7.2` assumption identities and their canonical
+  composed identifier in every result; orchestration consumes the engine
+  composition report and never reconstructs assumptions from prose or source
+  metadata;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
   claims with assertion provenance, configured/measured/authenticated/inferred/
   unknown assurance, expiry, and generation;
@@ -5277,7 +5447,8 @@ Verification:
   coalitions and malicious majorities, Sybil/correlation cases, impossible
   guarantees, forged diversity, unknown correlation, common upstreams,
   partitions, stale/mixed-generation sources, withdrawal under queue pressure,
-  hard/statistical mixing attempts, policy/membership reload during
+  hard/statistical mixing attempts, assumption loss/substitution/conflicting
+  generations/bounded-set exhaustion, policy/membership reload during
   withdrawals, in-flight crypto, pending servo proposals, and helper
   authorization, stale-result rejection, atomic replacement, and interval
   properties. Navheim is represented only by protocol-neutral fixtures here.
@@ -5540,8 +5711,9 @@ Deliverables:
 - EOP and external scale-offset publication accepts only the matching
   `v0.52.3` opaque `AdmittedEopSnapshot` or
   `AdmittedScaleOffsetSnapshot` proof and atomically rechecks every bound
-  content/source/authority/integrity/retrieval/policy/validity/expiry/rollback/
-  conversion-generation/withdrawal field at the same commit boundary;
+  content/source/configured-authority/retrieval-claim/verified-evidence/
+  assurance-basis/provider/policy/validity/expiry/rollback/conversion-
+  generation/withdrawal field at the same commit boundary;
 - withdrawal, expiry, policy or membership reload, evidence-generation change,
   or candidate replacement between admission and commit invalidates the
   transaction; generation comparison and commit share one linearized
@@ -5571,9 +5743,10 @@ Verification:
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
 - old/new admitted/raw leap candidate, EOP and scale-offset component proof,
-  evidence/policy/membership/conversion generation, authority/integrity/
-  retrieval, expiry, rollback, withdrawal, conversion context, UTC result, and
-  clock snapshot interleavings across admission/recheck/commit/publication;
+  evidence/policy/membership/conversion generation, retrieval claim, verified
+  assurance basis, provider/configured authority, expiry, rollback, withdrawal,
+  conversion context, UTC result, and clock snapshot interleavings across
+  verification/admission/recheck/commit/publication;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -6019,16 +6192,20 @@ Deliverables:
   reports;
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   exact open/closed/unbounded interval and finite-estimate semantics,
-  non-authoritative `HardBoundClaim`, process/machine lifecycle, monotonic
-  domains, dependency-correct layered
+  non-authoritative `HardBoundClaim`, content-addressed
+  `BoundAssumptionsId` composition/incompatibility through consensus,
+  process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
   caller-serialized independently trusted time-data ingestion,
-  `AdmittedEopSnapshot`/`AdmittedScaleOffsetSnapshot` proofs, and
+  untrusted `RetrievalClaim` versus verifier-issued
+  `VerifiedArtifactEvidence`, `AdmittedEopSnapshot`/
+  `AdmittedScaleOffsetSnapshot` proofs, and
   all-component concurrent publication,
   competing discipline ownership, honest ahead recovery, embedded concurrency,
   stable `ServiceCredentialContextId` invalidation without live-clock churn,
-  fresh TLS connection/exporter/NTS association generation hierarchy, and
-  conservative retention-horizon derivation,
+  bounded `ResumptionCredentialGeneration`, fresh TLS connection/exporter/NTS
+  association generation hierarchy, and layer-correct conservative retention-
+  horizon derivation,
   capability-qualified secret memory, concurrent snapshot, canonical external
   schema, frozen helper-policy/discipline-audit semantics, and language-binding
   review;
@@ -6409,18 +6586,21 @@ Deliverables:
   secret lifecycle review;
 - independent verification of every claimed `SecretMemoryProtection`
   capability and explicit unsupported/non-composable protection non-claims;
-- `ServiceCredentialContextId`, `TlsConnectionGeneration`,
-  `ExporterGeneration`, and `NtsAssociationGeneration` coverage across tickets,
-  full/resumed handshakes, NTS associations, cookies, trust/identity/revocation/
-  provider/time/leap/lifecycle changes, reference identity/endpoint/SNI/ALPN/
-  chain binding, conservative revalidation-horizon calculation, full validated
-  chain, CRL/OCSP temporal evidence, and invalidate/revalidate/continue action;
+- `ServiceCredentialContextId`, `ResumptionCredentialGeneration`,
+  `TlsConnectionGeneration`, `ExporterGeneration`, and
+  `NtsAssociationGeneration` coverage across tickets/PSKs, full/resumed
+  handshakes, NTS associations, cookies, trust/identity/revocation/provider/
+  ticket-key/time/leap/lifecycle changes, reference identity/endpoint/SNI/ALPN/
+  TLS/cipher-suite/hash/chain binding, conservative per-layer revalidation-
+  horizon calculation, full validated chain, CRL/OCSP temporal evidence, and
+  invalidate/revalidate/continue/disable-resumption action;
 - stable `CredentialPolicyGeneration` and immutable
   `TemporalValidationEvidence` remain service-level inputs and never absorb a
   per-connection/exporter/association lifetime;
 - proof that resumption without a resent chain reuses only still-valid immutable
-  service evidence while creating fresh connection/exporter/association
-  generations and never reusing exporter material;
+  service evidence through a revalidated, consumed resumption credential while
+  creating fresh connection/exporter/association generations and never reusing
+  exporter material;
 - interval-valued certificate temporal-validity and bootstrap review proving
   strict validation never uses a scalar `UnixTime`, midpoint/preferred
   projection, endpoint quantum adjustment, or a candidate artifact to
@@ -6455,13 +6635,16 @@ Deliverables:
   withdrawal/cancellation stress;
 - fork/exec/VM/container restore invalidation, competing clock discipliners,
   stable service-context invalidation without refinement churn, resumed-
-  handshake connection/exporter/association rotation, independent time-data
-  trust and caller-serialized-to-concurrent publication, raw/
-  authenticated-but-unauthorized EOP/scale-offset rejection, leap and time-data
-  admission-to-commit withdrawal/expiry/policy/authority/candidate races,
+  credential/provider/ticket-key/horizon revalidation and handshake connection/
+  exporter/association rotation, independent time-data retrieval/verification/
+  authority trust and caller-serialized-to-concurrent publication, forged
+  adapters and raw/authenticated-but-unauthorized EOP/scale-offset rejection,
+  leap and time-data admission-to-commit withdrawal/expiry/policy/authority/
+  candidate races,
   retention-deadline upper-bound/correlation/holdover/suspend campaigns,
   every interval endpoint combination at certificate/revocation/EOP/era/replay/
-  poll/leap/smear boundaries,
+  poll/leap/smear boundaries, hard-bound assumption loss/substitution/
+  incompatible-generation/capacity campaigns through consensus,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
   virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
@@ -6569,15 +6752,17 @@ Deliverables:
 - `query_once()` versus `TrustedClock::now()` acquisition semantics and
   `estimate_now()` truth-seeking semantics, ahead-recovery states, monotonic
   domain identity, and cross-language range behavior documented;
-- secret-memory capability/non-claim, service credential/ticket/connection/
-  exporter/NTS-association hierarchy, immutable temporal-validation evidence/
-  scalar-time non-claim and conservative retention horizons, independent
-  time-data trust/admission/publication phases, opaque leap/EOP/scale-offset
-  admission and precommit revalidation, smear-presentation separation, and
-  helper-policy/audit-full behavior documented without stronger implied claims;
+- secret-memory capability/non-claim, service credential/resumption credential/
+  connection/exporter/NTS-association hierarchy, immutable temporal-validation
+  evidence/scalar-time non-claim and layer-correct conservative retention
+  horizons, independent time-data retrieval/verification/authority-admission/
+  publication phases, opaque leap/EOP/scale-offset admission and precommit
+  revalidation, smear-presentation separation, and helper-policy/audit-full
+  behavior documented without stronger implied claims;
 - interval examples cover open/closed/half-open sets, unbounded algebra,
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
-  and `HardBoundClaim` non-authority semantics without quantum adjustment;
+  `HardBoundClaim` non-authority semantics, immutable assumption composition/
+  incompatibility, and no quantum adjustment;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

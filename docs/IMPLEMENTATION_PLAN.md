@@ -343,8 +343,13 @@ Included, excluded, and algebraically unbounded endpoints represent open,
 closed, and half-open sets exactly; no code simulates exclusion by adding or
 subtracting a domain quantum. Trusted estimates use only finite intervals.
 `HardBoundClaim` describes mathematical containment under named assumptions,
-not source honesty or authority. Era resolution, fractional residuals, and EOP
-all reuse the kernel. The later uncertainty phase adds asymmetric budgets,
+not source honesty or authority. Its bounded immutable assumption set has a
+canonical content-addressed identity and semantic generation; callers cannot
+choose aliases. Intersection and consensus conjunct exact sets, union/
+expansion/conversion preserve every prerequisite, incompatible or over-capacity
+sets fail explicitly, and no geometric operation may substitute or discard an
+assumption identity. Era resolution, fractional residuals, and EOP all reuse
+the kernel. The later uncertainty phase adds asymmetric budgets,
 covariance, confidence/model evidence, richer algebra, and observation
 integration without replacing these types or implicitly promoting statistical
 ranges into guaranteed bounds.
@@ -717,10 +722,16 @@ whole-chain and revocation-evidence digest/outcome, validity horizon, and
 revalidation deadline. `ServiceCredentialContextId` binds that evidence,
 reference identity, endpoint/SNI/ALPN policy, and relevant time/model/execution
 generations without embedding a live clock or TLS connection. A resumption
-ticket carries only this bounded service authorization and ticket limits.
-Every full or resumed handshake creates a fresh `TlsConnectionGeneration`,
-which creates a unique `ExporterGeneration`, which creates one
-`NtsAssociationGeneration`; exporter material never crosses connections.
+ticket/PSK becomes an opaque `ResumptionCredentialGeneration` binding that
+service context, provider-held handle/generation, TLS and cipher/hash
+compatibility, ticket identity/nonce/key generation where available,
+age/use/expiry/replay policy, and honest secret/persistence capabilities. A
+provider that cannot expose or enforce a required binding has resumption
+disabled. Every full handshake binds its service context directly; every
+resumed handshake consumes a revalidated resumption credential. Both create a
+fresh `TlsConnectionGeneration`, which creates a unique
+`ExporterGeneration`, which creates one `NtsAssociationGeneration`; exporter
+material never crosses connections.
 Normal refinement causes no service-context churn, while expiry, rollback,
 trust removal, confirmed revocation, or a relevant model/lifecycle
 discontinuity invalidates or requires revalidation. A scalar-`UnixTime`
@@ -729,15 +740,17 @@ conventional verifier cannot be promoted into strict whole-interval
 
 Temporal evidence binds the presented-chain digest, while the service context
 binds concrete reference identity, endpoint authority, SNI/ALPN policy, and
-its conservative horizon. `ContinueUntil` is the earliest chain, revocation,
-policy, ticket/session, exporter/key-usage, or other security horizon. Civil
-expiry is mapped to the monotonic domain using the worst-case upper time bound,
-correlation uncertainty, oscillator/holdover growth, and suspend semantics. If
-that deadline cannot be established—or a clock/correlation/domain
-discontinuity invalidates it—the state is revalidated before each use or
-rejected. Resumption revalidates the service/ticket context before creating
-fresh connection, exporter, and NTS association generations, including when
-TLS 1.3 does not resend the certificate chain.
+the earliest chain/revocation/identity/trust/time-model horizon. The resumption
+credential adds ticket/PSK/provider/ticket-key/age/use/replay limits; the TLS
+connection adds its lifetime; the exporter adds key-usage limits; and the NTS
+association adds association/cookie policy. Each child horizon is no later
+than its parent. Civil expiry is mapped to the monotonic domain using the
+worst-case upper time bound, correlation uncertainty, oscillator/holdover
+growth, and suspend semantics. If that deadline cannot be established—or a
+clock/correlation/domain discontinuity invalidates it—the state is revalidated
+before each use or rejected. Resumption revalidates and consumes the typed
+credential before creating fresh connection, exporter, and NTS association
+generations, including when TLS 1.3 does not resend the certificate chain.
 
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
@@ -765,20 +778,29 @@ rollback capability, withdrawal, and refresh failure remain visible in
 capability reports and `system_defaults()`.
 
 Caller-owned loading and artifact authentication still do not grant default
-clock authority. Opaque `AdmittedEopSnapshot` and
-`AdmittedScaleOffsetSnapshot` proofs bind content/model, configured authority,
-integrity/retrieval evidence, admission-policy generation, validity/expiry,
-rollback evidence, conversion generation, and withdrawal state. A valid
-signature from an unconfigured signer remains authentic but unauthorized. Raw
-snapshots stay usable only in isolated expert conversion contexts. Concurrent
-TrustedClock publication accepts these proofs and the separate engine-issued
+clock authority. Core's untrusted `RetrievalClaim` carries bytes/digest,
+claimed source/provider generation, platform metadata, claimed capabilities,
+and signature/attestation material. Platform implementations may emit only
+that claim. Engine's provider-neutral verifier privately creates
+`VerifiedArtifactEvidence` after checking the registered provider, applicable
+signature/attestation, digest, freshness, capability, and configured authority;
+OS-managed inputs explicitly name configured-platform-trust rather than
+cryptographic proof. Forged adapters, cloned identities, privileged enum
+variants, or `integrity: true` cannot cross this boundary.
+
+Opaque `AdmittedEopSnapshot` and `AdmittedScaleOffsetSnapshot` proofs then bind
+content/model, configured authority, retrieval and verified-evidence identity/
+assurance, admission-policy generation, validity/expiry, rollback evidence,
+conversion generation, and withdrawal state. A valid signature from an
+unconfigured signer remains authentic but unauthorized. Raw snapshots stay
+usable only in isolated expert conversion contexts. Concurrent TrustedClock
+publication accepts these proofs and the separate engine-issued
 `AdmittedLeapCandidate`, revalidating all bindings in the commit transaction.
-Core owns raw structures and the protocol-neutral retrieval/integrity evidence
-contract. Platform implementations emit that core evidence; engine admits only
-the normalized core values and never depends on platform. Engine alone owns
-admitted-wrapper constructors/revalidation, and the facade composes ergonomic
-policy/default publication. Dependencies and compile tests prevent core,
-platform, or protocol crates from acquiring admission authority.
+Engine consumes normalized core claims and never depends on platform; it alone
+owns verified/admitted constructors and revalidation, while the facade composes
+ergonomic policy/default publication. Dependencies and compile tests prevent
+core, platform, protocol, or custom adapter crates from acquiring verification
+or admission authority.
 
 Remote time data cannot authenticate itself: a candidate never validates the
 transport or credential interval that delivered it. Artifact signatures,
@@ -951,17 +973,17 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, hard/statistical classes, richer uncertainty, withdrawals | `v0.7.1`, `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
+| Foundational intervals, hard/statistical classes, immutable assumption composition, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.2`, `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers, serialized commit, independent trust, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
+| Hosted time-data providers, serialized commit, independent trust, untrusted retrieval versus verified evidence, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | Generic engine quorum/diversity and NTP orchestration | `v0.60.0`–`v0.62.0`, cross-family composition `v0.133.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| Crypto/secret protection, service/connection/exporter/association generations, NTS/bootstrap | `v0.72.0`–`v0.81.0`, hierarchy `v0.75.1`–`v0.75.2`, final review `v0.162.0` |
+| Crypto/secret protection, service/resumption-credential/connection/exporter/association generations, NTS/bootstrap | `v0.72.0`–`v0.81.0`, hierarchy `v0.75.1`–`v0.75.3`, final review `v0.162.0` |
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |

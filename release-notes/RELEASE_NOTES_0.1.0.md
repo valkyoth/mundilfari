@@ -90,10 +90,17 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   and concurrent-read wording.
 - Latest contract review made interval endpoints exact across open, closed,
   half-open, and algebraically unbounded forms while requiring finite trusted
-  estimates and honest `HardBoundClaim` naming; added `v0.75.2` to separate
-  service/ticket authorization from fresh connection/exporter/NTS association
-  generations; fixed engine ownership of admitted conversion-data constructors;
-  and moved identified EOP withdrawal into the generic lifecycle.
+  estimates and honest `HardBoundClaim` naming; expanded the `v0.75` hierarchy
+  to separate service/ticket authorization from fresh connection/exporter/NTS
+  association generations; fixed engine ownership of admitted conversion-data
+  constructors; and moved identified EOP withdrawal into the generic lifecycle.
+- Final follow-up review added `v0.7.2` for immutable, content-addressed
+  hard-bound assumption composition through consensus; made `v0.52.3`
+  distinguish untrusted platform `RetrievalClaim` values from engine-issued
+  `VerifiedArtifactEvidence`; and assigned resumption PSKs/tickets their own
+  provider-bound `ResumptionCredentialGeneration` at `v0.75.2` before the
+  fresh connection/exporter/association hierarchy at `v0.75.3`, with separate
+  service, ticket, connection, exporter, and association horizons.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

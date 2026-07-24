@@ -83,9 +83,17 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 - Refined those contracts with exact open/closed/unbounded interval endpoints,
   finite trusted estimates, and `HardBoundClaim` non-authority semantics;
   split reusable service credential/ticket authorization from fresh TLS
-  connection, exporter, and NTS association generations in new `v0.75.2`;
+  connection, exporter, and NTS association generations in the `v0.75`
+  hierarchy;
   assigned conversion-data admission constructors to the engine boundary; and
   deferred EOP withdrawal events to the generic lifecycle.
+- Strengthened the resulting boundaries with a new `v0.7.2` immutable,
+  content-addressed hard-bound assumption composition milestone; separated
+  untrusted `RetrievalClaim` from engine-issued `VerifiedArtifactEvidence` in
+  `v0.52.3`; and split TLS resumption into a provider-bound cryptographic
+  `ResumptionCredentialGeneration` at `v0.75.2` before fresh connection,
+  exporter, and NTS association generations at `v0.75.3`, with horizons owned
+  by their actual layers.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

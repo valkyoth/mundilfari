@@ -56,8 +56,11 @@ the release branch between review and tagging.
   stable non-interchangeable interval classes exist before EOP or era
   consumers. Open/closed endpoints are exact and never simulated by adjusting
   one quantum; trusted estimates are finite. A hard-bound claim states
-  mathematical containment, not source honesty, and statistical estimates
-  require explicit policy before contributing a bound.
+  mathematical containment, not source honesty. Its immutable content-
+  addressed assumptions are conjunctively preserved through intersection and
+  consensus; expansion/conversion cannot replace them, and incompatibility or
+  bounded-capacity exhaustion fails explicitly. Statistical estimates require
+  explicit policy before contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
@@ -103,32 +106,42 @@ the release branch between review and tagging.
   midpoint/preferred estimates cannot turn partial overlap into validity, and
   scalar-time verifier success cannot substitute for immutable evidence.
 - Retained TLS/NTS state uses separate lifetimes: a stable service credential
-  context binds policy/identity/chain/revocation/time evidence, a ticket carries
-  only bounded resumption authorization, every handshake gets a fresh TLS
-  connection generation, every connection gets a unique exporter generation,
-  and every exporter derives a distinct NTS association generation. Exporter
-  material never crosses full or resumed connections. Normal clock refinement
-  does not rotate the service context; relevant policy, expiry, revocation,
-  model, or lifecycle change still invalidates or requires revalidation.
+  context binds policy/identity/chain/revocation/time evidence; each ticket/PSK
+  becomes a bounded `ResumptionCredentialGeneration` that also binds its
+  provider handle/generation, cryptographic compatibility, ticket identity/key
+  generation where available, age/use/expiry/replay policy, and secret/
+  persistence capabilities. Every handshake gets a fresh TLS connection
+  generation, every connection gets a unique exporter generation, and every
+  exporter derives a distinct NTS association generation. Exporter material
+  never crosses full or resumed connections. Missing adapter enforcement
+  disables resumption. Normal clock refinement does not rotate the service
+  context; relevant policy, expiry, revocation, model, or lifecycle change
+  still invalidates or requires revalidation.
 - Temporal evidence also binds the concrete reference identity, endpoint,
-  SNI/ALPN policy, and chain evidence. Retention never exceeds the earliest
-  conservative chain/revocation/policy/session/key horizon;
-  worst-case time/correlation/holdover/suspend semantics derive the monotonic
+  SNI/ALPN policy, and chain evidence. Each layer owns its horizon: service
+  chain/revocation/identity/trust/time-model, then ticket/PSK/provider limits,
+  connection lifetime, exporter/key usage, and association/cookie policy;
+  every child ends no later than its parent. Worst-case time/correlation/
+  holdover/suspend semantics derive the monotonic
   deadline, and failure or domain discontinuity requires per-use revalidation
   or rejection.
-- TLS 1.3 resumption revalidates the service/ticket context and creates fresh
-  connection/exporter/association generations even when the peer does not
-  resend its certificate chain; absence of a chain is never fresh evidence.
+- TLS 1.3 resumption revalidates and consumes the typed resumption credential
+  before creating fresh connection/exporter/association generations even when
+  the peer does not resend its certificate chain; absence of a chain is never
+  fresh evidence.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/
   commit transaction and make no concurrent-reader claim; later publication
   accepts only opaque admitted leap, EOP, and scale-offset forms and exposes
   conversion/clock state consistently. Raw or merely authenticated artifacts
-  remain expert-only; configured authority is independently required. A
-  candidate never authenticates the transport or signature that delivered
-  itself, redirects preserve admitted authority, remote retrieval is explicit,
-  and offline/manual ingestion uses the same candidate pipeline.
+  remain expert-only; platform/custom adapters emit untrusted retrieval claims,
+  engine verification produces opaque evidence, and configured authority is
+  independently required. Configured platform trust is named distinctly from
+  cryptographic proof. A candidate never authenticates the transport or
+  signature that delivered itself, redirects preserve admitted authority,
+  remote retrieval is explicit, and offline/manual ingestion uses the same
+  candidate pipeline.
 - The helper consumes one canonical pre-daemon policy ceiling and discipline
   audit/gap schema; later daemon configuration and exporters may extend those
   types but cannot replace, reinterpret, or widen them.
