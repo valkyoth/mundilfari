@@ -352,33 +352,52 @@ conversion adds model/rounding through `All`, and consensus emits the reviewed
 Simplification is sound-rule-only and all expression/evaluation work is
 bounded.
 
+Every root hard claim and every claim-transforming interval, era, fraction,
+scale, UTC/POSIX/smear, uncertainty, or observation operation automatically
+produces or composes a core-owned `UnverifiedBoundDerivation<T>`. This bounded,
+acyclic, non-authoritative recipe preserves exact input/output endpoints and
+digests, origin/observation identity, operation, rounding, model generations,
+condition, and rewrites under independent depth/node/fan-out/storage/work
+limits. It is verification material, never proof or authority, and cannot be
+silently detached from a hard claim.
+
 External decoding yields only unresolved references/conditions. Exact digest
 algorithm, namespace, canonical content, schema/rule/registry generation,
 collision, rollback, and capacity checks produce an opaque resolved condition;
 no IPC, persistence, C, WASM, or network input directly deserializes a trusted
 condition identity or hard claim. The early core resolver accepts already-
 admitted immutable registry evidence and owns no crypto, storage, platform, or
-engine authority; later provider/persistence layers preserve the type-state.
+engine authority. Derivation bytes likewise decode only as bounded
+`UnverifiedBoundDerivationRecord` and may resolve only to the non-authoritative
+core recipe; the opaque verified type has no deserialize/restore path. Later
+provider/persistence layers preserve these type states and require complete
+current-engine reverification.
 
 Canonical resolution still does not prove that a condition currently holds.
 The engine separately issues a bounded `ConditionAssessment` over exact
 evidence, policy, membership, source, correlation, lifecycle, and monotonic
 generations, with supported/contradicted/indeterminate/expired/withdrawn status
-and a conservative reassessment deadline. Each atom retains a typed support
-basis—measured, cryptographically verified, authority assertion, configured
-assumption, or derived—so an accepted adversary-budget assumption can never
-masquerade as measured evidence.
+and a conservative reassessment deadline. Each atom retains a structured
+support basis with independent evidence-origin, integrity, authority, and
+direct/derived-lineage axes, so measured evidence may also record cryptographic
+protection and recognized authority without conflation. Derived results retain
+their complete bounded transitive leaf bases; an accepted adversary-budget
+configuration can never masquerade as measurement or disappear behind a
+derived label.
 
 Runtime acceptance also requires a non-forgeable
-`VerifiedBoundDerivation<T>`. Root derivations bind the exact admitted
-observation/evidence and claimed endpoints; derived proofs bind every input
-claim, interval/conversion operation, rounding policy, model generation,
-condition, and output digest. The engine recomputes or verifies this bounded
-proof rather than accepting a plausible caller interval. Assessment captures
-one complete provider/assessor/rule/evidence/policy generation vector, evaluates
-callbacks without locks, and atomically rechecks the vector before minting the
-assessment and any accepted token at one linearization point. Change causes a
-bounded retry or indeterminate result.
+`VerifiedBoundDerivation<T>`, created only by engine verification of the
+complete early recipe. Root derivations bind the exact admitted observation/
+evidence and claimed endpoints; derived proofs bind every input claim,
+interval/conversion operation, rounding policy, model generation, condition,
+and output digest. The engine recomputes or verifies this bounded proof rather
+than accepting a plausible caller interval. Assessment captures one complete
+provider/assessor/rule/evidence/policy generation vector, evaluates callbacks
+without locks, and atomically rechecks the vector before minting the assessment
+and any accepted token at one linearization point. It resamples a conservative
+monotonic read interval there and refuses current issuance when its upper edge,
+including resolution/latency/rate uncertainty and completion margin, reaches
+the deadline. Change causes a bounded retry or indeterminate result.
 
 Only a verified derivation and current snapshot-consistent supported assessment
 accepted by policy can produce an opaque `PolicyAcceptedHardBound`; the
@@ -500,11 +519,14 @@ elapsed intervals, correlations, helper expiries, and persisted bootstrap
 anchors from different identities cannot be combined.
 
 Strict virtual-clock reads enforce accepted-bound expiry themselves: each read
-uses the current value from the deadline's exact monotonic domain and refuses
-synchronized authority at or after the deadline even if no writer or timer has
+uses a bounded monotonic read interval from the deadline's exact domain and
+compares its conservative upper edge, including resolution, sampling/return
+latency, rate uncertainty, and completion margin. It refuses synchronized
+authority when that edge reaches the deadline even if no writer or timer has
 run. Suspend-inclusive time or reliable resume invalidation is mandatory;
-read failure, pause without invalidation, reset, domain change, or incomparable
-identity fails closed to an expired/diagnostic result.
+an unbounded read/return interval, read failure, pause without invalidation,
+reset, domain change, or incomparable identity fails closed to an expired/
+diagnostic result.
 
 Fork, VM snapshot/restore, and container checkpoint/restore are generic
 execution-lifecycle discontinuities. They rotate affected process/machine
@@ -1037,7 +1059,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, verified claim derivation, typed support basis, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.138.0` |
+| Foundational intervals, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, verified claim derivation, structured support-basis axes, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.15.1`, schema/persistence `v0.22.1`, `v0.39.1`, engine `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.140.1` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
@@ -1051,7 +1073,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Trusted-clock read-side deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | `v0.137.0`–`v0.145.0` |
+| Conservative monotonic-read intervals, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`, consumers `v0.60.1`, `v0.137.0`–`v0.145.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

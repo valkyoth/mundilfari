@@ -117,12 +117,21 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - The same milestone now requires an opaque engine-verified derivation binding
   exact claim endpoints to root observations or every derived operation,
   rounding rule, model generation, condition, and input digest. Atom assessment
-  preserves typed measured, cryptographic, authority-asserted, configured-
-  assumption, or derived basis, and assessment/acceptance issuance uses one
-  snapshot-consistent generation transaction.
+  preserves structured support basis, and assessment/acceptance issuance uses
+  one snapshot-consistent generation transaction.
 - `v0.137.0`–`v0.137.1` now require every strict virtual-clock read to enforce
   the accepted deadline in its exact monotonic domain, including idle expiry,
   timer starvation, suspend/resume, reset, and domain-failure cases.
+- Derivation inputs are now retained from their true owners: `v0.7.1` creates
+  bounded non-authoritative root recipes, `v0.7.2` composes them, and every
+  claim-transforming era/fraction/scale/UTC/POSIX/uncertainty/observation
+  milestone through `v0.15.0` preserves them for later engine verification.
+  Serialized and persisted recipes remain explicit unverified records.
+- Support basis is now a structured set of independent evidence-origin,
+  integrity, authority, and direct/derived-lineage axes; derived results retain
+  their complete bounded transitive bases. Deadline issuance and strict reads
+  sample after evaluator work and compare conservative monotonic upper edges
+  including resolution, latency, rate uncertainty, and completion margin.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

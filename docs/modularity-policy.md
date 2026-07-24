@@ -14,15 +14,24 @@ Rules:
   expressions owned by core: intersection uses `All`, union/hull uses `Any`,
   conversion preserves prerequisites, and engine consensus emits reviewed
   threshold/fault predicates rather than conjuncting every source.
+- Core hard-claim constructors and transformations own bounded, acyclic,
+  non-authoritative `UnverifiedBoundDerivation` recipes; every interval, era,
+  fraction, scale, civil, uncertainty, and observation layer preserves the
+  exact inputs/outputs/operation/rounding/model/condition/origin needed by the
+  later engine verifier.
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
+- External or persisted derivation bytes decode only to
+  `UnverifiedBoundDerivationRecord`; no schema, persistence, IPC, or binding
+  directly decodes the opaque verified engine type.
 - Canonical condition resolution grants no runtime trust. Engine alone owns
   bounded `VerifiedBoundDerivation` construction, snapshot-consistent current
   evidence assessment, and `PolicyAcceptedHardBound` construction. Exact
-  per-atom support basis remains visible; derivation/condition/assessment loss
-  invalidates all downstream consumers through the generic lifecycle and
-  generation graph.
+  per-atom evidence-origin, integrity, authority, and direct/derived-lineage
+  axes—including derived transitive leaves—remain visible; derivation/
+  condition/assessment loss invalidates all downstream consumers through the
+  generic lifecycle and generation graph.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
@@ -50,7 +59,9 @@ Rules:
   diagnostic APIs expose the conditional claim, condition, assessment,
   verified-derivation status, per-atom support basis, deadline, reasons,
   assurance, and non-claims without a trusted boolean. Strict virtual-clock
-  reads enforce the exact monotonic-domain deadline even without a writer.
+  reads enforce the exact monotonic-domain deadline using the conservative
+  upper edge of a bounded resolution/latency/rate/completion interval even
+  without a writer.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
 - Leap-candidate structure and pure validation live in core; generic evidence

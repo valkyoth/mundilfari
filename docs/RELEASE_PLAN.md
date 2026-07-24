@@ -361,6 +361,13 @@ Deliverables:
   the identifier is an opaque reference to immutable assumption content, not
   a caller-selected label, and its complete composition algebra follows in
   `v0.7.2`;
+- every root `HardBoundClaim<T>` constructor also emits a paired, core-owned,
+  immutable `UnverifiedBoundDerivation<T>` recipe binding a bounded
+  `ClaimOriginId`, the exact included/excluded output endpoints, claim digest,
+  operation=`Root`, and condition identity. The recipe is material for later
+  engine verification, not proof, source provenance, authentication, honesty,
+  authority, or current support, and no hard-claim constructor can silently
+  discard or detach it;
 - typed saturated/invalid outcomes rather than sentinel endpoints;
 - no source authority, authentication, observation provenance, covariance,
   confidence, error-budget composition, midpoint preference, or implicit
@@ -377,12 +384,16 @@ Verification:
   width without plus/minus-quantum adjustment, containment/intersection
   properties, finite-estimate enforcement, instant-versus-duration
   non-substitution, compile-fail hard/statistical mixing/promotion, no_std/MSRV,
-  and dependency tests proving no later provenance/observation coupling.
+  paired root-recipe creation, endpoint/condition/origin/digest substitution,
+  recipe-drop/detachment refusal, and dependency tests proving the opaque
+  origin identity does not introduce later provenance/observation coupling.
 
 Exit criteria:
 
 - every earlier era, fraction, and conversion model can use one stable bounded
   interval vocabulary without inventing provisional uncertainty types;
+- every root hard claim retains the bounded non-authoritative material required
+  for later exact derivation verification;
 - `v0.7.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.7.2 - Bounded Hard-Bound Condition Algebra
@@ -421,10 +432,21 @@ Deliverables:
   and evaluation/rewrite work, with typed capacity, incompatibility, unknown-
   rule, generation/schema, and digest-collision failures rather than silent
   strengthening, weakening, truncation, or fallback;
-- a protocol-neutral derivation report records exact input condition
-  identities, canonical output identity, operation/proof rule, policy and
-  membership generations where applicable, rewrites used, and non-claims for
-  later uncertainty, quorum, and consensus evidence;
+- every claim-transforming interval operation automatically composes the
+  `v0.7.1` `UnverifiedBoundDerivation<T>` recipe with exact ordered input claim
+  and recipe digests, input/output endpoints, operation/proof rule, rounding
+  direction/policy, model identity/generation where applicable, input and
+  canonical output conditions, and rewrites; no API returns a transformed hard
+  claim while omitting its recipe;
+- recipes have independent fixed depth, node, fan-out, input, byte/storage,
+  traversal, cycle-detection, and later verification-work bounds. Internal
+  construction is acyclic; overflow, attempted cycles, unavailable inputs, or
+  capacity exhaustion returns a typed failure rather than truncating,
+  flattening, or replacing the recipe with a digest-only claim;
+- the protocol-neutral derivation report projects this complete
+  non-authoritative recipe plus policy and membership generations where
+  applicable and explicit non-claims for later uncertainty, quorum, and
+  consensus evidence;
 - `v0.14.0` may enrich assumption content and statistical conversion policy,
   but it reuses this condition algebra rather than reconstructing assumptions.
 
@@ -438,12 +460,17 @@ Verification:
   depth/node/fan-out/work exhaustion boundary;
 - adversarial rewrite tests prove no simplifier strengthens or weakens a
   formula, and engine fixtures prove `n`/`f` results do not conjunct every
-  source claim or collapse a threshold to an unaudited boolean.
+  source claim or collapse a threshold to an unaudited boolean;
+- recipe property tests cover every root/intersection/union/hull/widening/
+  conversion/projection path, exact endpoint and digest binding, canonical
+  input order, rounding/model/condition substitution, cycle attempts, and
+  every independent depth/node/fan-out/storage/traversal/work boundary.
 
 Exit criteria:
 
 - no hard-bound operation can produce a geometrically plausible claim while
-  misstating the logical condition required for containment;
+  misstating the logical condition required for containment or discarding the
+  complete bounded recipe for its exact endpoint derivation;
 - `v0.7.2 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.7.3 - Untrusted Bound-Condition Resolution
@@ -451,14 +478,18 @@ Exit criteria:
 Status: planned.
 
 Goal: prevent serialized, persisted, IPC, C, WASM, or network-derived
-assumption identifiers from bypassing canonical condition construction.
+assumption identifiers or derivation records from bypassing canonical
+condition/recipe construction or later engine verification.
 
 Deliverables:
 
 - external decoding produces only `UnresolvedAssumptionReference` and
-  `UnresolvedBoundCondition` values; no deserializer may directly create
-  `AssumptionId`, admitted `BoundAssumptionsId`, `ResolvedBoundCondition`, or a
-  `HardBoundClaim`;
+  `UnresolvedBoundCondition` values and, for derivation material, only a
+  bounded `UnverifiedBoundDerivationRecord`;
+  no deserializer may directly create `AssumptionId`, admitted
+  `BoundAssumptionsId`,
+  `ResolvedBoundCondition`, a `HardBoundClaim`, or any engine-verified
+  derivation;
 - explicit resolution checks digest algorithm, namespace, semantic-schema and
   proof-rule-registry generations, canonical content, identifier/content
   equality, collision handling, rule availability, expression canonicality,
@@ -467,6 +498,11 @@ Deliverables:
   the exact canonical condition and immutable registry generation used; cache
   entries key the complete resolution context and cannot upgrade unresolved
   references;
+- derivation-record resolution checks complete referenced claims/inputs,
+  endpoints, digests, operations, rounding, models, conditions, canonical
+  ordering, acyclicity, and every recipe bound, then returns only the
+  non-authoritative core `UnverifiedBoundDerivation<T>`; resolution never
+  asserts mathematical correctness or runtime authority;
 - identifier-only encodings are accepted only when the receiver already holds
   and verifies the exact immutable registry generation and canonical content;
   otherwise the complete bounded canonical condition and required rule
@@ -492,12 +528,16 @@ Verification:
   deserialization/construction tests, plus dependency tests proving no early
   crypto/storage/platform/engine coupling;
 - canonical schema, persistence, IPC, C, and WASM fixtures prove decoding
-  remains unresolved until the complete bounded resolution succeeds.
+  remains unresolved until the complete bounded resolution succeeds;
+- malformed/truncated/spliced derivation records, cycles, missing inputs,
+  endpoint/operation/rounding/model/condition substitution, and all recipe
+  depth/node/fan-out/storage/work limits.
 
 Exit criteria:
 
 - no external identifier or serialized hard claim obtains trusted condition
-  semantics without exact content and registry resolution;
+  semantics without exact content and registry resolution, and no serialized
+  derivation becomes proof or authority before complete engine verification;
 - `v0.7.3 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.8.0 - Epoch And Era Framework
@@ -512,6 +552,9 @@ Deliverables:
   admissible finite `v0.7.1` `HardBoundClaim<AtomicInstant>` with explicit
   endpoint semantics, the `v0.7.2` canonical condition identity, resolved
   through `v0.7.3` for any external context, and maximum-distance policy;
+- every successful era-resolution hard claim preserves and extends the input
+  `UnverifiedBoundDerivation` with the exact era context, raw/truncated value,
+  resolver operation, selected era, output endpoints, and claim digest;
 - resolver traits for RFC 868, NTP, PTP, broadcast, and device counters;
 - a resolved-external-instant boundary for Navheim and other providers;
 - ambiguity and missing-context errors.
@@ -519,7 +562,8 @@ Deliverables:
 Verification:
 
 - before/at/after rollover vectors, ambiguous windows, negative epochs, and
-  multiple-wrap rejection.
+  multiple-wrap rejection, plus recipe preservation and context/raw-value/
+  selected-era/output substitution tests.
 
 Exit criteria:
 
@@ -540,6 +584,9 @@ Deliverables:
   directed rounding without quantum adjustment and whose `v0.7.2`
   `All(input, model, rounding)` condition preserves every conversion and
   rounding precondition;
+- every hard residual/conversion result extends the bounded
+  `UnverifiedBoundDerivation` with exact rational input, output endpoints,
+  quantum, directed-rounding policy, model generation, and claim digest;
 - fixed maximum limb width, canonical sign location, positive nonzero
   denominator, and explicit reduced/unreduced invariants;
 - bounded comparison, reduction, and conversion algorithms without
@@ -551,7 +598,8 @@ Verification:
 
 - exhaustive reduced-width fractions, zero/maximum denominators, worst-case
   reduction work, comparison-overflow cases, official protocol examples,
-  halfway rounding, maximum precision, and monotonicity tests.
+  halfway rounding, maximum precision, monotonicity, and recipe quantum/
+  rounding/model/endpoint substitution tests.
 
 Exit criteria:
 
@@ -596,6 +644,9 @@ Deliverables:
   in the requirement ledger;
 - one immutable versioned `ConversionContext`, never a general path-search
   graph, with explicit model generations and admissible data;
+- every conversion API that returns or transforms a hard claim must consume
+  and extend its `UnverifiedBoundDerivation` with the exact context/model
+  generation, operation, rounding, endpoints, and output condition/digest;
 - typed missing, stale, mixed-generation, unavailable, and unsupported
   conversion outcomes;
 - no GNSS signal, navigation-message, receiver, or UTC-model interpretation.
@@ -603,8 +654,8 @@ Deliverables:
 Verification:
 
 - scale-identity non-substitution, context generation replacement,
-  mixed-generation rejection, missing/stale data, and forbidden implicit
-  conversion tests.
+  mixed-generation rejection, missing/stale data, forbidden implicit
+  conversion, and claim-recipe loss/context/model/rounding substitution tests.
 
 Exit criteria:
 
@@ -632,6 +683,9 @@ Deliverables:
   owned by `v0.14.0` and `v0.15.0`;
 - checked UT1-offset evaluation and application to continuous instants through
   `ConversionContext`; UTC civil conversion completes with `v0.12.0`;
+- hard-bound UT1 evaluation/application preserves a complete
+  `UnverifiedBoundDerivation` binding the EOP content/model generation,
+  interpolation/extrapolation decision, rounding, and exact endpoints;
 - stale, extrapolated, missing, caller-removed, replaced, and unavailable
   structural model outcomes; identified withdrawal events and propagation
   begin only at `v0.15.1` and the `v0.52.x` orchestration milestones.
@@ -642,7 +696,8 @@ Verification:
   caller removal/replacement/unavailability, mixed generations, classified
   uncertainty propagation, and compile tests preventing source-neutral
   metadata from satisfying later provenance/authority or generic-withdrawal
-  contracts.
+  contracts; recipe tests replace EOP content, generation, interpolation
+  decision, rounding, and endpoints independently.
 
 Exit criteria:
 
@@ -665,12 +720,16 @@ Deliverables:
 - exact identifiers, epochs, rates, model constants, validity, and references
   for each admitted scale;
 - checked conversions under an explicit model/context generation;
+- every hard-bound coordinate-scale conversion extends the
+  `UnverifiedBoundDerivation` with exact constants, equation/operation,
+  context/model generation, rounding, and endpoints;
 - explicit out-of-scope scales and accuracy non-claims.
 
 Verification:
 
 - official published examples, epoch/rate extremes, rounding, reverse
-  conversion residuals, wrong model, and unsupported-scale tests.
+  conversion residuals, wrong model, unsupported scales, and complete recipe
+  preservation/substitution tests.
 
 Exit criteria:
 
@@ -689,12 +748,16 @@ Deliverables:
 - NTP-as-UTC-encoding and era context separated from a standalone scale;
 - PTP timescale, arbitrary-timescale, epoch, and UTC-offset semantics;
 - exact conversion-context/model generation attached to normalized results;
+- hard normalized results retain an `UnverifiedBoundDerivation` binding the
+  protocol-native value/identity, era/offset input, conversion operation,
+  context/model generation, rounding, condition, and endpoints;
 - protocol identity retained through conversion.
 
 Verification:
 
 - NTP era/UTC examples, PTP timescale/arbitrary-timescale cases, stale offset,
-  mixed model generations, and cross-protocol non-substitution.
+  mixed model generations, cross-protocol non-substitution, and native-input/
+  era/offset/context/recipe substitution.
 
 Exit criteria:
 
@@ -714,6 +777,9 @@ Deliverables:
   Galileo, BeiDou, GLONASS, QZSS, and NavIC observations;
 - non-fixed-offset GLONASS distinction and typed unknown/custom identities;
 - cross-check-only adapters under `ConversionContext`;
+- any hard cross-check result preserves an `UnverifiedBoundDerivation`
+  containing the external observation identity, supplied offset/model
+  generation, operation, rounding, condition, and exact endpoints;
 - no week resolution, navigation UTC model, receiver, health, or
   authentication logic.
 
@@ -721,7 +787,7 @@ Verification:
 
 - externally resolved examples, missing/stale offset evidence, GLONASS
   non-fixed behavior, unknown identities, mixed generations, and compile-time
-  Navheim-boundary checks.
+  Navheim-boundary checks, plus external-observation/model/recipe substitution.
 
 Exit criteria:
 
@@ -769,6 +835,10 @@ Deliverables:
 - explicit generic TAI-to-UTC and UTC-to-TAI conversion against the canonical
   `AtomicInstant` origin, including realization metadata and typed ambiguous,
   missing-table, stale-table, and out-of-coverage outcomes;
+- every hard UTC/TAI/UT1 conversion result extends its
+  `UnverifiedBoundDerivation` with the immutable leap/EOP content hash and
+  generation, selected branch, operation, rounding, condition, and exact
+  input/output endpoints;
 - checked UTC/UT1 conversion using the admitted EOP model and matching
   conversion-context generations;
 - this milestone does not own evidence provenance, announcement lifecycle,
@@ -781,8 +851,9 @@ Verification:
 - canonical TAI/UTC origin and published offset vectors, every historical leap
   boundary, second 60, invalid leap dates, immutable table/hash/source-neutral
   metadata, outside-coverage behavior, realization-evidence non-equivalence,
-  and negative-leap synthetic tests; compile/dependency tests prove the
-  deferred provenance/admission/publication layers are absent.
+  negative-leap synthetic tests, and recipe table/EOP/branch/rounding/endpoint
+  substitution; compile/dependency tests prove the deferred provenance/
+  admission/publication layers are absent.
 
 Exit criteria:
 
@@ -844,12 +915,16 @@ Deliverables:
   outcomes before policy;
 - repeat/clamp/reject policies and typed smear profiles carrying provider,
   window, function, model generation, and inverse limitations;
+- hard POSIX/UTC/smear results extend the `UnverifiedBoundDerivation` with the
+  exact policy/profile, model generation, branch/invertibility outcome,
+  rounding, condition, and input/output endpoints;
 - labels preventing smeared time from being reported as UTC.
 
 Verification:
 
 - leap boundaries, each policy, noninvertible cases, and smear endpoint
-  continuity tests.
+  continuity tests, including complete policy/profile/branch/model/recipe
+  preservation and substitution.
 
 Exit criteria:
 
@@ -878,13 +953,20 @@ Deliverables:
 - richer checked union, expansion, error-budget composition, projection, and
   midpoint policy reusing the foundational containment/intersection and
   logical-condition semantics;
+- every operation producing a hard bound, including explicit statistical-to-
+  hard conversion and uncertainty expansion, composes the complete bounded
+  `UnverifiedBoundDerivation`; covariance/statistical-only operations cannot
+  manufacture a hard-claim recipe without the named conversion policy and its
+  condition/model evidence;
 - empty/disjoint/saturated results.
 
 Verification:
 
 - interval algebra properties, extremes, asymmetry, empty sets, rounding,
   covariance units/symmetry, confidence/model substitution, and compile-fail
-  hard/statistical mixing.
+  hard/statistical mixing; recipe composition, statistical-only recipe refusal,
+  expansion/conversion policy/model/condition substitution, and recipe-bound
+  exhaustion.
 
 Exit criteria:
 
@@ -910,6 +992,11 @@ Deliverables:
   interval/hard-bound types, `v0.7.2` condition identities, and `v0.7.3`
   external resolution; statistical fields use the enriched `v0.14.0` evidence
   without a parallel interval representation;
+- each observation root hard claim binds its `UnverifiedBoundDerivation` origin
+  to the exact observation/source/provider identity, evidence digest,
+  generations, raw reading/capture identity, and claimed endpoints; derived
+  observation bounds retain the complete transitive recipe rather than only
+  the final claim digest;
 - bounded error-budget components separating systematic/random,
   measured/asserted, correlation identity, calibration, quantization, path,
   capture, scale-model, and oscillator contributions;
@@ -920,7 +1007,8 @@ Verification:
 
 - construction invariants, redacted debug output, non-substitution type tests,
   forged diversity, correlation conflicts, digest assurance, error-budget
-  composition, and no trusted-boolean API.
+  composition, observation/source/evidence/raw-reading recipe substitution,
+  transitive-recipe preservation, and no trusted-boolean API.
 
 Exit criteria:
 
@@ -1012,6 +1100,11 @@ Deliverables:
   raw-oscillator versus frequency-adjusted rate semantics, process-local
   versus system-wide scope, boot/session, namespace, process generation,
   machine-instance generation, clock generation, rate, and uncertainty;
+- bounded `MonotonicReadInterval { earliest, latest }` in one exact domain;
+  `latest` conservatively includes clock resolution/quantization, sampling
+  latency, rate uncertainty/drift since the measurement point, and an
+  operation-supplied completion margin. A scalar hardware/API counter reading
+  cannot by itself prove that a deadline has not passed;
 - checked same-domain arithmetic only, with typed domain/suspend/generation
   mismatch errors;
 - stale/rollback/restart detection;
@@ -1022,7 +1115,9 @@ Verification:
 - compile-time/runtime cross-domain rejection, each suspend/rate/scope
   combination, restart, suspend, rollback, drift, stale generation/
   correlation, persisted-anchor mismatch, helper-expiry mismatch, and
-  uncertainty-growth simulations.
+  uncertainty-growth simulations; coarse resolution, delayed sampling,
+  latency spikes, rate-uncertainty growth, completion margins, and exact
+  upper-edge deadline comparisons.
 
 Exit criteria:
 
@@ -1273,6 +1368,10 @@ Deliverables:
   `UnresolvedAssumptionReference`/`UnresolvedBoundCondition` type-state;
   canonical schema decoding cannot directly construct a
   `BoundAssumptionsId`, `ResolvedBoundCondition`, or `HardBoundClaim`;
+- derivation fields decode only into bounded
+  `UnverifiedBoundDerivationRecord`; canonical schema has no tag or decode
+  trait for the opaque engine `VerifiedBoundDerivation`, and recipe resolution
+  remains non-authoritative;
 - budget-consumption hooks completed by `v0.25.0` for bytes, items, nesting,
   and work;
 - compatibility rules that later schema work may extend but never silently
@@ -1284,6 +1383,7 @@ Verification:
   field, maximum/over-depth and item-count inputs, tag/range collisions,
   identifier-reuse fixture, integer extremes, required-length/short-buffer
   atomicity, deterministic re-encoding, version skew, stack bounds,
+  unverified-derivation-record encoding and direct verified-tag/decode absence,
   no-allocation, and arbitrary-byte fuzz/property tests.
 
 Exit criteria:
@@ -1888,6 +1988,13 @@ Deliverables:
 - persisted `ConditionAssessment` or `PolicyAcceptedHardBound` data is
   historical evidence only after restore and must pass fresh `v0.60.1`
   lifecycle/policy/evidence/deadline revalidation before regaining authority;
+- serialized or persisted derivation material decodes only as
+  `UnverifiedBoundDerivationRecord`; the opaque `VerifiedBoundDerivation<T>`
+  has no direct `Deserialize`, canonical-schema decode, or restore path.
+  Restoration must resolve the complete bounded recipe and the later
+  `v0.60.1` engine must reverify it against current input claims/observations,
+  proof-rule registry, conversion models, source/provider generations, and
+  lifecycle state before constructing new authority;
 - crash-consistent atomic replacement, partial/torn-write detection, explicit
   durability semantics, and bounded schema migration;
 - checksum separated from authenticated integrity and confidentiality;
@@ -1916,7 +2023,10 @@ Verification:
   state plus ordinary local key, copied boot/session state, restored accepted-
   bound token refusal/reassessment, trusted-counter/sealed/remote-witness
   faults, unknown schema, migration chains, size exhaustion, concurrent
-  readers, and recovery.
+  readers, and recovery;
+- derivation replay/rollback, cross-engine copy, direct verified-type decode,
+  missing or substituted input, stale rule/model/source generation, lifecycle
+  withdrawal, malformed recipe, and complete bounded re-verification tests.
 
 Exit criteria:
 
@@ -2746,13 +2856,20 @@ Deliverables:
   generations, evidence identities or bounded digest, evaluation instant and
   full `MonotonicClockId`, conservative `valid_until`/re-evaluation deadline,
   reasons, assurance, and non-claims;
-- every assessed atom carries a non-interchangeable typed `SupportBasis`:
-  `Measured`, `CryptographicallyVerified`, `AuthorityAssertion`,
-  `ConfiguredAssumption`, or `Derived`; condition composition preserves exact
-  per-atom basis and provenance rather than upgrading it to the strongest
-  input, and an `AtMostFaulty`/Byzantine-budget configuration can be accepted
-  by policy only as a visible configured assumption, never reported as
-  measured or cryptographically verified;
+- every assessed atom carries a bounded structured `SupportBasis` with
+  independent `EvidenceOrigin` (measurement, external assertion, or configured
+  assumption), `IntegrityBasis` (none/digest/cryptographically verified),
+  `AuthorityBasis` (none, asserted identity, or policy-recognized authority),
+  and direct-versus-derived lineage. These are orthogonal axes: one measurement
+  may also be cryptographically protected and authority-issued without losing
+  any fact;
+- derived support binds its rule and complete bounded transitive leaf-basis
+  set/digest; it never replaces that set with a bare `Derived` label.
+  Condition composition preserves every atom's axes/provenance rather than
+  upgrading to the strongest input, and an `AtMostFaulty`/Byzantine-budget
+  configuration can be accepted only with its configured-assumption origin
+  still visible, never reported as measured evidence merely because another
+  axis is cryptographically verified or authority-recognized;
 - reviewed multi-valued truth tables for `Atom`, `All`, `Any`, `AtLeast`,
   `AtMostFaulty`, and every admitted `Derived` proof rule; indeterminate,
   expired, withdrawn, and contradictory members are preserved in the
@@ -2762,13 +2879,16 @@ Deliverables:
   diversity/correlation, policy, membership, and lifecycle generations;
   provider callbacks return structured evidence, not `is_true`;
 - a non-forgeable `VerifiedBoundDerivation<T>` proves that the exact claimed
-  endpoints follow from admitted inputs before policy can accept the bound.
-  A root derivation binds the observation identity, source/provider/evidence
-  identities and generations, original finite interval, and output claim
-  digest. A derived proof binds every ordered input claim and derivation
-  digest, the bounded interval/conversion operation, exact input and output
-  endpoints, rounding direction and policy, conversion-model identity and
-  generation, canonical output condition, and output claim digest;
+  endpoints follow from admitted inputs before policy can accept the bound. It
+  is created only by engine verification of the complete `v0.7.1`–`v0.15.0`
+  `UnverifiedBoundDerivation<T>`; missing, truncated, digest-only, over-budget,
+  or externally unresolved recipes fail closed. A root derivation binds the
+  observation identity, source/provider/evidence identities and generations,
+  original finite interval, and output claim digest. A derived proof binds
+  every ordered input claim and derivation digest, the bounded interval/
+  conversion operation, exact input and output endpoints, rounding direction
+  and policy, conversion-model identity and generation, canonical output
+  condition, and output claim digest;
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -2788,6 +2908,13 @@ Deliverables:
   permit it, optional `PolicyAcceptedHardBound<T>` are minted together at one
   documented engine linearization point; callback re-entry cannot observe or
   publish an in-progress assessment;
+- the final issuance comparison resamples a `v0.16.0`
+  `MonotonicReadInterval` in the assessment deadline's exact domain at that
+  linearization point after evaluator/verification work, then compares its
+  conservative `latest` edge including resolution, sampling latency, rate
+  uncertainty, and completion margin. If `latest >= valid_until`, the engine
+  emits expired/indeterminate diagnostics and never mints a current assessment
+  or accepted token;
 - opaque, non-forgeable `PolicyAcceptedHardBound<T>` is constructed only when
   a finite `HardBoundClaim<T>`, its exact `VerifiedBoundDerivation<T>` and
   resolved condition, a snapshot-consistent current `Supported` assessment,
@@ -2816,9 +2943,10 @@ Verification:
 
 - unknown, contradicted, expired, withdrawn, and restored atoms; exhaustive
   `All`/`Any`/threshold/fault-rule evaluation with indeterminate members;
-  preservation of every `SupportBasis`, mixed-basis composition, and proof
-  that `AtMostFaulty`/Byzantine-budget configured assumptions can never emerge
-  as measured or cryptographically verified evidence;
+  all origin/integrity/authority/lineage axis combinations, mixed-basis
+  composition, complete transitive leaf-basis preservation, and proof that
+  `AtMostFaulty`/Byzantine-budget configured assumptions can never emerge as
+  measured origin or disappear behind derived/cryptographic/authority labels;
 - root and derived claim recomputation plus adversarial interval narrowing,
   supported-condition reuse with different endpoints, spliced input
   derivations, reordered/substituted input or observation digests, wrong
@@ -2829,6 +2957,9 @@ Verification:
   point between vector capture, unlocked evaluation, verification, final
   comparison, and issuance; bounded retry exhaustion returns `Indeterminate`
   and no mixed or partial assessment/token;
+- coarse monotonic resolution, final reads straddling expiry, callbacks or
+  verification work crossing expiry, latency spikes, rate uncertainty,
+  completion-margin exhaustion, and exact `latest == valid_until` refusal;
 - source and threshold lifecycle cases include
   source loss changing a threshold, correlation-group reclassification,
   calibration/oscillator/path-delay expiry, policy/membership/source/evidence
@@ -5926,11 +6057,19 @@ Deliverables:
   revalidates under the current policy/evidence/lifecycle generations;
   conditional or diagnostic estimates remain available without synchronized
   labeling;
-- every strict `TrustedClock::now()` read samples the current monotonic value
-  from the exact `MonotonicClockId` carried by the accepted-bound deadline and
-  compares it before returning synchronized authority. At or after the exact
-  deadline it immediately returns a typed expired/diagnostic result even when
-  no writer, timer, invalidation event, or republish operation has run;
+- every strict `TrustedClock::now()` read obtains a `v0.16.0`
+  `MonotonicReadInterval` from the exact `MonotonicClockId` carried by the
+  accepted-bound deadline and compares its conservative `latest` edge before
+  returning synchronized authority. Resolution/quantization, sample latency,
+  rate uncertainty, and a bounded read-to-return completion margin are
+  included; `latest >= deadline` immediately returns a typed expired/
+  diagnostic result even when no writer, timer, invalidation event, or
+  republish operation has run;
+- strict authority is valid at the documented read linearization instant unless
+  a stronger API explicitly bounds validity through return/completion. If the
+  monotonic provider or operation cannot bound the sample/return interval and
+  required margin, the strict operation returns diagnostics rather than
+  comparing a scalar best-case reading;
 - strict authority requires a suspend-inclusive monotonic domain or a platform
   resume signal that invalidates the token before another strict read.
   Monotonic read failure, pause without reliable resume invalidation, domain
@@ -5951,7 +6090,9 @@ Verification:
   expiry/withdrawal/stale token, conditional-not-synchronized refusal, and
   monotonicity properties; exact-deadline refusal, idle expiry without a
   writer, timer starvation, suspend/resume for both monotonic-domain profiles,
-  monotonic read failure/reset/domain mismatch, and fail-closed diagnostics;
+  coarse resolution, read interval straddling expiry, sampling/return latency
+  spikes, rate uncertainty/completion margin, monotonic read failure/reset/
+  domain mismatch, and fail-closed diagnostics;
   multi-reader publication/interleavings remain `v0.137.1`.
 
 Exit criteria:
@@ -5979,10 +6120,12 @@ Deliverables:
   per-atom support basis, status, and conservative deadline. Conditional
   estimates publish only with explicit diagnostic/non-synchronized state;
 - every concurrent strict read obtains one logical snapshot and an exact-domain
-  monotonic sample, then validates the accepted-bound deadline and domain
-  before returning synchronized authority; at/after expiry, reset/domain
-  mismatch, unavailable suspend coverage/resume invalidation, or monotonic
-  failure it returns expired/diagnostic state without waiting for a writer.
+  `MonotonicReadInterval`, then validates its conservative `latest` edge,
+  completion margin, accepted-bound deadline, and domain before returning
+  synchronized authority; a sample that may straddle expiry, reset/domain
+  mismatch, unavailable suspend coverage/resume invalidation, unbounded
+  read-to-return interval, or monotonic failure returns expired/diagnostic state
+  without waiting for a writer.
   The documented read linearization/order prevents a cached pre-expiry label
   from surviving expiry or being paired with another publication generation;
 - concurrent publication consumes only an engine-issued
@@ -6041,9 +6184,10 @@ Verification:
   `PolicyAcceptedHardBound`, servo/proposal invalidation, and synchronized-to-
   diagnostic snapshot interleavings across assessment/recheck/commit;
 - verified-derivation replacement/invalidation and exact-deadline, idle-expiry,
-  timer-starvation, suspend/resume, monotonic failure/reset/domain-change
-  interleavings across snapshot selection, monotonic sampling, deadline check,
-  writer commit, and strict return;
+  timer-starvation, suspend/resume, coarse/straddling monotonic intervals,
+  latency/rate-uncertainty/completion-margin spikes, monotonic failure/reset/
+  domain-change interleavings across snapshot selection, monotonic sampling,
+  deadline check, writer commit, and strict return;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -6243,11 +6387,14 @@ Deliverables:
   of a bound condition preserves the `v0.7.3` unresolved/resolved type-state;
   identifier-only forms require the exact verified registry generation and no
   binding directly constructs admitted condition identities or hard claims;
-- serialized assessments/accepted-bound tokens decode as historical evidence
-  or unresolved references only; receiving engines revalidate exact
-  `v0.60.1` derivation/policy/evidence/generation/deadline state before granting
-  current authority, and C/WASM/language bindings cannot construct verified
-  derivations or accepted tokens;
+- serialized derivations decode only as bounded
+  `UnverifiedBoundDerivationRecord`, while assessments/accepted-bound tokens
+  decode as historical evidence or unresolved references only; receiving
+  engines resolve and completely reverify recipes against current inputs,
+  rule registries, models, source/lifecycle generations, and exact `v0.60.1`
+  policy/evidence/generation/deadline state before granting authority.
+  C/WASM/language bindings cannot construct verified derivations or accepted
+  tokens, and the opaque verified type has no direct deserialize path;
 - compatibility/freeze ledger proving deterministic field order/encoding,
   bounds, version negotiation, unknown field/criticality rules, canonicality,
   and maximum message sizes retain the early kernel semantics;
@@ -6264,7 +6411,9 @@ Verification:
   version skew, truncation, integer/range extremes, schema migration,
   deterministic re-encoding, forged/cross-generation assumption identifiers,
   missing/rolled-back registries, forged/stale serialized assessments and
-  accepted-bound tokens, C/WASM/JNI-or-C/Swift-or-C fixtures, and fuzzing.
+  accepted-bound tokens, derivation replay/rollback/cross-engine copy,
+  missing-input/stale-rule-or-model substitution, direct verified-type decode
+  refusal, C/WASM/JNI-or-C/Swift-or-C fixtures, and fuzzing.
 
 Exit criteria:
 
@@ -6525,12 +6674,17 @@ Deliverables:
   exact open/closed/unbounded interval and finite-estimate semantics,
   non-authoritative `HardBoundClaim`, content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
-  through consensus, and unresolved-to-resolved external condition type-state,
-  engine `VerifiedBoundDerivation`, typed per-atom `SupportBasis`,
+  through consensus, bounded core `UnverifiedBoundDerivation` preservation
+  across every root/transforming milestone,
+  unresolved-to-resolved external condition type-state plus
+  `UnverifiedBoundDerivationRecord`, complete engine
+  `VerifiedBoundDerivation`, structured per-atom `SupportBasis` origin/
+  integrity/authority/transitive-lineage axes,
   snapshot-consistent runtime `ConditionAssessment` versus opaque
   `PolicyAcceptedHardBound`, reserved derivation/assessment-loss propagation
-  through every consensus/control/publication consumer, read-side exact-domain
-  expiry enforcement, strict-versus-diagnostic facade behavior,
+  through every consensus/control/publication consumer, conservative monotonic
+  upper-edge issuance/read expiry enforcement,
+  strict-versus-diagnostic facade behavior,
   process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
   caller-serialized independently trusted time-data ingestion,
@@ -6985,9 +7139,12 @@ Deliverables:
   untrusted-reference/registry-rollback/cache-poisoning campaigns through
   consensus and every external schema/binding, runtime condition
   contradiction/indeterminacy/expiry/withdrawal, stale accepted-bound tokens,
-  narrowed/spliced/substituted derivations, mixed-generation assessment
-  issuance, configured-assumption basis laundering, assessment-to-publication
-  races, idle/read-side expiry and suspend/reset/domain failures,
+  missing/truncated/over-budget early recipes, narrowed/spliced/substituted
+  derivations, serialized-record replay/rollback/cross-engine restore and stale
+  input/rule/model/lifecycle reverification, mixed-generation assessment
+  issuance, origin/integrity/authority/transitive-basis laundering,
+  assessment-to-publication races, coarse/straddling/latency/rate/completion
+  monotonic upper-edge expiry and suspend/reset/domain failures,
   servo/holdover/proposal invalidation, and strict-facade synchronized-label
   refusal,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
@@ -7108,11 +7265,13 @@ Deliverables:
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
   `HardBoundClaim` non-authority semantics, bounded logical conditions for
   intersection/union/conversion/consensus, unresolved external-reference
-  resolution, verified root/derived claim proofs, runtime assessment statuses
-  and issuance linearization, typed support basis including configured
-  adversary assumptions, policy-accepted-bound lifetime, strict read-side
-  deadline/domain enforcement, strict versus conditional facade results,
-  incompatibility, and no quantum adjustment;
+  resolution, early non-authoritative derivation recipes and unverified record
+  restore type-state, verified root/derived claim proofs, runtime assessment
+  statuses and issuance linearization, structured independent origin/
+  integrity/authority/lineage support axes with transitive configured
+  assumptions, policy-accepted-bound lifetime, conservative monotonic
+  upper-edge deadline/domain enforcement, strict versus conditional facade
+  results, incompatibility, and no quantum adjustment;
 - `TimeEstimate` and facade documentation expose condition, assessment,
   verified-derivation identity, atom support basis, evidence/policy
   generations, deadline, reasons, assurance, and non-claims; no trusted boolean

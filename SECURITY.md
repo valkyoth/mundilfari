@@ -62,20 +62,29 @@ the release branch between review and tagging.
   threshold/fault predicate for consensus; simplification cannot silently
   strengthen or weaken it. External identifiers remain unresolved until exact
   canonical content or a trusted immutable registry generation is verified.
+  Every root and transforming hard-claim operation preserves a bounded,
+  acyclic, non-authoritative `UnverifiedBoundDerivation` with exact endpoints,
+  inputs, operation, rounding, models, condition, and origin/observation
+  identity; absence or truncation prevents later acceptance.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
-  evidence/generations/deadline and preserves whether every atom is measured,
-  cryptographically verified, asserted by an authority, configured as an
-  adversary assumption, or derived. Engine acceptance additionally requires
-  recomputation or verification of a bounded `VerifiedBoundDerivation` binding
-  the exact observations, endpoints, operation, rounding, models, condition,
-  and claim digest; a supported condition cannot justify a substituted narrower
+  evidence/generations/deadline and preserves independent evidence-origin,
+  integrity, authority, and direct/derived-lineage axes for every atom.
+  Derived basis retains all bounded transitive leaves, so configured assumptions
+  cannot hide behind cryptographic, authority, or derived labels. Engine
+  acceptance additionally requires complete current verification of the early
+  recipe into an opaque `VerifiedBoundDerivation` binding the exact
+  observations, endpoints, operation, rounding, models, condition, and claim
+  digest; a supported condition cannot justify a substituted narrower
   interval. Statistical estimates require explicit policy before contributing
   a bound.
 - Assessment issuance captures and rechecks one complete generation vector
   around unlocked provider callbacks. It publishes no mixed-generation result:
   change causes bounded retry or indeterminate status, and any accepted token
-  is minted with its assessment at the same engine linearization point.
+  is minted with its assessment at the same engine linearization point. A fresh
+  bounded monotonic interval is sampled there after evaluator work; its
+  conservative upper edge, including resolution, latency, rate uncertainty,
+  and completion margin, must remain before the deadline.
 - Derivation or condition-assessment loss invalidates consensus, leap decisions,
   servo/estimator/holdover state, discipline proposals, synchronized
   publication, and strict facade results through reserved lifecycle/generation
@@ -110,6 +119,10 @@ the release branch between review and tagging.
 - Persisted authentication, confidentiality, corruption detection, and
   rollback freshness are separate capabilities; ordinary mutable local state
   never receives a strong rollback-protection claim.
+- Persisted derivations decode only as `UnverifiedBoundDerivationRecord`;
+  verified derivations have no deserialize/restore path. Replay, restore, or
+  migration requires bounded reverification against current inputs, rules,
+  models, source/provider generations, and lifecycle state.
 - Protocol and persistence consumers use the shared bounded crypto-provider
   contract with per-key usage limits and fail-closed entropy/rekey behavior.
 - Secret-memory protection is capability-qualified: redaction, zeroization,
@@ -150,10 +163,12 @@ the release branch between review and tagging.
   fresh evidence.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
-- Every strict clock read checks the current value from the accepted deadline's
-  exact monotonic domain. At/after expiry, idle without a writer, monotonic
+- Every strict clock read compares the conservative upper edge of a bounded
+  interval from the accepted deadline's exact monotonic domain, including
+  resolution, sample/return latency, rate uncertainty, and completion margin.
+  A straddling/unbounded interval, idle expiry without a writer, monotonic
   failure/reset/domain mismatch, or suspend without inclusive time or reliable
-  resume invalidation, synchronized authority fails closed to diagnostics.
+  resume invalidation fails closed to diagnostics.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/
   commit transaction and make no concurrent-reader claim; later publication
   accepts only opaque admitted leap, EOP, and scale-offset forms and exposes

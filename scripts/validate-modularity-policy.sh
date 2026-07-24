@@ -36,16 +36,22 @@ grep -q 'mundilfari-engine.workspace = true' crates/mundilfari/Cargo.toml
 ! grep -q 'linux-clock-adjust' docs/IMPLEMENTATION_PLAN.md
 grep -q 'Foundational instant/duration interval algebra' docs/modularity-policy.md
 grep -q 'Hard-bound conditions are immutable' docs/modularity-policy.md
+grep -q 'non-authoritative `UnverifiedBoundDerivation` recipes' docs/modularity-policy.md
+grep -q 'every interval, era,' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
+grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md
+grep -q 'directly decodes the opaque verified engine type' docs/modularity-policy.md
 grep -q 'Canonical condition resolution grants no runtime trust' docs/modularity-policy.md
 grep -q 'bounded `VerifiedBoundDerivation` construction' docs/modularity-policy.md
 grep -q 'snapshot-consistent current' docs/modularity-policy.md
 grep -q 'evidence assessment, and `PolicyAcceptedHardBound` construction' docs/modularity-policy.md
-grep -q 'per-atom support basis remains visible' docs/modularity-policy.md
+grep -q 'per-atom evidence-origin, integrity, authority' docs/modularity-policy.md
+grep -q 'derived transitive leaves' docs/modularity-policy.md
 grep -q 'Generic interval quorum, falseticker rejection' docs/modularity-policy.md
 grep -q 'Facade strict APIs require an engine-issued current accepted bound' docs/modularity-policy.md
 grep -q 'Strict virtual-clock' docs/modularity-policy.md
-grep -q 'enforce the exact monotonic-domain deadline' docs/modularity-policy.md
+grep -q 'enforce the exact monotonic-domain deadline using the conservative' docs/modularity-policy.md
+grep -q 'upper edge of a bounded resolution/latency/rate/completion interval' docs/modularity-policy.md
 grep -q 'Leap-candidate structure and pure validation live in core' docs/modularity-policy.md
 grep -q 'Core raw leap-model replacement is isolated' docs/modularity-policy.md
 grep -q 'Raw EOP and scale-offset snapshots are likewise isolated' docs/modularity-policy.md
