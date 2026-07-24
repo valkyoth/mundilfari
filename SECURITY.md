@@ -105,6 +105,16 @@ the release branch between review and tagging.
   Cancellation, global work exhaustion, snapshot invalidation, or invariant
   failure mints no proof/token prefix and explicitly reports every member as
   indeterminate or unprocessed with stable complete resource accounting.
+  Completeness preserves original configured membership; only a current
+  accepted-bound member contributes an interval/vote. Every other terminal
+  status stays in `n` and cannot lower the threshold, so contributor shortage
+  is insufficient/unsafe. Duplicate roots count distinctly only through
+  explicit correlation/diversity admission.
+  Aborted refreshes report prior authority as retained, invalidated, or absent.
+  Operational failure cannot clear or extend an otherwise still-current prior
+  batch; genuine dependency invalidation revokes it even without replacement.
+  An internal invariant fault invalidates prior authority. Complete-new commit
+  and prior retirement are one transaction, with no partial replacement.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,

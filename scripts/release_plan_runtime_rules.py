@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from release_plan_batch_rules import extend_batch_review_rules
+
 
 def extend_runtime_review_rules(
     coverage: dict[str, tuple[str, ...]],
@@ -200,18 +202,6 @@ def extend_runtime_review_rules(
             "source-arena-independent",
             "VerifiedBoundDerivationRef<'engine, T>",
             "undocumented pointer",
-            "owned multi-root set",
-            "individual proof/token identity equivalence",
-            "BatchVerificationOutcome<T>",
-            "BatchMemberId",
-            "never caller order",
-            "complete admitted membership",
-            "shared derivation node is verified once",
-            "Structural failure propagates",
-            "root-specific evidence",
-            "CompleteBatchVerification<T>",
-            "globally aborts the transaction",
-            "`Unprocessed`",
             "`UnverifiedBoundDerivation<T>`",
             "`DerivationHandle<'arena, T>`",
             "exact admitted arena brand/",
@@ -245,7 +235,6 @@ def extend_runtime_review_rules(
             "PolicyAcceptedHardBound",
             "derivation identity, condition",
             "through explicit diagnostic",
-            "consumes `CompleteBatchVerification`",
         ),
         "v0.61.1": (
             "verified-bound-derivation",
@@ -256,7 +245,6 @@ def extend_runtime_review_rules(
             "verified-derivation and assessment",
             "unmodified per-atom `SupportBasis`",
             "no servo or clock-publication authority",
-            "caller-filtered result iterators",
         ),
         "v0.134.0": (
             "PolicyAcceptedHardBound",
@@ -337,7 +325,6 @@ def extend_runtime_review_rules(
             "retained unique bytes/nodes",
             "`'static` spawning",
             "compile-fail borrowed-claim spawn",
-            "authoritative prefix escapes",
         ),
         "v0.140.0": (
             "derivation arena",
@@ -355,7 +342,6 @@ def extend_runtime_review_rules(
             "partial-promotion rollback",
             "worst-case claim/handle size",
             "DAG sharing/exhaustion/eviction",
-            "membership/result slots",
         ),
         "v0.140.1": (
             "historical evidence",
@@ -403,7 +389,6 @@ def extend_runtime_review_rules(
             "reviewed-WCET through-completion",
             "structured per-atom `SupportBasis`",
             "strict-versus-diagnostic facade behavior",
-            "`BatchVerificationOutcome` complete/abort",
         ),
         "v0.160.0": (
             "borrowed-to-owned claim promotion",
@@ -412,7 +397,6 @@ def extend_runtime_review_rules(
             "multi-root count/per-root/unique-total",
             "untrusted batch",
             "promotion failure leaks no arena",
-            "shared-node-once charging",
         ),
         "v0.161.0": (
             "C/JNI/Swift context/child ownership",
@@ -430,9 +414,6 @@ def extend_runtime_review_rules(
             "owned-promotion",
             "multi-root long-chain/diamond",
             "root-removal retention",
-            "proof/token identity equivalence",
-            "no-token global abort",
-            "complete-membership witness enforcement",
             "source drop before/during/after",
             "`'static` owned-task",
             "returned-clock",
@@ -462,7 +443,6 @@ def extend_runtime_review_rules(
             "fallible canonical promotion",
             "no third public claim",
             "`OwnedHardBoundClaimSet` multi-root",
-            "`BatchVerificationOutcome`",
             "`EngineProofHandle<'engine, K, T>`",
             "source-arena-independent verified root/",
             "no_std engine-storage lifetime/generation",
@@ -495,5 +475,6 @@ def extend_runtime_review_rules(
     }
     for version, phrases in additions.items():
         coverage[version] = coverage.get(version, ()) + phrases
+    extend_batch_review_rules(coverage)
     for version, phrases in exclusions.items():
         forbidden[version] = forbidden.get(version, ()) + phrases

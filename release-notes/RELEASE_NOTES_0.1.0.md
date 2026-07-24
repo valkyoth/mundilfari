@@ -157,6 +157,11 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   attacker-selected successful prefixes. Global aborts mint no proof/token,
   and the no_std proof/accepted references share one kind-safe checked engine-
   handle abstraction.
+- Failed batch members now remain in configured membership/original `n` while
+  contributing no interval or vote; they cannot be filtered to weaken a
+  threshold, and shortage is explicitly insufficient/unsafe. Aborted refreshes
+  report whether prior authority was retained, invalidated, or absent, while
+  complete replacement and prior retirement share one linearization point.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

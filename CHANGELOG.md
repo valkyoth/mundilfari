@@ -145,6 +145,11 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   invalidation, or invariant failure mints no proof/token prefix. The no_std
   engine handle is now the single kind-safe backing for both semantic proof and
   accepted-bound reference views.
+- Corrected batch/quorum terminology so failed members remain in configured
+  membership and original `n` but never contribute an interval or vote, cannot
+  lower a threshold, and cause insufficient/unsafe results when contributors
+  are short. Batch refresh now reports retained, invalidated, or absent prior
+  authority and atomically replaces old state only with a complete new batch.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

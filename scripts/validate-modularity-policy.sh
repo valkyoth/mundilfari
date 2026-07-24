@@ -56,6 +56,9 @@ grep -q 'engine-storage lifetime' docs/modularity-policy.md
 grep -q 'kind-parameterized engine handle' docs/modularity-policy.md
 grep -q 'canonical multi-root verification order' docs/modularity-policy.md
 grep -q 'authoritative successful prefix' docs/modularity-policy.md
+grep -q 'original configured membership' docs/modularity-policy.md
+grep -q 'accepted-bound interval contributors' docs/modularity-policy.md
+grep -q 'retained/invalidated/absent prior-authority' docs/modularity-policy.md
 grep -q 'cannot extend arena lifetimes' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
 grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md

@@ -56,7 +56,11 @@ Rules:
 - Engine alone owns canonical multi-root verification order, shared-node work,
   batch generation snapshots, complete/aborted outcomes, and the non-forgeable
   complete-membership witness. Facade, async, and consensus layers cannot
-  extract an authoritative successful prefix from an aborted batch.
+  extract an authoritative successful prefix from an aborted batch. Engine
+  also owns the distinction between original configured membership and current
+  accepted-bound interval contributors, unchanged quorum thresholds, and the
+  retained/invalidated/absent prior-authority refresh transaction. Concurrent
+  publication implements its one-point replacement but cannot redefine it.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
