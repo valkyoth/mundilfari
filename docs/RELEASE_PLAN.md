@@ -332,6 +332,43 @@ Exit criteria:
 - one continuous internal timeline exists without erasing native wire values;
 - `v0.7.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.7.1 - Fundamental Intervals And Uncertainty Classes
+
+Status: planned.
+
+Goal: provide stable source-neutral interval and uncertainty-class types before
+era resolution, fractions, EOP, or other conversion models require them.
+
+Deliverables:
+
+- bounded generic instant and duration intervals with normalized ordered
+  endpoints, explicit closed/empty semantics, checked width, containment, and
+  intersection sufficient for foundational conversion work;
+- non-interchangeable `HardBound<T>` and `StatisticalRange<T>` wrappers;
+  `HardBound` asserts containment under a source-neutral
+  `BoundAssumptionsId`, while an early `StatisticalRange` is explicitly
+  non-guaranteed and cannot be promoted;
+- typed saturated/unbounded/invalid outcomes rather than sentinel endpoints;
+- no source authority, authentication, observation provenance, covariance,
+  confidence, error-budget composition, midpoint preference, or implicit
+  statistical-to-hard conversion;
+- `v0.14.0` extends these stable primitives with asymmetric uncertainty,
+  covariance/confidence/model evidence, richer algebra, and observation use
+  without replacing the foundational interval representation.
+
+Verification:
+
+- endpoint order/equality/extremes, empty and singleton intervals, checked
+  width overflow, containment/intersection properties, instant-versus-duration
+  non-substitution, compile-fail hard/statistical mixing and promotion, no_std/
+  MSRV, and dependency tests proving no later provenance/observation coupling.
+
+Exit criteria:
+
+- every earlier era, fraction, and conversion model can use one stable bounded
+  interval vocabulary without inventing provisional uncertainty types;
+- `v0.7.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.8.0 - Epoch And Era Framework
 
 Status: planned.
@@ -341,7 +378,7 @@ Goal: make epoch identity and rollover resolution explicit.
 Deliverables:
 
 - typed epochs, custom epoch identifiers, and bounded `EraContext` carrying an
-  admissible interval and maximum-distance policy;
+  admissible `v0.7.1` `HardBound<AtomicInstant>` and maximum-distance policy;
 - resolver traits for RFC 868, NTP, PTP, broadcast, and device counters;
 - a resolved-external-instant boundary for Navheim and other providers;
 - ambiguity and missing-context errors.
@@ -366,7 +403,7 @@ Deliverables:
 
 - binary, decimal, scaled-nanosecond, and bounded exact-fraction adapters;
 - caller-selected rounding, exact rational quantum, and lower/upper residual
-  interval;
+  `v0.7.1` `HardBound<Duration>`;
 - fixed maximum limb width, canonical sign location, positive nonzero
   denominator, and explicit reduced/unreduced invariants;
 - bounded comparison, reduction, and conversion algorithms without
@@ -443,15 +480,20 @@ Exit criteria:
 Status: planned.
 
 Goal: implement the EOP/UT1 model foundation needed for later UTC conversion
-with explicit provenance and uncertainty.
+with source-neutral model metadata and classified uncertainty.
 
 Deliverables:
 
 - the official `iers-conventions-2010-tn36` model baseline, its official
   corrections register, and the distinction between the official release and
   non-definitive working updates reviewed and recorded;
-- versioned Earth-orientation records, source, validity, interpolation policy,
-  model generation, and hard/statistical uncertainty separation;
+- versioned Earth-orientation records and source-neutral `EopModelMetadata`
+  carrying model/document identity, exact revision/content hash, validity,
+  interpolation policy, and model generation without asserting source
+  authority, authentication, retrieval history, or observation provenance;
+- `v0.7.1` hard/statistical interval classification for EOP validity and
+  uncertainty; richer covariance/confidence and observation provenance remain
+  owned by `v0.14.0` and `v0.15.0`;
 - checked UT1-offset evaluation and application to continuous instants through
   `ConversionContext`; UTC civil conversion completes with `v0.12.0`;
 - stale, extrapolated, missing, and withdrawn model outcomes.
@@ -459,8 +501,9 @@ Deliverables:
 Verification:
 
 - official EOP examples, interpolation boundaries, stale/extrapolated data,
-  model replacement/withdrawal, mixed generations, and uncertainty
-  propagation.
+  model replacement/withdrawal, mixed generations, classified uncertainty
+  propagation, and compile tests preventing source-neutral metadata from
+  satisfying later provenance/authority contracts.
 
 Exit criteria:
 
@@ -677,17 +720,20 @@ Exit criteria:
 
 Status: planned.
 
-Goal: make uncertain time a first-class interval.
+Goal: extend the `v0.7.1` interval foundation into complete uncertainty
+algebra and evidence for observations and algorithms.
 
 Deliverables:
 
-- earliest/latest intervals and asymmetric uncertainty;
-- a typed distinction between guaranteed hard bounds and statistical
-  estimates carrying covariance, confidence level, model identity, and model
-  generation;
+- asymmetric uncertainty and error-budget composition over the stable
+  `v0.7.1` instant/duration interval representation;
+- statistical estimates carrying covariance, confidence level, model identity,
+  and model generation while preserving the foundational hard/statistical
+  non-substitution;
 - explicit, policy-named statistical-to-hard-bound conversion only where its
   assumptions and confidence are supplied; no implicit covariance promotion;
-- checked intersection, union, expansion, containment, and midpoint policy;
+- richer checked union, expansion, error-budget composition, projection, and
+  midpoint policy reusing the foundational containment/intersection semantics;
 - empty/disjoint/saturated results.
 
 Verification:
@@ -716,6 +762,9 @@ Deliverables:
 - source generation, protocol, authority, path, optional typed
   `EvidenceDigest { algorithm, value, assurance }`, monotonic capture,
   warnings, integrity, and reading;
+- observation earliest/latest and duration-error bounds reuse `v0.7.1`
+  interval/hard-bound types; statistical fields use the enriched `v0.14.0`
+  evidence without a parallel interval representation;
 - bounded error-budget components separating systematic/random,
   measured/asserted, correlation identity, calibration, quantization, path,
   capture, scale-model, and oscillator contributions;
@@ -896,6 +945,9 @@ Goal: audit the complete time model before protocols depend on it.
 Deliverables:
 
 - arithmetic and conversion audit;
+- foundational instant/duration interval and hard/statistical type-separation
+  audit proving every era, fraction, EOP, and later uncertainty consumer uses
+  the `v0.7.1` types without provisional duplicates;
 - leap-candidate validation/transaction and evidence-provenance/lifecycle
   boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
   authority/diversity admission remains deferred to `v0.61.1`;
@@ -2076,7 +2128,8 @@ Goal: load leap, IERS/EOP, and external scale-offset data with provenance.
 Deliverables:
 
 - strict bounded loaders and canonical internal snapshots;
-- signature/checksum hooks, activation, expiry, rollback, and conflict policy;
+- signature/checksum hooks plus candidate activation metadata, expiry,
+  rollback, and conflict inputs; caller-owned commit belongs to `v0.52.1`;
 - no automatic network download in core.
 
 Verification:
@@ -2110,7 +2163,7 @@ Deliverables:
 - caller-owned commit is indivisible but provides no concurrent-reader or
   `TrustedClock` publication guarantee before
   `v0.137.1`;
-- failed refresh leaves the current admitted snapshot untouched and reports
+- failed refresh leaves the current caller-owned snapshot untouched and reports
   stale/expired/degraded/faulted state; withdrawal and rollback invalidate
   dependent conversions;
 - no remote retrieval in core, protocol crates, builds, tests, or default
@@ -2157,8 +2210,9 @@ Deliverables:
 - signing/transport key activation, overlap, expiry, compromise, revocation,
   rollback, emergency replacement, and offline trust-root update policy;
 - offline/manual and OS-managed ingestion use the identical bounded
-  verify → stage → compare → activate pipeline and cannot bypass artifact
-  identity/provenance checks;
+  verify → stage → compare → commit caller-owned snapshot pipeline and cannot
+  bypass artifact identity/provenance checks; concurrent publication remains
+  deferred to `v0.137.1`;
 - the early milestone accepts caller-supplied authenticated fetch evidence;
   no built-in production TLS claim exists before `v0.72.0`/`v0.75.1`.
 
@@ -2176,6 +2230,50 @@ Exit criteria:
 - no remotely or manually obtained time-data candidate can establish the trust
   used to authenticate itself;
 - `v0.52.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.52.3 - EOP And Scale-Offset Admission Proofs
+
+Status: planned.
+
+Goal: require non-forgeable typed admission for every non-leap data component
+that can alter trusted conversions.
+
+Deliverables:
+
+- opaque, policy-constructed `AdmittedEopSnapshot` and
+  `AdmittedScaleOffsetSnapshot`, plus bounded `AdmittedTimeDataSnapshot`
+  aggregation for coherent non-leap conversion-data candidates; component
+  types cannot be substituted;
+- each proof binds content hash and model generation, artifact/source
+  identity and configured authority, integrity and retrieval evidence,
+  admission-policy generation, validity and expiry with monotonic domain,
+  rollback evidence/capability, applicable conversion-context generation, and
+  current withdrawal state;
+- artifact authentication and admission authority remain independent: a
+  correctly signed artifact from an unconfigured or wrong-role signer is
+  authentic but not admitted;
+- admission revalidation detects withdrawal, expiry, rollback, authority/
+  policy change, artifact replacement, and conversion-generation mismatch;
+- raw EOP and scale-offset snapshots remain available only to isolated
+  caller-owned expert conversion contexts and cannot update `TrustedClock` or
+  the default facade;
+- no leap authority duplication: leap evidence still requires the engine-owned
+  `AdmittedLeapCandidate` at `v0.61.1`; concurrent publication of every
+  admitted component remains deferred to `v0.137.1`.
+
+Verification:
+
+- forged/private construction, correct signature with absent/wrong authority,
+  hash/model/source/retrieval/policy/context mismatch, expiry/withdrawal/
+  rollback/replacement between admission and revalidation, mixed EOP/offset
+  generations, raw-snapshot default publication compile failures, bounded
+  aggregate capacity, and caller-owned expert-context behavior.
+
+Exit criteria:
+
+- no raw or merely authenticated EOP/scale-offset artifact can change the
+  default trusted conversion context;
+- `v0.52.3 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.53.0 - Documented Vendor Extension Framework
 
@@ -2868,6 +2966,10 @@ Deliverables:
   interval used for validation, validation instant, whole-chain/revocation
   evidence digest and outcomes, capability/non-claims, validity horizon, and
   revalidation deadline;
+- evidence binds the concrete verified reference identity, endpoint authority,
+  SNI where applicable, negotiated ALPN, presented-chain digest, TLS
+  connection generation, and exporter generation; sharing a general policy
+  never permits cross-service or cross-connection reuse;
 - stable `CredentialValidationContextId` binds the credential-policy
   generation, temporal-evidence identity/digest, relevant conversion/leap-model
   generation, and process/machine generation, never the continuously refined
@@ -2878,6 +2980,17 @@ Deliverables:
   `InvalidateImmediately`, `RevalidateBeforeUse`, or policy-bounded
   `ContinueUntil`, with strict defaults for trust removal, revocation,
   identity-policy tightening, time-model rollback, or definite expiry;
+- `ContinueUntil` never exceeds the earliest conservative certificate-chain,
+  revocation-freshness, policy, ticket/session, exporter/key-usage, or other
+  applicable security horizon;
+- civil horizons convert to a monotonic revalidation deadline using the
+  worst-case upper trusted-time bound, correlation uncertainty, conservative
+  oscillator/holdover growth, and exact suspend semantics; holdover growth may
+  move the effective deadline earlier;
+- inability to establish or maintain a conservative monotonic deadline
+  requires revalidation before every use or rejection; clock discontinuity,
+  correlation loss, suspend-domain mismatch, or `MonotonicClockId`
+  invalidation cancels the deadline;
 - ordinary clock refinement within the same admitted time/model generation
   does not rotate the context; definite expiry, trust removal, confirmed
   revocation, rollback, execution-generation change, or relevant time-model
@@ -2898,8 +3011,12 @@ Verification:
   chain member expiry, resumption after context change, certificate expiry
   during cookie retention, time/leap-model rollback/replacement, process/
   machine generation change, repeated normal clock refinements without
-  context churn, revalidation-horizon expiry, and every invalidation/
-  revalidation/continued-use action.
+  context churn, reference identity/endpoint/SNI/ALPN/chain/connection/exporter
+  substitution, every competing chain/revocation/policy/key horizon,
+  upper-bound/correlation/oscillator/holdover/suspend deadline calculations,
+  earlier deadline movement, missing conservative deadline, discontinuity,
+  revalidation-horizon expiry, and every invalidation/revalidation/continued-
+  use action.
 
 Exit criteria:
 
@@ -5292,8 +5409,9 @@ Deliverables:
 
 Verification:
 
-- concurrent reads, clock rollback, system step, suspend/restart, leap/smear,
-  holdover, split-brain, and monotonicity properties.
+- single-reader logical snapshot/state-model tests, clock rollback, system
+  step, suspend/restart, leap/smear, holdover, split-brain, and monotonicity
+  properties; multi-reader publication/interleavings remain `v0.137.1`.
 
 Exit criteria:
 
@@ -5316,6 +5434,11 @@ Deliverables:
   `AdmittedLeapCandidate`; immediately before commit it atomically rechecks
   candidate/evidence/authority/policy/membership/decision generations, expiry
   in its exact monotonic domain, and replacement/withdrawal state;
+- EOP and external scale-offset publication accepts only the matching
+  `v0.52.3` opaque `AdmittedEopSnapshot` or
+  `AdmittedScaleOffsetSnapshot` proof and atomically rechecks every bound
+  content/source/authority/integrity/retrieval/policy/validity/expiry/rollback/
+  conversion-generation/withdrawal field at the same commit boundary;
 - withdrawal, expiry, policy or membership reload, evidence-generation change,
   or candidate replacement between admission and commit invalidates the
   transaction; generation comparison and commit share one linearized
@@ -5324,7 +5447,8 @@ Deliverables:
   UTC result, and dependent clock snapshot become visible as one internally
   consistent transition; no reader observes mixed component generations;
 - raw `LeapModelCandidate` or expert core replacement can never update
-  `TrustedClock` or the default facade without `AdmittedLeapCandidate`;
+  `TrustedClock` or the default facade without `AdmittedLeapCandidate`; raw EOP
+  or scale-offset data is likewise rejected without its typed admitted proof;
 - clarifies that `v0.12.1` atomicity was only a single-thread transactional
   generation replacement, while this milestone supplies concurrent-reader
   visibility and ordering;
@@ -5343,8 +5467,9 @@ Verification:
 
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
-- old/new admitted/raw leap candidate, evidence/policy/membership generation,
-  expiry, withdrawal, EOP, scale-offset, conversion context, UTC result, and
+- old/new admitted/raw leap candidate, EOP and scale-offset component proof,
+  evidence/policy/membership/conversion generation, authority/integrity/
+  retrieval, expiry, rollback, withdrawal, conversion context, UTC result, and
   clock snapshot interleavings across admission/recheck/commit/publication;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
@@ -5792,10 +5917,12 @@ Deliverables:
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
-  caller-serialized independently trusted time-data ingestion plus
-  all-component concurrent publication, competing discipline ownership,
-  honest ahead recovery, embedded concurrency, stable policy/evidence-based
-  `CredentialValidationContextId` invalidation without live-clock churn,
+  caller-serialized independently trusted time-data ingestion,
+  `AdmittedEopSnapshot`/`AdmittedScaleOffsetSnapshot` proofs, and
+  all-component concurrent publication,
+  competing discipline ownership, honest ahead recovery, embedded concurrency,
+  stable policy/evidence-based `CredentialValidationContextId` invalidation
+  without live-clock churn and conservative retention-horizon derivation,
   capability-qualified secret memory, concurrent snapshot, canonical external
   schema, frozen helper-policy/discipline-audit semantics, and language-binding
   review;
@@ -6179,8 +6306,10 @@ Deliverables:
 - `CredentialValidationContextId` coverage for every retained TLS/NTS state,
   stable `CredentialPolicyGeneration`, immutable
   `TemporalValidationEvidence`, trust/identity/revocation/provider/time/leap/
-  lifecycle change, revalidation horizon, full validated chain, CRL/OCSP
-  temporal evidence, and invalidate/revalidate/continue action;
+  lifecycle change, reference identity/endpoint/SNI/ALPN/chain/connection/
+  exporter binding, conservative revalidation-horizon calculation, full
+  validated chain, CRL/OCSP temporal evidence, and invalidate/revalidate/
+  continue action;
 - interval-valued certificate temporal-validity and bootstrap review proving
   strict validation never uses a scalar `UnixTime`, midpoint/preferred
   projection, or a candidate artifact to authenticate its own retrieval;
@@ -6213,8 +6342,10 @@ Deliverables:
   withdrawal/cancellation stress;
 - fork/exec/VM/container restore invalidation, competing clock discipliners,
   stable credential-context invalidation without refinement churn, independent
-  time-data trust and caller-serialized-to-concurrent publication, leap
-  admission-to-commit withdrawal/expiry/policy/member/candidate races,
+  time-data trust and caller-serialized-to-concurrent publication, raw/
+  authenticated-but-unauthorized EOP/scale-offset rejection, leap and time-data
+  admission-to-commit withdrawal/expiry/policy/authority/candidate races,
+  retention-deadline upper-bound/correlation/holdover/suspend campaigns,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
   virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
@@ -6323,10 +6454,11 @@ Deliverables:
   `estimate_now()` truth-seeking semantics, ahead-recovery states, monotonic
   domain identity, and cross-language range behavior documented;
 - secret-memory capability/non-claim, credential-validation-context,
-  immutable temporal-validation evidence/scalar-time non-claim, independent
-  time-data trust and publication phases, opaque leap admission/precommit
-  revalidation, smear-presentation separation, and helper-policy/audit-full
-  behavior documented without stronger implied claims;
+  immutable temporal-validation evidence/scalar-time non-claim and conservative
+  retention horizons, independent time-data trust/admission/publication
+  phases, opaque leap/EOP/scale-offset admission and precommit revalidation,
+  smear-presentation separation, and helper-policy/audit-full behavior
+  documented without stronger implied claims;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

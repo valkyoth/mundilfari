@@ -74,6 +74,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   separated leap truth from smear presentation; stabilized credential identity
   around policy generations and immutable whole-chain validation evidence; and
   deferred all-component concurrent time-data publication to `v0.137.1`.
+- Integrated the next dependency and retention review with a new `v0.7.1`
+  interval/type-separation foundation before era, fraction, and EOP consumers;
+  a new `v0.52.3` opaque admission boundary for EOP/scale-offset data; exact
+  authentication-versus-authority separation; service/connection-bound
+  credential evidence and conservative monotonic retention horizons; and
+  removal of residual early activation/concurrent-reader claims.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

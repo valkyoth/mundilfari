@@ -53,7 +53,9 @@ the release branch between review and tagging.
   carry suspend/rate/scope/process/machine/namespace/generation identity and
   cannot cross domains implicitly.
 - Guaranteed hard bounds and statistical covariance/confidence are distinct;
-  statistical estimates require explicit policy before contributing a bound.
+  stable non-interchangeable interval classes exist before EOP or era
+  consumers, and statistical estimates require explicit policy before
+  contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
@@ -102,11 +104,19 @@ the release branch between review and tagging.
   relevant time/leap-model and lifecycle generations. Normal clock refinement
   does not churn identity; expiry, rollback, trust removal, revocation, or a
   relevant discontinuity explicitly invalidates or requires revalidation.
+- Temporal evidence also binds the concrete reference identity, endpoint,
+  SNI/ALPN, chain, connection, and exporter generation. Retention never exceeds
+  the earliest conservative chain/revocation/policy/session/key horizon;
+  worst-case time/correlation/holdover/suspend semantics derive the monotonic
+  deadline, and failure or domain discontinuity requires per-use revalidation
+  or rejection.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/
   commit transaction and make no concurrent-reader claim; later publication
-  exposes leap, EOP, scale-offset, conversion, and clock state consistently. A
+  accepts only opaque admitted leap, EOP, and scale-offset forms and exposes
+  conversion/clock state consistently. Raw or merely authenticated artifacts
+  remain expert-only; configured authority is independently required. A
   candidate never authenticates the transport or signature that delivered
   itself, redirects preserve admitted authority, remote retrieval is explicit,
   and offline/manual ingestion uses the same candidate pipeline.

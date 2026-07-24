@@ -336,6 +336,14 @@ sign location, positive nonzero denominator, reduction state, comparison work,
 and conversion work are fixed and bounded. No attacker selects an unbounded
 numerator, denominator, allocation, or GCD workload.
 
+Immediately after `AtomicInstant`, one stable source-neutral interval kernel
+defines bounded instant/duration intervals and non-interchangeable
+`HardBound<T>` versus non-guaranteed `StatisticalRange<T>` classes. Era
+resolution, fractional residuals, and EOP all reuse it. The later uncertainty
+phase adds asymmetric budgets, covariance, confidence/model evidence, richer
+algebra, and observation integration without replacing these foundational
+types or implicitly promoting statistical ranges into guaranteed bounds.
+
 ### 4.3 Explicit scale and context
 
 UTC, TAI, UT1, POSIX, NTP, PTP, GPS, Galileo, BeiDou, GLONASS, terrestrial,
@@ -347,6 +355,11 @@ arbitrary timescale, GLONASS is not treated as a fixed-offset continuous
 scale, and UT1 or relativistic coordinate scales require named admitted
 models and uncertainty. UTC before 1972 has an explicit non-claim until a
 historical frequency-offset model is admitted.
+
+Early EOP records carry source-neutral model/document identity, revision/hash,
+validity, interpolation policy, generation, and the foundational uncertainty
+class. They do not manufacture authentication, retrieval, source authority, or
+the full observation provenance introduced by later layers.
 
 Mundilfari keeps generic scale identifiers and versioned conversion context so
 GNSS-derived observations can be compared with other clocks. Navheim
@@ -702,6 +715,16 @@ relevant model/lifecycle discontinuity invalidates or requires revalidation.
 A scalar-`UnixTime` conventional verifier cannot be promoted into strict
 whole-interval `TemporalValidity` evidence.
 
+Temporal evidence also binds the concrete verified reference identity,
+endpoint authority, SNI/ALPN where applicable, presented-chain digest, and TLS
+connection/exporter generations. `ContinueUntil` is the earliest conservative
+chain, revocation, policy, ticket/session, exporter/key-usage, or other
+security horizon. Civil expiry is mapped to the monotonic domain using the
+worst-case upper time bound, correlation uncertainty, oscillator/holdover
+growth, and suspend semantics. If that deadline cannot be established—or a
+clock/correlation/domain discontinuity invalidates it—the state is revalidated
+before each use or rejected.
+
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
 rules, and read-latency guarantee are documented and model-tested; instant,
@@ -726,6 +749,16 @@ TrustedClock publication mechanism exposes leap, EOP, external scale-offset,
 conversion-context, and clock generations as one consistent snapshot. Expiry,
 rollback capability, withdrawal, and refresh failure remain visible in
 capability reports and `system_defaults()`.
+
+Caller-owned loading and artifact authentication still do not grant default
+clock authority. Opaque `AdmittedEopSnapshot` and
+`AdmittedScaleOffsetSnapshot` proofs bind content/model, configured authority,
+integrity/retrieval evidence, admission-policy generation, validity/expiry,
+rollback evidence, conversion generation, and withdrawal state. A valid
+signature from an unconfigured signer remains authentic but unauthorized. Raw
+snapshots stay usable only in isolated expert conversion contexts. Concurrent
+TrustedClock publication accepts these proofs and the separate engine-issued
+`AdmittedLeapCandidate`, revalidating all bindings in the commit transaction.
 
 Remote time data cannot authenticate itself: a candidate never validates the
 transport or credential interval that delivered it. Artifact signatures,
@@ -898,11 +931,11 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
+| Foundational intervals, hard/statistical classes, richer uncertainty, withdrawals | `v0.7.1`, `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers, serialized commit, independent trust, concurrent publication | `v0.52.0`–`v0.52.2`, publication `v0.137.1`, product gate `v0.148.0` |
+| Hosted time-data providers, serialized commit, independent trust, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |

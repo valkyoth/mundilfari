@@ -110,6 +110,7 @@ Additional boundaries:
 | Loss of sources | holdover state with growing uncertainty and bounded recovery |
 | Retracted or invalid evidence remains active | generic identified withdrawal/discontinuity events, reserved invalidation capacity, generation propagation through filter/consensus/servo/clock/audit |
 | Statistical confidence presented as guaranteed time | distinct hard/statistical types, named confidence/model, explicit conversion policy, error-budget provenance |
+| Provisional interval types diverge before EOP | one source-neutral bounded interval kernel and non-interchangeable hard/statistical wrappers precede era, fraction, and EOP consumers; later algebra extends rather than replaces it |
 | GNSS spoofing or bad upstream evidence | preserve Navheim health/authentication/integrity/provenance, honor invalidation, compare independent clock families |
 | Radio spoofing | source fusion, propagation checks, signal quality, independent corroboration |
 | PTP manipulation | authenticated mechanism or trusted boundary/corroboration for strict discipline, topology identity, correction/delay monitoring, redundant grandmasters and paths |
@@ -126,10 +127,13 @@ Additional boundaries:
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |
 | Specification drift | official revision registry, errata review, draft isolation, source hashes |
 | Malicious or partial time-data update | explicit provider authorization, bounded caller-serialized verify/stage/compare/commit, competing-writer control, rollback/withdrawal/expiry state, current model retained on failure, and later consistent concurrent publication |
+| Authenticated but unauthorized conversion data | opaque EOP/scale-offset admission proofs separately bind artifact integrity/retrieval and configured source authority; raw or wrong-role signed data cannot publish the default clock |
 | Circular remote time-data bootstrap | a candidate never validates the transport, certificate, signature time, or credential context that delivered itself; require an admitted signer/pin or HTTPS under already admitted time, preserve redirect authority, and route offline/manual ingestion through the same pipeline |
 | Certificate midpoint acceptance | concrete verifier returns immutable whole-chain/revocation evidence for interval-valued temporal validity; scalar `UnixTime`, midpoint, or preferred projection cannot satisfy strict validation |
 | Stale retained TLS/NTS credentials after trust change | stable policy generation plus immutable temporal evidence/horizon and relevant time-model/lifecycle generations; explicit invalidate, revalidate, or bounded-continuation action |
 | Credential-context churn from normal clock refinement | context identity references immutable validation evidence rather than the live clock interval; only expiry or relevant policy, revocation, rollback, model, or lifecycle change rotates/revalidates it |
+| Cross-service credential-state reuse | temporal evidence binds concrete reference identity, endpoint authority, SNI/ALPN, presented chain, connection, and exporter generations |
+| Retained credential outlives a safe horizon | `ContinueUntil` uses the earliest chain/revocation/policy/session/key horizon and a worst-case upper-time/correlation/oscillator/holdover/suspend conversion; missing or invalid monotonic deadline forces per-use revalidation or rejection |
 | Deep canonical-schema exhaustion | maximum depth/item counts, iterative or bounded recursion, common non-resettable work budget, stable tag namespaces |
 | False audit tamper-evidence claim | strict sequence/gap records, domain and TAI/model generations, append-only distinct from chained/sealed/witnessed tamper evidence |
 | Configuration rollback or secret leakage | provenance/integrity/rollback generation, staged atomic activation, opaque secret references, independent helper ceiling |

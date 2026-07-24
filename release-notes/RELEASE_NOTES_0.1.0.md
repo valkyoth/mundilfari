@@ -82,6 +82,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   truth; credential contexts use stable policy generations and immutable
   whole-chain temporal evidence; and early time-data updates explicitly defer
   concurrent-reader publication.
+- Subsequent dependency audit added `v0.7.1` so stable interval and
+  hard/statistical types precede era, fractions, and EOP; added `v0.52.3` typed
+  EOP/scale-offset admission so valid signatures cannot bypass configured
+  authority; defined service/connection binding and worst-case monotonic
+  credential-retention horizons; and corrected the remaining early activation
+  and concurrent-read wording.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.
