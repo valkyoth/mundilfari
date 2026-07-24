@@ -133,7 +133,12 @@ the release branch between review and tagging.
   and target-domain deadlines; the correlation cannot validate either
   deadline through itself. Identity, generation, verified derivations,
   assessments, support, anchors, endpoint validity, provider/lifecycle, and
-  expiry all become dependencies. Platform providers emit only untrusted
+  expiry all become dependencies. In the initial model, engine walks the full
+  transitive recipe/condition/assessment/support leaf set and rejects any
+  current, stale, replaced, or historical admitted-correlation dependency or
+  claim derived through one. This makes numerical proof support
+  acyclic-by-construction; two-node, longer, replacement-generation, and
+  restored-reference cycles fail closed. Platform providers emit only untrusted
   candidates. Translation is outward-rounded and a mapped deadline uses the
   target interval's earliest edge; reverse use, implicit composition, provider
   self-admission, circular validity, and stale/forged/high-uncertainty
@@ -155,14 +160,22 @@ the release branch between review and tagging.
   point. Every mutation of an admission, proof, condition assessment, support,
   membership, policy, correlation, endpoint-validity, provider, execution, or
   publication dependency advances the watermark atomically before exposure.
-  Explicit cancellation, unwind, panic, early return, or guard drop tombstones
-  the reservation. No external callback, fallible work, or async
+  Explicit cancellation, unwind, panic, early return, or guard drop atomically
+  changes the already-owned preallocated reservation slot from `Live` to
+  `Tombstone`. It requires no allocation or separate tombstone capacity and is
+  bounded, callback-free, nonblocking, non-panicking, and valid during unwind.
+  `SupersededTombstone` cleanup is a successful fenced no-op; an impossible
+  transition latches an engine invariant fault and irrevocably disables the old
+  install capability without panicking. No external callback, fallible work, or async
   `Poll::Pending` is permitted after acquisition. A higher fencing generation
   may supersede only a tombstoned reservation or an invalidated owner/process/
   session; timeout alone never permits stealing, and an old writer returns
   `SupersededNoInstall`. Process/session restart invalidates inherited
-  reservations. Tombstones are reclaimed only behind a bounded reader
-  generation floor; table or fencing exhaustion faults closed. Readers
+  reservations. The preallocated
+  `Vacant`/`Live`/`Tombstone`/`SupersededTombstone` slots are reclaimed only
+  behind a bounded reader generation floor. Full slot capacity rejects new
+  acquisition but never cleanup; reclamation or fencing exhaustion faults
+  closed. Readers
   boundedly return current state, `RefreshInProgress`, or a typed fault,
   including when safe code leaks a writer. Arbitrary post-sample preemption is
   allowed, delayed installation cannot overwrite a newer invalidation/version,

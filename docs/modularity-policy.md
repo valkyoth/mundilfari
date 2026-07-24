@@ -69,7 +69,11 @@ Rules:
   derivation and condition machinery: engine verifies every offset/rate/drift
   recipe, snapshot-consistently assesses it, preserves structured support
   axes and immutable paired capture anchors, and independently checks both
-  endpoint validity domains. Provider registration alone grants no proof.
+  endpoint validity domains. Initial admission walks every transitive recipe,
+  condition, assessment, and support leaf and forbids all current/stale/
+  replaced/historical admitted-correlation dependencies or claims derived
+  through them, so proof support is acyclic by construction. Provider
+  registration alone grants no proof.
   Batch admission cannot enter servo, discipline, publication, or trusted-time
   APIs; only consensus constructs time authority.
   Losing used proof support invalidates that authority; an unused alternative
@@ -80,7 +84,11 @@ Rules:
   nonwrapping fencing generation plus strict-reader revalidation without WCET.
   Engine owns cancellation/drop tombstoning, timeout-independent supersession,
   `SupersededNoInstall`, restart invalidation, bounded reader generation floors,
-  tombstone reclamation, and capacity/fencing exhaustion. Async wrappers finish
+  tombstone reclamation, and capacity/fencing exhaustion. Each preallocated
+  reservation slot holds `Live` and tombstone states in place; cleanup is
+  bounded, allocation-free, callback-free, nonblocking, and non-panicking,
+  cannot exhaust, treats prior supersession as success, and latches an engine
+  fault/no-install on an impossible transition. Async wrappers finish
   all pending/fallible/external work before acquisition and cannot retain the
   guard across `Poll::Pending`. Optional `CommitCoveredRefresh` adds the
   reviewed remaining-work bound. Concurrent

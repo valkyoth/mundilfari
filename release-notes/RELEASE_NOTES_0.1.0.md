@@ -203,6 +203,16 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   bounded reader progress, tombstone reclamation, and exhaustion are explicit.
   Async code completes every pending/fallible/external operation before guard
   acquisition and cannot return `Poll::Pending` while holding it.
+- Guard cleanup cannot be denied by tombstone capacity: its already-owned
+  preallocated slot transitions in place through live/tombstone/superseded
+  states using bounded, allocation-free, callback-free, nonblocking,
+  non-panicking cleanup. Prior supersession is a successful fenced no-op;
+  impossible transitions latch an engine fault and disable installation.
+- Initial correlation numerical proofs and condition assessments cannot depend
+  transitively on any current, stale, replaced, or historical admitted
+  correlation. This acyclic-by-construction rule covers A→B/B→A, longer,
+  replacement-generation, and restored-reference cycles; a future bounded
+  correlation dependency DAG would require a separate version and pentest.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

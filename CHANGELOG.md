@@ -8,6 +8,16 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ### Changed
 
+- Clarified that refresh-guard cleanup cannot exhaust: each preallocated
+  reservation slot transitions in place to its tombstone state using a bounded,
+  allocation-free, callback-free, nonblocking, non-panicking path; superseded
+  cleanup is a successful fenced no-op and impossible transitions latch an
+  engine fault while disabling installation.
+- Made initial correlation proof support acyclic by construction by rejecting
+  every transitive current, stale, replaced, or historical admitted-correlation
+  dependency in numerical recipes, conditions, assessments, and support leaves;
+  two-node, longer, replacement-generation, and restored-reference cycles are
+  assigned explicit tests.
 - Strengthened the monotonic-correlation roadmap so offset, rate, and drift
   claims carry verifiable bounded derivations, logical conditions, immutable
   paired capture anchors, structured support, and independently checked

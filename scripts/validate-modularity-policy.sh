@@ -63,9 +63,15 @@ grep -q '`CompleteMemberStatus` and `AbortMemberDiagnostic` are disjoint' docs/m
 grep -q 'cannot enter quorum' docs/modularity-policy.md
 grep -q '`BatchAdmissionState`, exact-support `ConsensusAuthority`' docs/modularity-policy.md
 grep -q 'conservative validity, and proof-bearing admitted monotonic-correlation' docs/modularity-policy.md
-grep -q 'Provider registration alone grants no proof' docs/modularity-policy.md
+grep -q 'registration alone grants no proof' docs/modularity-policy.md
 grep -q 'immutable paired capture anchors' docs/modularity-policy.md
+grep -q 'acyclic by construction' docs/modularity-policy.md
+grep -q 'replaced/historical admitted-correlation dependencies' docs/modularity-policy.md
 grep -q 'engine-owned RAII `RefreshReservationGuard`' docs/modularity-policy.md
+grep -q 'reservation slot holds `Live` and tombstone states in place' docs/modularity-policy.md
+grep -q 'allocation-free, callback-free, nonblocking, and non-panicking' docs/modularity-policy.md
+grep -q 'cannot exhaust' docs/modularity-policy.md
+grep -q 'latches an engine' docs/modularity-policy.md
 grep -q 'timeout-independent supersession' docs/modularity-policy.md
 grep -q '`SupersededNoInstall`' docs/modularity-policy.md
 grep -q 'Async wrappers finish' docs/modularity-policy.md

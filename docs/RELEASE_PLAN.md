@@ -1373,6 +1373,12 @@ Deliverables:
   supervision-domain form is deferred until a reviewed dependency-DAG proof
   can exclude self/indirect cycles; one translated aggregate deadline cannot
   validate the correlation that performs the translation;
+- the initial candidate recipe/condition contract exposes every transitive
+  input and support reference needed for later admission. It grants no way to
+  treat an opaque or historical `AdmittedMonotonicDomainCorrelation` reference
+  as a root observation, proof input, condition atom, or authority. Initial
+  engine admission therefore can enforce an acyclic-by-construction leaf set
+  rather than trusting “direct translation only” to prevent semantic cycles;
 - translating a source instant or deadline produces an outward-rounded target
   interval with accumulated offset/rate/drift/elapsed/quantization uncertainty.
   For a source `valid_until` mapped to target `[earliest, latest]`, the only
@@ -1408,7 +1414,9 @@ Verification:
   missing/circular/same-correlation-translated validity, and source/target
   endpoint deadline/reset cases fail. Property tests grow uncertainty
   monotonically from both anchors and independently check each endpoint
-  deadline.
+  deadline. Structural fixtures attempting to hide current or historical
+  admitted-correlation references in a recipe, condition, or derived support
+  leaf remain untrusted and cannot become an admitted candidate dependency.
 
 Exit criteria:
 
@@ -1511,7 +1519,8 @@ Deliverables:
   complete bounded recipes/conditions and immutable paired capture anchors,
   uncertainty grows outward from those anchors, endpoint validity is
   independently checkable without self-translation, and no core/platform value
-  can construct engine-admitted correlation state;
+  can construct engine-admitted correlation state or use an admitted/
+  historical correlation as transitive numerical proof or condition support;
 - hard/statistical uncertainty, error-budget, observation-lifecycle,
   formatting, and error-taxonomy audit;
 - Kani-style reduced-state proofs for handle resolution, brand/generation
@@ -1531,7 +1540,8 @@ Verification:
   cases, borrowed/owned promotion and source-drop/owner-drop state machines,
   compile-fail lifetime-escape corpus, multi-root shared-DAG/retention/
   compaction state machines, forged correlation bounds/anchors, circular
-  validity cases, and reduced-state proof artifacts are mandatory.
+  validity cases, two-node/longer/replacement/restored-reference correlation
+  proof cycles, and reduced-state proof artifacts are mandatory.
 
 Exit criteria:
 
@@ -3320,6 +3330,16 @@ Deliverables:
   those verified derivations, accepted tokens, assessments/support bases, and
   anchors; rate/drift uncertainty grows outward from the anchors at every
   translation rather than trusting a provider-supplied final number;
+- initial correlation numerical derivation and condition-assessment admission
+  is acyclic by construction: the verifier walks the complete bounded
+  transitive recipe, condition, and `SupportBasis` leaves and rejects any
+  dependency on any current, stale, replaced, or historical
+  `AdmittedMonotonicDomainCorrelation` identity or a claim/assessment derived
+  through one. This applies to both endpoints and every intermediate derived
+  claim. A future correlation-on-correlation proof model requires its own
+  versioned bounded dependency DAG, atomic cycle check, canonical ordering,
+  replacement semantics, resource limits, and pentest; it is not implied by
+  direct translation;
 - admitted `CorrelationValidity` initially accepts only independently checked
   source and target endpoint deadlines. Admission and every strict use read
   both exact domains independently and require each conservative latest edge
@@ -3329,8 +3349,9 @@ Deliverables:
 - the opaque result exposes only direct outward-rounded translation. Missing/
   invalid derivation, unsupported/expired/withdrawn assumptions, provider
   registration without adequate evidence, forged narrow bounds or anchors,
-  circular validity, excessive uncertainty, reverse use, implicit composition,
-  and stale candidates fail closed;
+  circular validity, two-node or longer proof-support cycles, replaced/restored
+  correlation references, excessive uncertainty, reverse use, implicit
+  composition, and stale candidates fail closed;
 - either domain/provider reset, suspend incompatibility, rate-semantics or
   scope/migration change, expiry, withdrawal, or generation change invalidates
   the admitted correlation through reserved lifecycle propagation and every
@@ -3499,19 +3520,29 @@ Deliverables:
   the watermark before exposing that mutation;
 - `RefreshReservationGuard` tombstones its reservation on explicit
   cancellation, unwind/panic where supported, normal early return, and `Drop`;
-  no external callback or fallible/Pending-producing work is permitted after
-  acquisition. A leaked/stalled live guard cannot be stolen because a timeout
-  elapsed. Engine cancellation, owner/process/session invalidation, or an
-  already published tombstone may authorize a new writer to atomically
-  supersede it with a strictly higher fencing generation; the delayed old
-  writer then returns typed `SupersededNoInstall`;
+  the already-owned fixed reservation slot atomically transitions in place
+  from `Live` to `Tombstone` and therefore requires no allocation, separate
+  tombstone capacity, callback, blocking operation, fallible operation, or
+  panic-capable cleanup. This bounded transition is valid during unwinding and
+  `Drop` cannot return an error. If a higher fence already changed the slot to
+  `SupersededTombstone`, cleanup is a successful fenced no-op. An impossible
+  owner/fence/state transition atomically latches an engine invariant fault and
+  permanently removes the old writer's install capability; it never panics or
+  permits installation. No external callback or fallible/Pending-producing
+  work is permitted after acquisition. A leaked/stalled live guard cannot be
+  stolen because a timeout elapsed. Engine cancellation, owner/process/session
+  invalidation, or an already published tombstone may authorize a new writer
+  to atomically supersede it with a strictly higher fencing generation; the
+  delayed old writer then returns typed `SupersededNoInstall`;
 - process/session restart invalidates every inherited reservation before state
-  use. Tombstones use bounded storage and are reclaimed only after the reader
-  generation floor proves no observer can accept the old fence; fencing
-  generations are never reused, and counter or reclamation-capacity exhaustion
-  faults closed rather than risking ABA. Readers remain bounded: they return a
-  current revalidated state, `RefreshInProgress`, or a typed fault and never
-  wait for a leaked/stalled writer;
+  use. `Vacant`/`Live`/`Tombstone`/`SupersededTombstone` share the same
+  preallocated bounded slot; tombstones are reclaimed to `Vacant` only after
+  the reader generation floor proves no observer can accept the old fence.
+  Slot saturation may reject new acquisition but can never prevent guard
+  cleanup. Fencing generations are never reused, and counter or reclamation
+  exhaustion faults closed rather than risking ABA. Readers remain bounded:
+  they return a current revalidated state, `RefreshInProgress`, or a typed
+  fault and never wait for a leaked/stalled writer;
 - `CommitCoveredRefresh` is optional. It uses the same reservation and sample,
   then expands the conservative latest edge by a current reviewed bound
   covering every remaining generation comparison, write, atomic swap,
@@ -3691,7 +3722,10 @@ Verification:
   uncertainty growth, exact earliest-edge deadline translation, and attempted
   composition all fail closed. Endpoint validity tests independently sample
   both domains and reject self/indirect translation, circular supervision,
-  either deadline expiry, and either domain reset;
+  either deadline expiry, and either domain reset. Numerical-proof cycle tests
+  reject A→B supported by B→A, longer cycles, cycles introduced by replacement
+  generations, and restored historical correlation references used as current
+  recipe/condition/support inputs;
 - prior-observation tests bind identity/generation, exact-domain
   `PriorStateSubject`, `LinearizationObservationStamp`, unchanged
   `valid_until`, invalidation generation/reason, and engine/publication
@@ -3709,11 +3743,17 @@ Verification:
   abandonment/supersession, invalidation watermark changes, delayed-writer ABA,
   generation exhaustion, and newer-writer ordering cannot overwrite newer
   state. Every invalidating dependency class advances the watermark before
-  visibility. Panic/unwind, explicit cancellation, guard drop/early return,
-  future drop, leaked/stalled owner, engine cancellation, process/session
+  visibility. State-machine tests cover in-place `Live` to `Tombstone`,
+  already-superseded cleanup as a fenced no-op, impossible-transition engine-
+  fault latching with no install, and cleanup under reservation-slot saturation;
+  allocator/callback/panic/blocking instrumentation proves cleanup is bounded,
+  allocation-free, callback-free, nonblocking, and non-panicking. Panic/unwind,
+  explicit cancellation, guard drop/early return, future drop, leaked/stalled
+  owner, engine cancellation, process/session
   restart, timeout-only steal attempts, higher-fence supersession,
   `SupersededNoInstall`, bounded tombstone reclamation, reader-generation
-  floors, capacity exhaustion, and bounded reader availability are covered;
+  floors, acquisition-capacity exhaustion, and bounded reader availability are
+  covered;
 - `CommitCoveredRefresh` injects preemption after the sample and each remaining
   generation comparison, write, swap, critical-section edge, and observation-
   record step. Tests hit one tick below/at/above the reviewed remaining-work
@@ -3815,7 +3855,9 @@ Deliverables:
   then enter the proof-support set. The authority retains and independently
   checks both endpoint `CorrelationValidity` deadlines; neither is translated
   through the correlation itself. Raw cross-domain deadline comparison is
-  forbidden;
+  forbidden. Consensus also rechecks the admission's no-transitive-correlation
+  proof-support invariant; it cannot introduce correlation-backed claims or
+  assessments into an existing correlation dependency after admission;
 - expiry, withdrawal, replacement, or generation change of any used
   contributor or correlation invalidates that exact consensus authority even
   when unused members could form another quorum. Alternative support requires
@@ -7005,7 +7047,10 @@ Deliverables:
   support bases, capture anchors, independent endpoint validity, provider/
   lifecycle/expiry into the snapshot. Publication independently rechecks both
   endpoint deadlines and never uses the correlation to validate itself.
-  Otherwise publication fails typed; raw cross-domain comparison is forbidden;
+  Publication also rejects any numerical derivation, condition assessment, or
+  support leaf transitively backed by an admitted or historical correlation,
+  including a reference restored after replacement. Otherwise publication
+  fails typed; raw cross-domain comparison is forbidden;
 - concurrent batch refresh publishes a new `CompleteBatchVerification` and
   retires the prior batch/snapshot at one linearization point after rechecking
   both generation vectors. A non-invalidating cancellation, capacity, or
@@ -7039,6 +7084,14 @@ Deliverables:
   process/session invalidation permits a higher-fence writer to supersede;
   elapsed time alone never does. Superseded writers publish nothing and return
   `SupersededNoInstall`;
+- each guard owns one preallocated reservation slot whose
+  `Vacant`/`Live`/`Tombstone`/`SupersededTombstone` transition occurs in place.
+  Cleanup consumes no secondary tombstone capacity and is bounded,
+  allocation-free, callback-free, nonblocking, and non-panicking, including
+  during unwind. Cleanup after higher-fence supersession is a successful fenced
+  no-op; an impossible transition latches the engine fault and irrevocably
+  disables old-writer installation. Slot saturation rejects acquisition, never
+  cleanup;
 - optional `CommitCoveredRefresh` expands the sample's latest edge by a current
   reviewed remaining-work capability covering checks, writes, swap,
   preemption/critical-section allowance, and observation-record publication,
@@ -7128,7 +7181,9 @@ Verification:
 - admitted-correlation publication schedules substitute numerical proofs,
   conditions, assessments, support bases, capture anchors, endpoint deadlines,
   and provider/lifecycle generations one at a time; either endpoint reset/
-  expiry or circular self-validation prevents synchronized publication;
+  expiry or circular self-validation prevents synchronized publication.
+  Two-node and longer numerical-proof/support cycles, replacement-generation
+  cycles, and restored historical references likewise prevent publication;
 - preemption is injected after every post-sample step and at the exact
   remaining-work/deadline margin for `CommitCoveredRefresh`. Separate
   `LinearizationRefresh` schedules inject unbounded preemption immediately
@@ -7136,8 +7191,11 @@ Verification:
   abandonment, every watermark-advancing invalidation and newer
   publication during delay, delayed historical install/receipt, reader retry
   exhaustion, higher-fence supersession/`SupersededNoInstall`, process/session
-  restart, bounded tombstone reclamation/exhaustion, and strict-read expiry/
-  revalidation. Timeout-only theft is refused. Capability absence leaves
+  restart, in-place tombstoning at full slot capacity, already-superseded
+  cleanup, impossible-transition fault latching, bounded tombstone reclamation/
+  exhaustion, and strict-read expiry/revalidation. Cleanup instrumentation
+  rejects allocation, callbacks, blocking, or panic. Timeout-only theft is
+  refused. Capability absence leaves
   this hosted profile functional. Monotonic sample failure, no comparable
   domain, or reservation failure proves
   `LinearizationObservationStamp::Unavailable` can accompany absence or known
@@ -7365,7 +7423,8 @@ Deliverables:
   that can return `Poll::Pending`; it must complete with `Poll::Ready` after
   install, typed no-install, or tombstone. Async state cannot store a live guard
   across polls. Future drop before acquisition owns no reservation; unwind/drop
-  during the final poll runs the guard tombstone path;
+  during the final poll runs the bounded in-place guard tombstone path without
+  allocation, callback, blocking, or panic;
 - no Tokio or runtime dependency.
 
 Verification:
@@ -7422,10 +7481,12 @@ Deliverables:
   validity, admitted monotonic-domain correlations, and authority dependency
   vectors. Observation storage always reserves the fixed-size measured/
   unavailable stamp plus refresh-profile evidence. Hosted builders size
-  reservation slots, fencing/watermark generations, owner/cancellation state,
-  tombstones, reader-generation tracking, and reclamation metadata for
+  reservation slots whose in-place state includes live/tombstone/superseded
+  forms, fencing/watermark generations, owner/cancellation state,
+  reader-generation tracking, and reclamation metadata for
   `LinearizationRefresh`; a remaining-work capability is required only when
-  enabling `CommitCoveredRefresh`;
+  enabling `CommitCoveredRefresh`. No separate tombstone capacity is consumed
+  by guard cleanup; zero/full capacity affects acquisition only;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -7443,8 +7504,10 @@ Verification:
   canonical-order, snapshot, accounting, and cancellation-checkpoint buffer;
   compile-fail cross-status construction plus exact size/stack evidence for
   proof-support/correlation proof/anchor/endpoint-validity capacities, zero/
-  exact/short reservation/tombstone/reader-floor capacity, generation
-  exhaustion and bounded reclamation, and both observation-stamp variants;
+  exact/short reservation-slot/reader-floor capacity, full-slot in-place
+  cleanup, already-superseded no-op, impossible-transition fault latch,
+  generation exhaustion and bounded reclamation, and both observation-stamp
+  variants;
   every prior-observation variant.
 
 Exit criteria:
@@ -7496,10 +7559,16 @@ Deliverables:
   correlation reference with historical assessment/support metadata; no schema
   directly constructs verified correlation derivations, accepted numerical
   claims, or the opaque current engine-admitted type;
+- decoded recipe, condition, assessment, and support records cannot regain
+  current correlation-proof authority when they contain an admitted/
+  historical correlation reference. They remain unresolved historical input,
+  and fresh admission rejects every transitive correlation dependency,
+  including replacement-generation and longer-cycle attempts;
 - reservation/fencing/watermark/tombstone encodings are diagnostic historical
   records only. No persisted/IPC/schema value recreates a live
   `RefreshReservationGuard`, authorizes supersession, or survives process/
-  session generation change as a current reservation;
+  session generation change as a current reservation. Decoding cannot create
+  a live/tombstone slot transition or bypass the in-place cleanup state machine;
 - every IPC, persistence, C, WASM, log/evidence, and language-binding encoding
   of a bound condition preserves the `v0.7.3` unresolved/resolved type-state;
   identifier-only forms require the exact verified registry generation and no
@@ -7838,10 +7907,13 @@ Deliverables:
   untrusted-versus-engine-admitted directed correlation lifecycle and outward-
   rounded earliest-edge deadline translation, proof-bearing offset/rate/drift
   claims with exact anchors/conditions/assessments/transitive support bases and
-  independently checked non-circular endpoint validity, admitted dependencies
-  for every translation, used-support invalidation despite an available
+  independently checked non-circular endpoint validity, initial prohibition of
+  all transitive admitted/historical-correlation numerical-proof or condition
+  support, admitted dependencies for every translation, used-support
+  invalidation despite an available
   alternative quorum, portable version-reserved `LinearizationRefresh` with
-  RAII guard/watermark/fencing/tombstone/restart recovery, and optional
+  RAII guard/watermark/fencing/in-place non-failing tombstone/restart recovery,
+  and optional
   remaining-work-bounded `CommitCoveredRefresh`,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
@@ -8210,10 +8282,14 @@ Deliverables:
   available without a commit-coverage capability;
 - correlation claim/recipe/condition/assessment/support/anchor/endpoint-
   validity storage and verification/uncertainty-growth work are included in
-  operation-wide limits. Refresh reservation/tombstone/reader-generation
-  tables have fixed capacities and bounded reclamation; leaked/stalled writers,
-  tombstone saturation, and fencing exhaustion return bounded typed failure and
-  cannot trigger timeout-based stealing, unbounded scanning, or ABA reuse;
+  operation-wide limits. Because initial correlation proofs forbid every
+  transitive correlation input, no hidden correlation-DAG capacity or traversal
+  exists. Refresh reservation-slot/reader-generation tables have fixed
+  capacities and bounded reclamation; each slot contains its tombstone states
+  in place, so full capacity may refuse acquisition but never cleanup. Leaked/
+  stalled writers, slot saturation, and fencing exhaustion return bounded typed
+  failure and cannot trigger timeout-based stealing, unbounded scanning, or ABA
+  reuse;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -8256,7 +8332,8 @@ Deliverables:
   and bounded numerical claim recipes/conditions, withdraw on every declared
   reset/suspend/rate/migration/provider transition, and have no constructor,
   numerical-proof bypass, or dependency path to engine-admitted correlation
-  state;
+  state; platform output cannot smuggle a current/historical admitted
+  correlation into a numerical recipe, condition, or support leaf;
 - safe-wrapper length/alignment/discriminant/ownership/lifetime/kernel-size
   validation;
 - C/JNI/Swift context/child ownership, retain/close/destruction order,
@@ -8378,13 +8455,18 @@ Deliverables:
   offset/rate/drift proof or capture anchor, condition/assessment/support-basis
   substitution/withdrawal, elapsed uncertainty growth, directed outward-
   rounded earliest-edge translation, independently checked endpoint deadlines,
-  circular self/indirect validity, mixed-domain rejection, each domain/
+  circular self/indirect validity, A→B/B→A and longer proof-support cycles,
+  replacement-generation cycles, restored historical-reference support,
+  mixed-domain rejection, each domain/
   provider/lifecycle reset/suspend/rate/migration/expiry/change,
   used-contributor withdrawal while an unused alternative quorum remains, and
   mandatory new-authority identity; prior identity/generation,
   measured/unavailable stamp, deadline, invalidation generation/reason,
   engine/publication generation, unbounded post-sample hosted preemption,
-  guard panic/unwind/drop/cancellation, reservation abandonment/leak/stall/ABA/
+  guard panic/unwind/drop/cancellation, in-place non-failing tombstone cleanup,
+  full-slot cleanup, superseded-cleanup no-op, impossible-transition fault
+  latch/no-install, allocation/callback/blocking/panic cleanup instrumentation,
+  reservation abandonment/leak/stall/ABA/
   higher-fence supersession, every invalidation-watermark dependency class,
   process/session restart, delayed old-writer `SupersededNoInstall`, bounded
   tombstone/reader-floor reclamation and exhaustion, timeout-steal refusal,
@@ -8553,14 +8635,16 @@ Deliverables:
   untrusted directed versus opaque engine-admitted monotonic correlation,
   proof-bearing offset/rate/drift claims, exact capture anchors/uncertainty
   growth, condition/assessment/transitive support basis, independently checked
-  non-circular endpoint validity, outward-rounded earliest-edge deadline
-  mapping and lifecycle invalidation,
+  non-circular endpoint validity, no transitive admitted/historical-correlation
+  proof or condition support, outward-rounded earliest-edge deadline mapping
+  and lifecycle invalidation,
   non-authoritative `BatchAdmissionState`,
   version-reserved `LinearizationRefresh` versus remaining-work-bounded
   `CommitCoveredRefresh`, `RefreshReservationGuard` ownership/drop/cancel/
-  unwind, watermark mutation rules, fencing supersession/no-install, process/
-  session invalidation, bounded tombstone reclamation, timeout-steal refusal,
-  and async no-`Poll::Pending` rule after reservation,
+  unwind, allocation-free/non-panicking in-place cleanup with superseded no-op
+  and engine-fault fallback, watermark mutation rules, fencing supersession/no-
+  install, process/session invalidation, bounded tombstone reclamation, timeout-
+  steal refusal, and async no-`Poll::Pending` rule after reservation,
   linearization-time `observed_at`/`valid_until` versus WCET-backed
   through-completion contracts, strict versus conditional facade results,
   incompatibility, and no quantum adjustment;
