@@ -108,6 +108,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   publication, and strict facade results; conditional diagnostics retain the
   condition, assessment, deadline, reasons, assurance, and non-claims without
   a trusted boolean.
+- Strengthened `v0.60.1` so policy acceptance additionally requires an
+  engine-verified exact claim derivation, atom assessments preserve typed
+  measured/cryptographic/authority/configured/derived support basis, and
+  assessment plus optional acceptance are issued from one generation-consistent
+  transaction. Strengthened `v0.137.0`–`v0.137.1` so strict reads enforce the
+  exact monotonic-domain deadline even without a writer or timer.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

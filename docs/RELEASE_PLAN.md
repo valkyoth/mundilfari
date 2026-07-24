@@ -2746,6 +2746,13 @@ Deliverables:
   generations, evidence identities or bounded digest, evaluation instant and
   full `MonotonicClockId`, conservative `valid_until`/re-evaluation deadline,
   reasons, assurance, and non-claims;
+- every assessed atom carries a non-interchangeable typed `SupportBasis`:
+  `Measured`, `CryptographicallyVerified`, `AuthorityAssertion`,
+  `ConfiguredAssumption`, or `Derived`; condition composition preserves exact
+  per-atom basis and provenance rather than upgrading it to the strongest
+  input, and an `AtMostFaulty`/Byzantine-budget configuration can be accepted
+  by policy only as a visible configured assumption, never reported as
+  measured or cryptographically verified;
 - reviewed multi-valued truth tables for `Atom`, `All`, `Any`, `AtLeast`,
   `AtMostFaulty`, and every admitted `Derived` proof rule; indeterminate,
   expired, withdrawn, and contradictory members are preserved in the
@@ -2754,12 +2761,41 @@ Deliverables:
   source, calibration, oscillator/model, freshness/path-delay, authority,
   diversity/correlation, policy, membership, and lifecycle generations;
   provider callbacks return structured evidence, not `is_true`;
+- a non-forgeable `VerifiedBoundDerivation<T>` proves that the exact claimed
+  endpoints follow from admitted inputs before policy can accept the bound.
+  A root derivation binds the observation identity, source/provider/evidence
+  identities and generations, original finite interval, and output claim
+  digest. A derived proof binds every ordered input claim and derivation
+  digest, the bounded interval/conversion operation, exact input and output
+  endpoints, rounding direction and policy, conversion-model identity and
+  generation, canonical output condition, and output claim digest;
+- engine construction either recomputes a root/derived claim or verifies the
+  complete bounded derivation with reviewed operation-specific rules and work
+  limits; a condition assessment, caller-supplied digest, geometrically
+  plausible interval, or previously verified different claim cannot justify
+  narrower/substituted endpoints. Derivation inputs, proof rules, and model
+  generations participate in lifecycle invalidation;
+- assessment/admission uses one snapshot-consistent transaction: capture a
+  bounded generation vector containing every condition, evidence, lifecycle,
+  policy, membership, source, correlation, assessor/provider identity and
+  generation, assessor-registry generation, proof-rule-registry generation,
+  monotonic-domain generation, and verified-derivation dependency before
+  evaluation; invoke assessors without engine locks; then atomically compare
+  the complete vector immediately before issuance;
+- a changed vector causes a bounded retry or an `Indeterminate` assessment,
+  never a partial or mixed-generation result. The final
+  `ConditionAssessment` and, only when derivation verification and policy
+  permit it, optional `PolicyAcceptedHardBound<T>` are minted together at one
+  documented engine linearization point; callback re-entry cannot observe or
+  publish an in-progress assessment;
 - opaque, non-forgeable `PolicyAcceptedHardBound<T>` is constructed only when
-  a finite `HardBoundClaim<T>`, its exact resolved condition, a current
-  `Supported` assessment, and the selected engine policy all agree; it binds
-  the interval/claim digest, condition and assessment identity/generation,
-  policy/membership/source/correlation generations, assurance/non-claims,
-  evaluation domain, and conservative expiry/re-evaluation deadline;
+  a finite `HardBoundClaim<T>`, its exact `VerifiedBoundDerivation<T>` and
+  resolved condition, a snapshot-consistent current `Supported` assessment,
+  and the selected engine policy all agree; it binds the interval/claim and
+  verified-derivation identities/digests/generations, condition and assessment
+  identity/generation, policy/membership/source/correlation generations,
+  per-atom support basis, assurance/non-claims, evaluation domain, and
+  conservative expiry/re-evaluation deadline;
 - policy may reject a `Supported` assessment because its assurance, evidence
   class, lifetime, fault scope, or non-claims are inadequate; no public
   constructor, deserializer, provider, or boolean can manufacture acceptance;
@@ -2780,6 +2816,20 @@ Verification:
 
 - unknown, contradicted, expired, withdrawn, and restored atoms; exhaustive
   `All`/`Any`/threshold/fault-rule evaluation with indeterminate members;
+  preservation of every `SupportBasis`, mixed-basis composition, and proof
+  that `AtMostFaulty`/Byzantine-budget configured assumptions can never emerge
+  as measured or cryptographically verified evidence;
+- root and derived claim recomputation plus adversarial interval narrowing,
+  supported-condition reuse with different endpoints, spliced input
+  derivations, reordered/substituted input or observation digests, wrong
+  rounding direction/policy, stale or substituted conversion-model/proof-rule
+  generation, output-condition mismatch, and verification-work exhaustion;
+- provider replacement/withdrawal, assessor- or proof-rule-registry reload,
+  policy reload, callback re-entry, and evidence/generation changes at every
+  point between vector capture, unlocked evaluation, verification, final
+  comparison, and issuance; bounded retry exhaustion returns `Indeterminate`
+  and no mixed or partial assessment/token;
+- source and threshold lifecycle cases include
   source loss changing a threshold, correlation-group reclassification,
   calibration/oscillator/path-delay expiry, policy/membership/source/evidence
   reload, monotonic-domain change, and assessment deadline boundaries;
@@ -2792,7 +2842,9 @@ Verification:
 Exit criteria:
 
 - no canonical or mathematically conditional `HardBoundClaim` is labeled
-  currently trusted without a fresh engine-issued policy-accepted assessment;
+  currently trusted without a verified exact derivation and fresh,
+  snapshot-consistent engine-issued policy-accepted assessment whose support
+  bases remain visible;
 - `v0.60.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.61.0 - Generic Clustering Combining And Diversity
@@ -2809,8 +2861,9 @@ Deliverables:
   and reviewed derivation report from `v0.60.0`;
 - trusted survivor/combined hard-bound paths consume only current
   `v0.60.1` `PolicyAcceptedHardBound` values and propagate the accepted
-  condition/assessment generation; conditional claims remain available only
-  through explicit diagnostic results;
+  derivation identity, condition/assessment generation, and support-basis
+  report; conditional claims remain available only through explicit diagnostic
+  results;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
@@ -2858,8 +2911,9 @@ Deliverables:
   identifier/hash, exact evidence set or digest, authority, policy and
   membership generations, evidence and decision generations, the exact
   `v0.7.2` canonical condition/`BoundAssumptionsId` and derivation report,
-  current `v0.60.1` condition-assessment/accepted-bound identity and generation,
-  non-claims, expiry, and the expiry's full `MonotonicClockId`;
+  current `v0.60.1` verified-bound-derivation, condition-assessment, and
+  accepted-bound identities and generations, support-basis report, non-claims,
+  expiry, and the expiry's full `MonotonicClockId`;
 - the handoff exposes bounded activation revalidation but no raw constructor;
   no model installation or concurrent publication occurs here, and
   `v0.137.1` is the only default-clock consumer.
@@ -5593,9 +5647,10 @@ Deliverables:
   orchestration consumes the engine derivation report and never reconstructs
   assumptions from prose or source metadata;
 - synchronized/servo-eligible consensus output carries a current
-  `PolicyAcceptedHardBound` and exact assessment generation; conditional,
-  indeterminate, expired, withdrawn, or policy-rejected results remain
-  diagnostic and have no servo or clock-publication authority;
+  `PolicyAcceptedHardBound`, exact verified-derivation and assessment
+  generations, and unmodified per-atom `SupportBasis`; conditional,
+  indeterminate, expired, withdrawn, policy-rejected, or unverified-derivation
+  results remain diagnostic and have no servo or clock-publication authority;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
   claims with assertion provenance, configured/measured/authenticated/inferred/
   unknown assurance, expiry, and generation;
@@ -5643,8 +5698,9 @@ Deliverables:
 - interval-valued input, saturating anti-windup control, phase/frequency
   limits, panic thresholds, startup/recovery, and generation-aware reset;
 - hard-bound servo input requires the current `v0.60.1`
-  `PolicyAcceptedHardBound`; assessment loss/expiry/withdrawal invalidates the
-  input and resets or faults accumulated state before another proposal;
+  `PolicyAcceptedHardBound`; verified-derivation or assessment
+  loss/expiry/withdrawal invalidates the input and resets or faults accumulated
+  state before another proposal;
 - hard/statistical uncertainty kept distinct and explicit target capability;
 - withdrawals and discontinuities reset or invalidate state before new output.
 
@@ -5670,7 +5726,8 @@ Deliverables:
 
 - FLL frequency estimation and proposal output over explicit sample intervals;
 - saturation, frequency/aging limits, startup/recovery, target generation,
-  accepted-bound assessment generation, withdrawal, and discontinuity behavior;
+  accepted-bound verified-derivation/assessment generations, withdrawal, and
+  discontinuity behavior;
 - error-budget and hard/statistical uncertainty preservation.
 
 Verification:
@@ -5723,8 +5780,8 @@ Deliverables:
 - typed step/slew/rate proposals, thresholds, maximum correction, backward and
   post-startup step policy, target identity/generation, and expiry;
 - each proposal binds the exact current `PolicyAcceptedHardBound` and condition-
-  assessment generation; assessment loss invalidates the proposal before
-  authorization or actuation;
+  assessment and verified-derivation generations; derivation or assessment
+  loss invalidates the proposal before authorization or actuation;
 - requested versus predicted applied/residual values and saturation evidence,
   clearly labeled as prediction until actual feedback arrives;
 - proposal-only engine output consumed by `mundilfari-discipline`;
@@ -5800,8 +5857,8 @@ Deliverables:
 - no conversion of covariance into hard earliest/latest bounds without a
   named policy and documented assumptions;
 - any policy conversion to a hard bound must obtain a fresh
-  `PolicyAcceptedHardBound`; assessment loss resets or downgrades estimator
-  output before it can feed a servo;
+  `PolicyAcceptedHardBound`; derivation or assessment loss resets or downgrades
+  estimator output before it can feed a servo;
 - no floating-point requirement in no_std core.
 
 Verification:
@@ -5831,8 +5888,9 @@ Deliverables:
   provenance through the common secure persistence boundary;
 - calibration, oscillator, temperature, aging, and source-availability
   condition atoms are reassessed during holdover; expired/withdrawn/
-  indeterminate assumptions invalidate any accepted hard bound and force
-  conservative conditional/statistical output or fault according to policy;
+  indeterminate assumptions or invalidated observation/model derivations
+  invalidate any accepted hard bound and force conservative conditional/
+  statistical output or fault according to policy;
 - systematic/random and measured/asserted error components retained; model
   prediction covariance never presented as a guaranteed bound.
 
@@ -5862,11 +5920,22 @@ Deliverables:
   freshness/holdover age, separate authentication/integrity/traceability,
   leap policy, source generation, canonical `BoundAssumptionsId`/condition,
   current `ConditionAssessment`, optional `PolicyAcceptedHardBound` identity/
-  generation/deadline, reasons/non-claims, and warnings;
+  generation/verified-derivation identity/deadline, per-atom `SupportBasis`,
+  reasons/non-claims, and warnings;
 - synchronized hard-bound status exists only while the accepted-bound token
   revalidates under the current policy/evidence/lifecycle generations;
   conditional or diagnostic estimates remain available without synchronized
   labeling;
+- every strict `TrustedClock::now()` read samples the current monotonic value
+  from the exact `MonotonicClockId` carried by the accepted-bound deadline and
+  compares it before returning synchronized authority. At or after the exact
+  deadline it immediately returns a typed expired/diagnostic result even when
+  no writer, timer, invalidation event, or republish operation has run;
+- strict authority requires a suspend-inclusive monotonic domain or a platform
+  resume signal that invalidates the token before another strict read.
+  Monotonic read failure, pause without reliable resume invalidation, domain
+  change/reset, or incomparable identity fails closed to diagnostics rather
+  than trusting the cached synchronized label;
 - monotonic nonrollback preferred application projection with no network I/O,
   distinct truth-seeking interval semantics, plus explicit UTC/POSIX
   conversion context and policy;
@@ -5880,8 +5949,10 @@ Verification:
 - single-reader logical snapshot/state-model tests, clock rollback, system
   step, suspend/restart, leap/smear, holdover, split-brain, accepted-assessment
   expiry/withdrawal/stale token, conditional-not-synchronized refusal, and
-  monotonicity properties; multi-reader publication/interleavings remain
-  `v0.137.1`.
+  monotonicity properties; exact-deadline refusal, idle expiry without a
+  writer, timer starvation, suspend/resume for both monotonic-domain profiles,
+  monotonic read failure/reset/domain mismatch, and fail-closed diagnostics;
+  multi-reader publication/interleavings remain `v0.137.1`.
 
 Exit criteria:
 
@@ -5903,10 +5974,17 @@ Deliverables:
   identity/deadline, synchronized status, validity, and generation;
 - synchronized hard-bound publication accepts only a current
   `PolicyAcceptedHardBound`; immediately before commit it atomically rechecks
-  the condition/assessment identity, evidence, policy, membership, source,
-  correlation, lifecycle and monotonic-domain generations, status, and
-  conservative deadline. Conditional estimates publish only with explicit
-  diagnostic/non-synchronized state;
+  the verified derivation, condition/assessment identity, evidence, policy,
+  membership, source, correlation, lifecycle and monotonic-domain generations,
+  per-atom support basis, status, and conservative deadline. Conditional
+  estimates publish only with explicit diagnostic/non-synchronized state;
+- every concurrent strict read obtains one logical snapshot and an exact-domain
+  monotonic sample, then validates the accepted-bound deadline and domain
+  before returning synchronized authority; at/after expiry, reset/domain
+  mismatch, unavailable suspend coverage/resume invalidation, or monotonic
+  failure it returns expired/diagnostic state without waiting for a writer.
+  The documented read linearization/order prevents a cached pre-expiry label
+  from surviving expiry or being paired with another publication generation;
 - concurrent publication consumes only an engine-issued
   `AdmittedLeapCandidate`; immediately before commit it atomically rechecks
   candidate/evidence/authority/policy/membership/decision generations, expiry
@@ -5962,6 +6040,10 @@ Verification:
   source/correlation/policy/membership generation, assessment deadline, stale
   `PolicyAcceptedHardBound`, servo/proposal invalidation, and synchronized-to-
   diagnostic snapshot interleavings across assessment/recheck/commit;
+- verified-derivation replacement/invalidation and exact-deadline, idle-expiry,
+  timer-starvation, suspend/resume, monotonic failure/reset/domain-change
+  interleavings across snapshot selection, monotonic sampling, deadline check,
+  writer commit, and strict return;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -6064,7 +6146,8 @@ Deliverables:
   current `PolicyAcceptedHardBound`, while conditional/diagnostic operations
   expose the interval, canonical condition, unresolved/unsupported atoms,
   `ConditionAssessment`, expiry/re-evaluation deadline, reasons, assurance,
-  and non-claims without synchronized authority;
+  exact per-atom `SupportBasis`, verified-derivation status, and non-claims
+  without synchronized authority;
 - no `is_trusted` boolean, convenience conversion, default unwrap, or preferred
   estimate erases why, under which policy/generations, or until when a bound is
   accepted;
@@ -6162,8 +6245,9 @@ Deliverables:
   binding directly constructs admitted condition identities or hard claims;
 - serialized assessments/accepted-bound tokens decode as historical evidence
   or unresolved references only; receiving engines revalidate exact
-  `v0.60.1` policy/evidence/generation/deadline state before granting current
-  authority, and C/WASM/language bindings cannot construct accepted tokens;
+  `v0.60.1` derivation/policy/evidence/generation/deadline state before granting
+  current authority, and C/WASM/language bindings cannot construct verified
+  derivations or accepted tokens;
 - compatibility/freeze ledger proving deterministic field order/encoding,
   bounds, version negotiation, unknown field/criticality rules, canonicality,
   and maximum message sizes retain the early kernel semantics;
@@ -6228,10 +6312,10 @@ Deliverables:
   expiry/source-generation replay defense, and pre-opened allowlisted clock
   handles;
 - proposal authorization binds the current `PolicyAcceptedHardBound`,
-  condition-assessment generation, and conservative deadline; the helper
-  tracks the independently authorized minimum current generation and rejects
-  stale tokens, while assessment-loss revocation uses reserved ordered control
-  capacity before any later actuation;
+  verified-derivation and condition-assessment generations, and conservative
+  deadline; the helper tracks the independently authorized minimum current
+  generations and rejects stale tokens, while derivation/assessment-loss
+  revocation uses reserved ordered control capacity before any later actuation;
 - helper-enforced phase/frequency/slew/step bounds, privilege reduction,
   syscall sandboxing, separated raw-capture authority where possible, and an
   append-only accepted/rejected request audit;
@@ -6442,9 +6526,11 @@ Deliverables:
   non-authoritative `HardBoundClaim`, content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, and unresolved-to-resolved external condition type-state,
-  runtime `ConditionAssessment` versus opaque `PolicyAcceptedHardBound`,
-  reserved assessment-loss propagation through every consensus/control/
-  publication consumer, strict-versus-diagnostic facade behavior,
+  engine `VerifiedBoundDerivation`, typed per-atom `SupportBasis`,
+  snapshot-consistent runtime `ConditionAssessment` versus opaque
+  `PolicyAcceptedHardBound`, reserved derivation/assessment-loss propagation
+  through every consensus/control/publication consumer, read-side exact-domain
+  expiry enforcement, strict-versus-diagnostic facade behavior,
   process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
   caller-serialized independently trusted time-data ingestion,
@@ -6899,8 +6985,11 @@ Deliverables:
   untrusted-reference/registry-rollback/cache-poisoning campaigns through
   consensus and every external schema/binding, runtime condition
   contradiction/indeterminacy/expiry/withdrawal, stale accepted-bound tokens,
-  assessment-to-publication races, servo/holdover/proposal invalidation, and
-  strict-facade synchronized-label refusal,
+  narrowed/spliced/substituted derivations, mixed-generation assessment
+  issuance, configured-assumption basis laundering, assessment-to-publication
+  races, idle/read-side expiry and suspend/reset/domain failures,
+  servo/holdover/proposal invalidation, and strict-facade synchronized-label
+  refusal,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
   virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
@@ -7019,12 +7108,15 @@ Deliverables:
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
   `HardBoundClaim` non-authority semantics, bounded logical conditions for
   intersection/union/conversion/consensus, unresolved external-reference
-  resolution, runtime assessment statuses, policy-accepted-bound lifetime,
-  strict versus conditional facade results, incompatibility, and no quantum
-  adjustment;
+  resolution, verified root/derived claim proofs, runtime assessment statuses
+  and issuance linearization, typed support basis including configured
+  adversary assumptions, policy-accepted-bound lifetime, strict read-side
+  deadline/domain enforcement, strict versus conditional facade results,
+  incompatibility, and no quantum adjustment;
 - `TimeEstimate` and facade documentation expose condition, assessment,
-  evidence/policy generations, deadline, reasons, assurance, and non-claims;
-  no trusted boolean or synchronized label hides missing current acceptance;
+  verified-derivation identity, atom support basis, evidence/policy
+  generations, deadline, reasons, assurance, and non-claims; no trusted boolean
+  or cached synchronized label hides missing current acceptance or expiry;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

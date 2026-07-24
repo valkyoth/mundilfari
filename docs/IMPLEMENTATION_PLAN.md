@@ -364,13 +364,29 @@ Canonical resolution still does not prove that a condition currently holds.
 The engine separately issues a bounded `ConditionAssessment` over exact
 evidence, policy, membership, source, correlation, lifecycle, and monotonic
 generations, with supported/contradicted/indeterminate/expired/withdrawn status
-and a conservative reassessment deadline. Only a current supported assessment
+and a conservative reassessment deadline. Each atom retains a typed support
+basis—measured, cryptographically verified, authority assertion, configured
+assumption, or derived—so an accepted adversary-budget assumption can never
+masquerade as measured evidence.
+
+Runtime acceptance also requires a non-forgeable
+`VerifiedBoundDerivation<T>`. Root derivations bind the exact admitted
+observation/evidence and claimed endpoints; derived proofs bind every input
+claim, interval/conversion operation, rounding policy, model generation,
+condition, and output digest. The engine recomputes or verifies this bounded
+proof rather than accepting a plausible caller interval. Assessment captures
+one complete provider/assessor/rule/evidence/policy generation vector, evaluates
+callbacks without locks, and atomically rechecks the vector before minting the
+assessment and any accepted token at one linearization point. Change causes a
+bounded retry or indeterminate result.
+
+Only a verified derivation and current snapshot-consistent supported assessment
 accepted by policy can produce an opaque `PolicyAcceptedHardBound`; the
-conditional `HardBoundClaim` remains available for diagnostics. Assessment
-loss invalidates consensus, leap admission, servo/estimator/holdover state,
-discipline proposals, synchronized clock publication, and facade status through
-the generic withdrawal/generation machinery. No trusted boolean erases the
-condition, reasons, assurance, non-claims, or deadline.
+conditional `HardBoundClaim` remains available for diagnostics. Derivation or
+assessment loss invalidates consensus, leap admission, servo/estimator/holdover
+state, discipline proposals, synchronized clock publication, and facade status
+through the generic withdrawal/generation machinery. No trusted boolean erases
+the condition, support basis, reasons, assurance, non-claims, or deadline.
 
 Era resolution, fractional residuals, and EOP all reuse the kernel. The later
 uncertainty phase adds asymmetric budgets, covariance, confidence/model
@@ -467,7 +483,8 @@ invalidate downstream state when evidence is withdrawn.
 Every estimate exposes its canonical condition and current assessment. Strict
 operations return synchronized hard bounds only with a current
 `PolicyAcceptedHardBound`; conditional diagnostics retain unresolved/
-unsupported assumptions, reasons, assurance, deadlines, and non-claims.
+unsupported assumptions, per-atom support basis, verified-derivation status,
+reasons, assurance, deadlines, and non-claims.
 `TrustedClock::now()` performs no network I/O and reads an already synchronized
 virtual application clock. Mobile and browser defaults are application clocks,
 not system discipline. Every C, WASM, Java/Kotlin, Swift, database, `time_t`,
@@ -481,6 +498,13 @@ semantics, process-versus-system scope, boot/session, process generation,
 machine-instance generation, namespace, and clock generation. Deadlines,
 elapsed intervals, correlations, helper expiries, and persisted bootstrap
 anchors from different identities cannot be combined.
+
+Strict virtual-clock reads enforce accepted-bound expiry themselves: each read
+uses the current value from the deadline's exact monotonic domain and refuses
+synchronized authority at or after the deadline even if no writer or timer has
+run. Suspend-inclusive time or reliable resume invalidation is mandatory;
+read failure, pause without invalidation, reset, domain change, or incomparable
+identity fails closed to an expired/diagnostic result.
 
 Fork, VM snapshot/restore, and container checkpoint/restore are generic
 execution-lifecycle discontinuities. They rotate affected process/machine
@@ -1013,7 +1037,7 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.138.0` |
+| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, verified claim derivation, typed support basis, snapshot-consistent runtime assessment/policy admission, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, `v0.60.0`–`v0.61.0`, consumers `v0.133.0`–`v0.138.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
@@ -1027,7 +1051,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | `v0.137.0`–`v0.145.0` |
+| Trusted-clock read-side deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | `v0.137.0`–`v0.145.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

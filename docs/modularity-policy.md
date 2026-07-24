@@ -18,9 +18,11 @@ Rules:
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
 - Canonical condition resolution grants no runtime trust. Engine alone owns
-  current evidence assessment and `PolicyAcceptedHardBound` construction;
-  condition/assessment loss invalidates all downstream consumers through the
-  generic lifecycle and generation graph.
+  bounded `VerifiedBoundDerivation` construction, snapshot-consistent current
+  evidence assessment, and `PolicyAcceptedHardBound` construction. Exact
+  per-atom support basis remains visible; derivation/condition/assessment loss
+  invalidates all downstream consumers through the generic lifecycle and
+  generation graph.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
@@ -46,7 +48,9 @@ Rules:
 - Facade/application crates compose protocol, engine, and platform.
 - Facade strict APIs require an engine-issued current accepted bound;
   diagnostic APIs expose the conditional claim, condition, assessment,
-  deadline, reasons, assurance, and non-claims without a trusted boolean.
+  verified-derivation status, per-atom support basis, deadline, reasons,
+  assurance, and non-claims without a trusted boolean. Strict virtual-clock
+  reads enforce the exact monotonic-domain deadline even without a writer.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
 - Leap-candidate structure and pure validation live in core; generic evidence

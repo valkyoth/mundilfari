@@ -114,6 +114,15 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   estimator/holdover state, proposals, synchronized publication, and strict
   facade operations, while diagnostics expose status, reasons, assurance,
   deadline, and non-claims without an `is_trusted` boolean.
+- The same milestone now requires an opaque engine-verified derivation binding
+  exact claim endpoints to root observations or every derived operation,
+  rounding rule, model generation, condition, and input digest. Atom assessment
+  preserves typed measured, cryptographic, authority-asserted, configured-
+  assumption, or derived basis, and assessment/acceptance issuance uses one
+  snapshot-consistent generation transaction.
+- `v0.137.0`–`v0.137.1` now require every strict virtual-clock read to enforce
+  the accepted deadline in its exact monotonic domain, including idle expiry,
+  timer starvation, suspend/resume, reset, and domain-failure cases.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

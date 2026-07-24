@@ -64,13 +64,22 @@ the release branch between review and tagging.
   canonical content or a trusted immutable registry generation is verified.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
-  evidence/generations/deadline, and only a current policy-accepted assessment
-  creates downstream hard-bound authority. Statistical estimates require
-  explicit policy before contributing a bound.
-- Condition-assessment loss invalidates consensus, leap decisions, servo/
-  estimator/holdover state, discipline proposals, synchronized publication,
-  and strict facade results through reserved lifecycle/generation propagation;
-  stale accepted tokens and trusted booleans are rejected.
+  evidence/generations/deadline and preserves whether every atom is measured,
+  cryptographically verified, asserted by an authority, configured as an
+  adversary assumption, or derived. Engine acceptance additionally requires
+  recomputation or verification of a bounded `VerifiedBoundDerivation` binding
+  the exact observations, endpoints, operation, rounding, models, condition,
+  and claim digest; a supported condition cannot justify a substituted narrower
+  interval. Statistical estimates require explicit policy before contributing
+  a bound.
+- Assessment issuance captures and rechecks one complete generation vector
+  around unlocked provider callbacks. It publishes no mixed-generation result:
+  change causes bounded retry or indeterminate status, and any accepted token
+  is minted with its assessment at the same engine linearization point.
+- Derivation or condition-assessment loss invalidates consensus, leap decisions,
+  servo/estimator/holdover state, discipline proposals, synchronized
+  publication, and strict facade results through reserved lifecycle/generation
+  propagation; stale accepted tokens and trusted booleans are rejected.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
@@ -141,6 +150,10 @@ the release branch between review and tagging.
   fresh evidence.
 - `TrustedClock::now()` monotonicity applies to a preferred application
   projection, never to hard truth bounds or a false synchronization label.
+- Every strict clock read checks the current value from the accepted deadline's
+  exact monotonic domain. At/after expiry, idle without a writer, monotonic
+  failure/reset/domain mismatch, or suspend without inclusive time or reliable
+  resume invalidation, synchronized authority fails closed to diagnostics.
 - Early hosted time-data updates use a caller-serialized verify/stage/compare/
   commit transaction and make no concurrent-reader claim; later publication
   accepts only opaque admitted leap, EOP, and scale-offset forms and exposes
