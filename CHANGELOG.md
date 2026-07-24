@@ -160,10 +160,18 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   published authority identities. Aggregate deadlines now use one monotonic
   domain with conservative minima and correlation-bound translation or typed
   rejection; loss of used support invalidates the old decision even when
-  another quorum exists. Refresh observations now use a concrete serialized
-  pre-commit read plus reviewed remaining-work bound and an explicit
+  another quorum exists. Commit-covered refresh observations use a concrete
+  serialized pre-commit read plus reviewed remaining-work bound and an explicit
   measured/unavailable stamp, so failed sampling cannot retain or mint
   authority.
+- Corrected that design so ordinary hosted targets do not require a WCET:
+  version-reserved `LinearizationRefresh` publishes historically linearized
+  state that strict readers revalidate, while optional
+  `CommitCoveredRefresh` alone needs a remaining-work bound. Renamed the
+  pre-consensus value to non-authoritative `BatchAdmissionState`, and assigned
+  directed untrusted correlation candidates, outward-rounded translation,
+  opaque engine admission, and complete reset/suspend/rate/provider lifecycle
+  invalidation to explicit owning milestones.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

@@ -113,30 +113,41 @@ the release branch between review and tagging.
   status stays in `n` and cannot lower the threshold, so contributor shortage
   is insufficient/unsafe. Duplicate roots count distinctly only through
   explicit correlation/diversity admission.
-  A complete witness is membership/verification state, not aggregate clock
-  authority. Batch-state, consensus, and published authorities have distinct,
+  A complete witness and `BatchAdmissionState` are membership/admission state,
+  not clock authority, and cannot enter servo, discipline, publication, or
+  trusted-time APIs. Only consensus selects a proof rule/support and constructs
+  time authority; consensus and published authorities have distinct,
   non-substitutable identities. Consensus records exactly the bounded support
   used by its proof, separately from unused eligible membership. Aggregate
   validity is the conservative minimum of every required deadline in one
   monotonic domain; mixed domains reject unless translated through current
-  admitted correlations whose identity, generation, uncertainty, and expiry
-  become dependencies. Loss of any used support invalidates the old authority
-  even if another quorum could be recomputed.
-  Aborted refreshes report prior authority as retained, invalidated, or absent.
+  engine-admitted directed correlations whose identity, generation,
+  uncertainty, provider/lifecycle, and expiry become dependencies. Platform
+  providers emit only untrusted candidates. Translation is outward-rounded and
+  a mapped deadline uses the target interval's earliest edge; reverse use,
+  implicit composition, provider self-admission, and stale/forged/high-
+  uncertainty candidates fail closed. Loss of any used support invalidates the
+  old authority even if another quorum could be recomputed.
+  Aborted refreshes report prior state as retained, invalidated, or absent.
   Operational failure cannot clear or extend an otherwise still-current prior
   batch; genuine dependency invalidation revokes it even without replacement.
   An internal invariant fault invalidates prior authority. Complete-new commit
   and prior retirement are one transaction, with no partial replacement.
-  Fixed-size `PriorAuthorityObservation` binds a tagged batch/consensus/
+  Fixed-size `PriorStateObservation` binds a tagged admission/consensus/
   publication subject, disposition, prior identity/generation, measured
   monotonic coverage or typed unavailability, unchanged deadline or
   invalidation generation/reason, and engine/publication generation.
-  Measurement occurs after callbacks/fallible work under commit serialization:
-  a pre-commit interval is expanded by a reviewed current bound for every
-  remaining check/write/swap/preemption/recording step through linearization.
-  Missing capability, sampling failure, or an incomparable domain cannot
-  publish new authority or report `Retained`. `Retained` never claims authority
-  through caller receipt.
+  Portable `LinearizationRefresh` uses a nonwrapping version reservation and
+  makes the exact-domain sample its logical point. Readers never observe an in-
+  progress generation, arbitrary post-sample preemption is allowed, delayed
+  installation cannot overwrite a newer invalidation/version, and every strict
+  reader revalidates current generations/deadline. Optional
+  `CommitCoveredRefresh` adds a reviewed bound for all remaining work through
+  physical commit. Missing WCET disables only that stronger profile; sampling,
+  domain, or reservation failure cannot report `Retained` or install new
+  admission/authority state, though an ordered diagnostic invalidation
+  tombstone remains permitted. Neither profile grants authority through caller
+  receipt.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,

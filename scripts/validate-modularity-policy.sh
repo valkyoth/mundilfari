@@ -58,12 +58,15 @@ grep -q 'canonical multi-root verification order' docs/modularity-policy.md
 grep -q 'authoritative successful prefix' docs/modularity-policy.md
 grep -q 'original configured membership' docs/modularity-policy.md
 grep -q 'accepted-bound interval contributors' docs/modularity-policy.md
-grep -q 'retained/invalidated/absent prior-authority' docs/modularity-policy.md
+grep -q 'retained/invalidated/absent prior-state' docs/modularity-policy.md
 grep -q '`CompleteMemberStatus` and `AbortMemberDiagnostic` are disjoint' docs/modularity-policy.md
 grep -q 'cannot enter quorum' docs/modularity-policy.md
-grep -q '`BatchAuthorityState`, exact-support `ConsensusAuthority`' docs/modularity-policy.md
+grep -q '`BatchAdmissionState`, exact-support `ConsensusAuthority`' docs/modularity-policy.md
 grep -q 'conservative validity, and admitted monotonic-correlation' docs/modularity-policy.md
-grep -q 'measured coverage or typed' docs/modularity-policy.md
+grep -q 'version reservation plus strict-reader revalidation' docs/modularity-policy.md
+grep -q '`CommitCoveredRefresh` adds the reviewed remaining-work bound' docs/modularity-policy.md
+grep -q '`UntrustedMonotonicCorrelationCandidate` structure' docs/modularity-policy.md
+grep -q '`AdmittedMonotonicDomainCorrelation`' docs/modularity-policy.md
 grep -q '`PublishedAuthoritySnapshotId`' docs/modularity-policy.md
 grep -q 'cannot extend arena lifetimes' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md

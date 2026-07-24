@@ -61,23 +61,33 @@ Rules:
   latter can represent `Unprocessed`, and it cannot enter quorum. Engine also
   owns the distinction between original configured membership and current
   accepted-bound interval contributors, unchanged quorum thresholds, and the
-  retained/invalidated/absent prior-authority refresh transaction. A complete
-  witness is not aggregate authority: engine separately owns
-  `BatchAuthorityState`, exact-support `ConsensusAuthority`, one-domain
+  retained/invalidated/absent prior-state refresh transaction. A complete
+  witness is not aggregate authority: engine separately owns non-authoritative
+  `BatchAdmissionState`, exact-support `ConsensusAuthority`, one-domain
   conservative validity, and admitted monotonic-correlation dependencies.
+  Batch admission cannot enter servo, discipline, publication, or trusted-time
+  APIs; only consensus constructs time authority.
   Losing used proof support invalidates that authority; an unused alternative
-  requires a new decision/identity. The fixed-size observation tags batch,
-  consensus, or published authority and records measured coverage or typed
-  unavailability using the reviewed serialized pre-commit/remaining-work
-  algorithm. Concurrent publication owns `PublishedAuthoritySnapshotId`, its
-  generation, and one-point replacement, but cannot redefine batch/consensus
-  identities or the observation as authority through receipt.
+  requires a new decision/identity. The fixed-size observation tags batch
+  admission, consensus, or published authority and records measured coverage
+  profile or typed unavailability. Portable `LinearizationRefresh` uses
+  version reservation plus strict-reader revalidation without WCET; optional
+  `CommitCoveredRefresh` adds the reviewed remaining-work bound. Concurrent
+  publication owns `PublishedAuthoritySnapshotId`, its generation, and
+  replacement ordering, but cannot redefine admission/consensus identities or
+  the observation as authority through receipt.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
 - Platform clock traits own `read_interval()` and capability provenance;
   hosted, PHC, architectural, browser, and embedded implementations inflate
   scalar counters conservatively or report strict authority unavailable.
+- Core owns directed `UntrustedMonotonicCorrelationCandidate` structure and
+  outward-rounded direct translation only. Platform may measure/withdraw
+  candidates but cannot admit them. Engine alone constructs opaque
+  `AdmittedMonotonicDomainCorrelation` after provider, domain-generation,
+  method, uncertainty, validity, suspend/reset/migration, and lifecycle policy
+  checks; facade and protocol crates cannot bypass or duplicate admission.
 - `mundilfari-platform` remains safe; necessary unsafe/FFI lives only in small
   OS-family or device-specific `mundilfari-platform-*-sys` crates.
 - Clock discipline uses a separate authorization boundary and a minimal

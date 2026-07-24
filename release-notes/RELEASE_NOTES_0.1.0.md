@@ -174,11 +174,22 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   in one monotonic domain; mixed domains require admitted correlation evidence
   or fail. Losing any contributor actually used by a proof invalidates that
   authority even if a different quorum could be formed.
-- Refresh timing now has an implementable contract: after callbacks and
-  fallible work, commit serialization protects a pre-commit interval expanded
-  by a reviewed bound for all remaining work through linearization. Fixed-size
-  measured/unavailable stamps make capability, sampling, and domain failure
-  explicit; unavailable observations never retain or create authority.
+- Commit-covered refresh timing has an implementable contract: after callbacks
+  and fallible work, commit serialization protects a pre-commit interval
+  expanded by a reviewed bound for all remaining work through physical commit.
+  Fixed-size measured/unavailable stamps make capability, sampling, and domain
+  failure explicit; unavailable observations never retain or create authority.
+- Refresh now has two explicit strength profiles. General hosted systems use a
+  nonwrapping reservation/version and the monotonic sample as the logical
+  `LinearizationRefresh` point, allowing unbounded later preemption while
+  strict readers revalidate installed historical state. Only optional
+  `CommitCoveredRefresh` requires a reviewed remaining-work/WCET capability.
+- Pre-consensus state is now accurately named `BatchAdmissionState` and has no
+  servo, discipline, publication, or trusted-time authority. Monotonic-domain
+  correlation now has a complete owner chain: core defines directed untrusted
+  candidates and outward-rounded earliest-edge deadline translation, platforms
+  measure candidates, and engine alone admits opaque correlations with full
+  reset/suspend/rate/migration/provider/lifecycle invalidation.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

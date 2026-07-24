@@ -485,49 +485,58 @@ shortage is `Insufficient`/`Unsafe`. Membership removal or reclassification is
 an atomic new generation with complete reassessment.
 
 Completeness is also not aggregate clock authority. Engine creates a distinct
-`BatchAuthorityState` whose identity and one-domain `AuthorityValidity` bind the
+`BatchAdmissionState` whose identity and one-domain `AdmissionValidity` bind the
 complete witness plus every accepted member and transitive policy, membership,
-evidence, model, lifecycle, and correlation dependency required to assert that
-state. Later fusion creates a non-substitutable `ConsensusAuthorityId` and
-bounded canonical `ProofSupportSet` containing exactly the contributors and
-correlations used by the proof; concurrent publication creates a separate
-`PublishedAuthoritySnapshotId` that binds that consensus authority. Unused
-eligible alternatives remain membership state, not hidden support for an old
-decision.
+evidence, model, lifecycle, and admitted-correlation dependency required to
+assert that state. It has no time-claim endpoints and cannot enter servo,
+discipline, publication, or trusted-time APIs. Only later fusion consumes the
+matching witness/admission state, chooses exact proof support and a proof rule,
+and creates a non-substitutable `ConsensusAuthorityId`. Its bounded canonical
+`ProofSupportSet` contains exactly the contributors and correlations used by
+the proof; concurrent publication creates a separate
+`PublishedAuthoritySnapshotId`. Unused eligible alternatives remain membership
+state, not hidden support for an old decision.
 
 Aggregate validity is the conservative minimum of every required deadline in
 one explicit `MonotonicClockId`. Mixed domains are rejected unless each
 deadline is conservatively translated through a current admitted
-`MonotonicDomainCorrelation`, whose identity, generation, uncertainty, and
-expiry become dependencies. Raw cross-domain numeric comparison is forbidden.
+`AdmittedMonotonicDomainCorrelation`, whose identity, generation, uncertainty,
+provider/lifecycle, and expiry become dependencies. Raw cross-domain numeric
+comparison is forbidden.
 Expiry, withdrawal, replacement, or generation change of any used support
 invalidates the exact authority even if other members could form a quorum; a
 new complete verification and consensus decision must issue a new identity.
 
-Each refresh returns fixed-size `PriorAuthorityObservation` data describing
+Each refresh returns fixed-size `PriorStateObservation` data describing
 `Retained`, `Invalidated`, or `Absent` at the refresh linearization point. A
-tagged `PriorAuthoritySubject` distinguishes batch, consensus, and published
-authority. `LinearizationObservationStamp::Measured` binds the authority
-domain, a conservative interval covering the boundary, and the reviewed
-remaining-work capability/generation; `Unavailable` binds a typed reason and
-contains no fabricated instant. Operational aborts leave an independently
-still-current prior authority unchanged, genuine dependency invalidation
-revokes it even without replacement, and an internal invariant fault
-invalidates it. Complete-new commit plus prior retirement share the sampled
-point.
+tagged `PriorStateSubject` distinguishes batch admission, consensus authority,
+and published authority. `LinearizationObservationStamp::Measured` binds the
+domain, conservative sample, and either `LinearizationRefresh` or
+`CommitCoveredRefresh`; `Unavailable` binds a typed reason and contains no
+fabricated instant. Operational aborts leave independently still-current prior
+state unchanged, genuine dependency invalidation revokes it even without
+replacement, and an internal invariant fault invalidates it.
 
-The measured algorithm completes callbacks and fallible work, acquires commit
-serialization, reads a pre-commit monotonic interval, and expands its latest
-edge by a current reviewed bound covering all remaining generation checks,
-writes, swap, preemption/critical-section allowance, and observation-record
-publication through linearization. Commit and `Retained` require the expanded
-edge to precede `valid_until` and completion within the bound. Missing
-capability, sampling failure, or an incomparable domain produces
-`Unavailable`, cannot mint new authority, and can never report `Retained`.
-`Absent` measures in the configured refresh domain where possible or reports
-`NoAuthorityObservationDomain`. Every disposition is historical, not authority
-through caller receipt; later use revalidates normally. No failed refresh
-partially replaces state or extends a prior deadline.
+Portable `LinearizationRefresh` completes callbacks/fallible work, reserves a
+nonwrapping transaction version, rechecks dependencies, and samples the exact
+domain. That sample is the logical point; reservation state makes readers
+boundedly retry or return `RefreshInProgress`, never observe an in-progress
+generation. Arbitrary preemption may follow. Physical installation succeeds
+only if reservation/version and invalidation watermark remain current, and
+every later strict use revalidates all generations and the deadline at its own
+sample. It claims nothing through physical commit or return.
+
+Optional `CommitCoveredRefresh` additionally expands the sample's latest edge
+by a current reviewed bound covering all remaining checks, writes, swap,
+preemption/critical-section allowance, and record publication, and commits
+within that bound. Missing capability disables only this stronger profile;
+hosted linearization refresh remains usable. Sampling/domain/reservation
+failure produces `Unavailable` and can never report `Retained` or install a new
+admission/authority record; an ordered diagnostic invalidation tombstone
+remains permitted. `Absent` measures in the configured refresh domain where
+possible or reports `NoAuthorityObservationDomain`. Every disposition is
+historical, not authority through caller receipt; later use revalidates
+normally.
 Assessment captures one complete provider/assessor/rule/evidence/policy/arena
 generation vector, evaluates callbacks without locks, and atomically rechecks
 the vector before minting the assessment and any accepted token at one
@@ -665,6 +674,21 @@ unavailable. Scalar hosted, PHC, architectural, browser, and embedded counters
 are conservatively inflated rather than mapped to singleton intervals.
 Hosted platforms normally provide linearization-time capability; a separate
 through-completion capability exists only with reviewed WCET evidence.
+
+Cross-domain correlation follows an explicit type-state boundary. Core defines
+directed `UntrustedMonotonicCorrelationCandidate` values and outward-rounded
+translation: exact source/target domain generations, offset interval,
+rate/drift bound, observation method, uncertainty provenance, validity,
+suspend/reset/migration compatibility, provider, and lifecycle are mandatory.
+Mapping a source deadline to a target interval uses the conservative earliest
+edge. Platform providers may measure and withdraw candidates but cannot admit
+them. Engine alone verifies provider registration, policy uncertainty limits,
+all domain/lifecycle bindings, and creates opaque
+`AdmittedMonotonicDomainCorrelation`. Direct translation is the only initial
+mode; implicit chaining, graph search, reverse use, cycles, and provider self-
+assertion are refused. Reset, incompatible suspend/rate/scope/migration,
+provider loss, expiry, withdrawal, or generation change invalidates every
+dependent admission, consensus, and publication state.
 
 Strict virtual-clock reads enforce accepted-bound expiry themselves: each read
 uses a bounded monotonic read interval from the deadline's exact domain and
@@ -1208,9 +1232,9 @@ its broader pre-1.0 completeness contract:
 | --- | --- |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
-| Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
+| Typed monotonic domains, directed untrusted correlation candidates, outward-rounded direct translation, platform measurement, opaque engine admission, and execution lifecycle generations | kernel `v0.16.0`; lifecycle `v0.23.1`; traits/platform `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; admission `v0.60.1`; consumers `v0.61.0`, `v0.133.0`, `v0.137.1` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, disjoint complete-versus-aborted batch status type-state, original-membership versus accepted-contributor quorum accounting, interval-observed transactional prior-state refresh, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers/publication `v0.133.0`–`v0.144.0` |
+| Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, disjoint complete-versus-aborted batch status type-state, non-authoritative batch admission versus consensus authority, original-membership versus exact proof-support quorum accounting, version-reserved linearization versus commit-covered prior-state refresh, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers/publication `v0.133.0`–`v0.144.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
@@ -1224,7 +1248,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Conservative provider-owned monotonic-read intervals, linearization-time versus WCET-backed completion authority, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0` |
+| Conservative provider-owned monotonic-read intervals, WCET-free version-reserved refresh linearization versus optional commit-covered refresh, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 
