@@ -385,58 +385,120 @@ Exit criteria:
   interval vocabulary without inventing provisional uncertainty types;
 - `v0.7.1 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.7.2 - Hard-Bound Assumption Identity And Composition
+### v0.7.2 - Bounded Hard-Bound Condition Algebra
 
 Status: planned.
 
-Goal: make the assumptions behind every hard containment claim immutable,
-bounded, composable, and impossible to replace silently before downstream
-interval consumers exist.
+Goal: express the exact logical condition under which every hard containment
+claim holds, without flattening intersection, union, conversion, or Byzantine
+fault guarantees into one incorrect conjunction.
 
 Deliverables:
 
-- bounded immutable `BoundAssumptionSet` values with canonical content,
-  content-addressed `BoundAssumptionsId`, semantic-schema generation, collision
-  detection, and engine/policy provenance where applicable; callers cannot
-  select an identifier that aliases different meanings;
-- exact assumption identity is part of `HardBoundClaim<T>` equality,
-  serialization, evidence, and cache keys, while geometric interval equality
+- bounded immutable atoms and a canonical `BoundCondition` expression language
+  with `Atom(AssumptionId)`, `All`, `Any`, `AtLeast`, `AtMostFaulty`, and
+  `Derived { rule: ProofRuleId, inputs }` forms; every collection, integer, and
+  proof-rule reference has a fixed bound;
+- `BoundAssumptionsId` is the content-addressed identity of the complete
+  canonical condition, binding digest algorithm, namespace, semantic-schema
+  generation, proof-rule-registry generation, and canonical content; callers
+  cannot select an identifier that aliases a different expression;
+- exact condition identity is part of `HardBoundClaim<T>` equality, evidence,
+  serialization contract, and cache keys, while geometric interval equality
   remains separately queryable;
-- intersection and consensus conjunct every contributing assumption set;
-  union and convex expansion conservatively preserve every input assumption,
-  and conversion/projection adds its model and rounding assumptions without
-  replacing those already present;
-- canonical deduplication and bounded set/expression capacity, with typed
-  `AssumptionCapacityExceeded`, `IncompatibleAssumptions`, generation/schema
-  mismatch, and digest-collision outcomes rather than truncation, relabeling,
-  or fallback to geometry alone;
-- explicit incompatibility rules for mutually exclusive source, model,
-  correlation, containment, and generation assertions; no operation silently
-  treats a conjunction as an alternative or drops a conflicting member;
-- a protocol-neutral composition report records exact input identifiers,
-  canonical result identifier, operation, added assumptions, incompatibility,
-  and non-claims for later uncertainty, quorum, and consensus evidence;
+- interval intersection constructs `All(A, B)`; union or convex hull constructs
+  `Any(A, B)`; widening that adds no new dependency retains the input
+  condition; conversion/projection constructs `All(input, model, rounding)`;
+- quorum and consensus use reviewed `AtLeast`, `AtMostFaulty`, or `Derived`
+  rules tied to exact policy, membership, diversity/correlation, and fault-model
+  generations; they never claim that every contributing source assumption must
+  hold when the proved guarantee is an `n`/`f` threshold;
+- simplification, deduplication, normalization, and contradiction detection
+  use only versioned reviewed sound rewrite/proof rules; an implementation
+  cannot replace `Any` with `All`, discard a branch, invent an implication, or
+  reduce a threshold from geometry alone;
+- maximum expression depth, node count, fan-out, atom count, proof-rule inputs,
+  and evaluation/rewrite work, with typed capacity, incompatibility, unknown-
+  rule, generation/schema, and digest-collision failures rather than silent
+  strengthening, weakening, truncation, or fallback;
+- a protocol-neutral derivation report records exact input condition
+  identities, canonical output identity, operation/proof rule, policy and
+  membership generations where applicable, rewrites used, and non-claims for
+  later uncertainty, quorum, and consensus evidence;
 - `v0.14.0` may enrich assumption content and statistical conversion policy,
-  but it reuses this identity/composition contract rather than reconstructing
-  assumption sets.
+  but it reuses this condition algebra rather than reconstructing assumptions.
 
 Verification:
 
-- canonical ordering/deduplication, identifier stability and collision
-  handling, caller-selected/substituted identifiers, assumption loss through
-  intersection/union/expansion/conversion, mutually incompatible assumptions,
-  conflicting semantic generations, bounded-set/expression exhaustion,
-  serialization/cache round trips, and compile-fail construction tests;
-- property tests prove that every resulting hard claim names at least all
-  assumptions required by its soundness rule and that consensus cannot
-  reconstruct or weaken the contributing assumption identities.
+- truth-table/property tests for intersection=`All`, union/hull=`Any`,
+  conversion requirements, `AtLeast`, `AtMostFaulty`, and reviewed derived
+  rules; canonical ordering/deduplication, identifier stability/collision,
+  caller-selected/substituted identifiers, incompatible atoms, unknown rules,
+  conflicting policy/membership/correlation/schema generations, and every
+  depth/node/fan-out/work exhaustion boundary;
+- adversarial rewrite tests prove no simplifier strengthens or weakens a
+  formula, and engine fixtures prove `n`/`f` results do not conjunct every
+  source claim or collapse a threshold to an unaudited boolean.
 
 Exit criteria:
 
 - no hard-bound operation can produce a geometrically plausible claim while
-  losing, substituting, or silently reconciling the assumptions required for
-  containment;
+  misstating the logical condition required for containment;
 - `v0.7.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.7.3 - Untrusted Bound-Condition Resolution
+
+Status: planned.
+
+Goal: prevent serialized, persisted, IPC, C, WASM, or network-derived
+assumption identifiers from bypassing canonical condition construction.
+
+Deliverables:
+
+- external decoding produces only `UnresolvedAssumptionReference` and
+  `UnresolvedBoundCondition` values; no deserializer may directly create
+  `AssumptionId`, admitted `BoundAssumptionsId`, `ResolvedBoundCondition`, or a
+  `HardBoundClaim`;
+- explicit resolution checks digest algorithm, namespace, semantic-schema and
+  proof-rule-registry generations, canonical content, identifier/content
+  equality, collision handling, rule availability, expression canonicality,
+  depth/node/fan-out/capacity/work bounds, and registry rollback/freshness;
+- successful resolution returns an opaque `ResolvedBoundCondition` carrying
+  the exact canonical condition and immutable registry generation used; cache
+  entries key the complete resolution context and cannot upgrade unresolved
+  references;
+- identifier-only encodings are accepted only when the receiver already holds
+  and verifies the exact immutable registry generation and canonical content;
+  otherwise the complete bounded canonical condition and required rule
+  references accompany the identifier;
+- trusted immutable registries have explicit authority, integrity, generation,
+  rollback-capability, replacement, and withdrawal behavior; a registry name
+  or caller-supplied generation is not authority;
+- this early core resolver accepts caller-supplied already-admitted immutable
+  registry evidence and owns no storage, cryptography, platform, or engine
+  authority; production provider assurance/persistence arrives through
+  `v0.24.1` and `v0.39.1` without changing the resolution type-state;
+- `v0.22.1` canonical schema, `v0.39.1` persistence, `v0.140.1` external
+  bindings, and every later IPC/C/WASM/network consumer reuse this type-state
+  boundary without adding direct identifier deserialization.
+
+Verification:
+
+- forged identifiers, valid identifiers paired with different content,
+  digest-algorithm/namespace/schema/rule-generation substitution, registry
+  rollback/replacement/withdrawal, unknown proof rules, noncanonical and
+  over-deep expressions, collision handling, identifier-only missing-registry
+  cases, cache poisoning/cross-generation reuse, and compile-fail direct
+  deserialization/construction tests, plus dependency tests proving no early
+  crypto/storage/platform/engine coupling;
+- canonical schema, persistence, IPC, C, and WASM fixtures prove decoding
+  remains unresolved until the complete bounded resolution succeeds.
+
+Exit criteria:
+
+- no external identifier or serialized hard claim obtains trusted condition
+  semantics without exact content and registry resolution;
+- `v0.7.3 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.8.0 - Epoch And Era Framework
 
@@ -448,8 +510,8 @@ Deliverables:
 
 - typed epochs, custom epoch identifiers, and bounded `EraContext` carrying an
   admissible finite `v0.7.1` `HardBoundClaim<AtomicInstant>` with explicit
-  endpoint semantics, the `v0.7.2` immutable assumption identity, and
-  maximum-distance policy;
+  endpoint semantics, the `v0.7.2` canonical condition identity, resolved
+  through `v0.7.3` for any external context, and maximum-distance policy;
 - resolver traits for RFC 868, NTP, PTP, broadcast, and device counters;
 - a resolved-external-instant boundary for Navheim and other providers;
 - ambiguity and missing-context errors.
@@ -475,8 +537,9 @@ Deliverables:
 - binary, decimal, scaled-nanosecond, and bounded exact-fraction adapters;
 - caller-selected rounding, exact rational quantum, and lower/upper residual
   `v0.7.1` `HardBoundClaim<Duration>` whose open/closed endpoints follow
-  directed rounding without quantum adjustment and whose `v0.7.2` assumption
-  set preserves every conversion and rounding precondition;
+  directed rounding without quantum adjustment and whose `v0.7.2`
+  `All(input, model, rounding)` condition preserves every conversion and
+  rounding precondition;
 - fixed maximum limb width, canonical sign location, positive nonzero
   denominator, and explicit reduced/unreduced invariants;
 - bounded comparison, reduction, and conversion algorithms without
@@ -798,7 +861,7 @@ Exit criteria:
 Status: planned.
 
 Goal: extend the `v0.7.1` interval foundation and `v0.7.2` hard-bound
-assumption contract into complete uncertainty algebra and evidence for
+condition contract into complete uncertainty algebra and evidence for
 observations and algorithms.
 
 Deliverables:
@@ -810,11 +873,11 @@ Deliverables:
   non-substitution;
 - explicit, policy-named statistical-to-hard-bound conversion only where its
   assumptions and confidence are supplied; the conversion adds them to the
-  immutable `v0.7.2` assumption set and never replaces prior containment
-  assumptions, with no implicit covariance promotion;
+  immutable `v0.7.2` condition with `All` and never replaces the prior
+  containment formula, with no implicit covariance promotion;
 - richer checked union, expansion, error-budget composition, projection, and
   midpoint policy reusing the foundational containment/intersection and
-  assumption-composition semantics;
+  logical-condition semantics;
 - empty/disjoint/saturated results.
 
 Verification:
@@ -844,9 +907,9 @@ Deliverables:
   `EvidenceDigest { algorithm, value, assurance }`, monotonic capture,
   warnings, integrity, and reading;
 - observation earliest/latest and duration-error bounds reuse `v0.7.1`
-  interval/hard-bound types and `v0.7.2` assumption identities; statistical
-  fields use the enriched `v0.14.0` evidence without a parallel interval
-  representation;
+  interval/hard-bound types, `v0.7.2` condition identities, and `v0.7.3`
+  external resolution; statistical fields use the enriched `v0.14.0` evidence
+  without a parallel interval representation;
 - bounded error-budget components separating systematic/random,
   measured/asserted, correlation identity, calibration, quantization, path,
   capture, scale-model, and oscillator contributions;
@@ -1206,6 +1269,10 @@ Deliverables:
 - required-length and atomic encode-or-error behavior with no Rust-layout,
   serde-data-model, filesystem, IPC, or language-runtime dependency;
 - import/export value traits for protocol, engine, and platform consumers;
+- bound-condition fields decode only into the `v0.7.3`
+  `UnresolvedAssumptionReference`/`UnresolvedBoundCondition` type-state;
+  canonical schema decoding cannot directly construct a
+  `BoundAssumptionsId`, `ResolvedBoundCondition`, or `HardBoundClaim`;
 - budget-consumption hooks completed by `v0.25.0` for bytes, items, nesting,
   and work;
 - compatibility rules that later schema work may extend but never silently
@@ -1815,6 +1882,9 @@ Deliverables:
 - state values encoded exclusively through the completed `v0.22.1` canonical
   schema kernel, with explicit maximum record size and unknown-version
   behavior; persistence adds no second envelope or serializer model;
+- restored bound-condition references remain unresolved until `v0.7.3`
+  resolution verifies exact canonical content or the immutable registry
+  generation; persistence integrity never upgrades an assumption reference;
 - crash-consistent atomic replacement, partial/torn-write detection, explicit
   durability semantics, and bounded schema migration;
 - checksum separated from authenticated integrity and confidentiality;
@@ -2327,24 +2397,27 @@ that can alter trusted conversions.
 
 Deliverables:
 
-- two non-substitutable pre-admission levels:
+- three non-substitutable trust levels:
   `RetrievalClaim` contains the retrieved bytes/content digest, claimed source
   and provider identity, provider generation, platform metadata, claimed
   capability, and supplied signature/attestation material but is explicitly
-  untrusted; opaque `VerifiedArtifactEvidence` is constructed only after the
-  engine's provider-neutral verifier validates the applicable signature or
-  attestation, configured authority/role, registered provider identity and
-  generation, content digest, freshness, capability, and anti-rollback
-  evidence;
+  untrusted; opaque `ArtifactIntegrityEvidence` records verification of the
+  applicable signature, digest, attestation, freshness, registered verifier
+  provider identity/generation/capability, and rollback evidence without
+  granting source authority; only an admitted snapshot applies configured
+  data-family authority/role and admission policy;
 - platform implementations may return only `RetrievalClaim`; neither a custom
   adapter, a claimed privileged evidence variant, cloned provider identity, nor
-  an `integrity: true`-style field can construct `VerifiedArtifactEvidence` or
+  an `integrity: true`-style field can construct `ArtifactIntegrityEvidence` or
   obtain admission;
-- `VerifiedArtifactEvidence` records its assurance basis without equivalence:
-  cryptographic signature/attestation proof is distinct from configured
-  platform trust. OS-managed data that lacks cryptographic verification names
-  the exact configured platform authority, provider registration/generation,
-  capability, and non-claim instead of being described as proven;
+- OS-managed data without cryptographic verification uses a distinct opaque
+  `ConfiguredPlatformTrustEvidence` assurance result binding the configured
+  platform provider identity/generation/capability and explicit non-claims; it
+  is never named artifact verification or treated as cryptographic proof;
+- platform-specific attestation verification may use an admitted verifier
+  provider, but evidence retains that verifier's identity, generation,
+  assurance capability, verification inputs, and non-claims; callback output
+  is a bounded structured result and never a trusted boolean;
 - opaque, engine-policy-constructed `AdmittedEopSnapshot` and
   `AdmittedScaleOffsetSnapshot`, plus bounded `AdmittedTimeDataSnapshot`
   aggregation for coherent non-leap conversion-data candidates; component
@@ -2354,24 +2427,27 @@ Deliverables:
   plus the protocol-neutral untrusted `RetrievalClaim` contract,
   `mundilfari-platform` owns platform retrieval/attestation implementations
   that emit those claims,
-  `mundilfari-engine` owns provider-neutral verification, configured provider
-  registration/authority policy, private `VerifiedArtifactEvidence` and
-  admission constructors, opaque wrappers, and revalidation, while the
-  `mundilfari` facade owns ergonomic policy builders/default orchestration and
-  consumes engine-issued proofs for `TrustedClock` publication;
+  `mundilfari-engine` owns verifier-provider admission, provider-neutral
+  integrity/attestation verification, private `ArtifactIntegrityEvidence` and
+  `ConfiguredPlatformTrustEvidence` constructors, separate configured source-
+  authority/role admission policy, admitted constructors/wrappers, and
+  revalidation, while the `mundilfari` facade owns ergonomic policy builders/
+  default orchestration and consumes engine-issued proofs for `TrustedClock`
+  publication;
 - core and platform never depend on engine/facade admission authority; engine
   consumes only protocol-neutral core snapshots/claims and never depends on
   platform, while facade composes the layers without adding a second
   verification or admission implementation;
 - each proof binds content hash and model generation, artifact/source
   identity and configured authority, the exact retrieval claim and opaque
-  verified-evidence identity/assurance basis, registered provider generation,
+  integrity or configured-platform-trust evidence identity/assurance basis,
+  verifier/provider generation, separate source-authority/role decision,
   admission-policy generation, validity and expiry with monotonic domain,
   rollback evidence/capability, applicable conversion-context generation, and
   current withdrawal state;
 - artifact authentication and admission authority remain independent: a
   correctly signed artifact from an unconfigured or wrong-role signer is
-  authentic but not admitted;
+  represented by valid `ArtifactIntegrityEvidence` but is not admitted;
 - admission revalidation detects withdrawal, expiry, rollback, authority/
   policy change, artifact replacement, and conversion-generation mismatch;
 - raw EOP and scale-offset snapshots remain available only to isolated
@@ -2386,15 +2462,17 @@ Verification:
 - forged/private construction, forged custom adapters, claimed privileged
   variants or integrity booleans, cloned/unregistered provider identities,
   stale attestations, unsupported verification capabilities, valid integrity
-  from an unauthorized source, configured-platform-trust versus cryptographic
-  assurance separation, correct signature with absent/wrong authority,
+  from an unauthorized/wrong-role source, `ArtifactIntegrityEvidence` survival
+  across failed authorization, configured-platform-trust versus cryptographic
+  assurance separation, forged verifier callbacks/booleans, correct signature
+  with absent/wrong authority,
   hash/model/source/retrieval/policy/context mismatch, expiry/withdrawal/
   rollback/replacement between verification, admission, and revalidation,
   mixed EOP/offset generations, raw-snapshot default publication compile
   failures, bounded aggregate capacity, caller-owned expert-context behavior,
   crate dependency/feature matrices, and compile-fail tests proving core,
-  platform, protocol, and custom adapter crates cannot construct verified or
-  admitted values.
+  platform, protocol, and custom adapter crates cannot construct integrity,
+  configured-platform-trust, or admitted values.
 
 Exit criteria:
 
@@ -2620,9 +2698,14 @@ Deliverables:
   falseticker evidence under explicit `n`, maximum faulty diversity groups
   `f`, required overlap, freshness, and path-delay assumptions;
 - every candidate and result carries the exact immutable `v0.7.2`
-  `BoundAssumptionsId`; intersection conjuncts the contributing sets through
-  the shared bounded composition API, and incompatible/exhausted combinations
-  return an explicit unsafe/insufficient outcome rather than a narrower claim;
+  `BoundAssumptionsId` for its canonical condition; raw interval intersection
+  uses `All`, while the quorum guarantee uses a reviewed `AtLeast`,
+  `AtMostFaulty`, or `Derived` rule binding exact `n`, `f`, policy, membership,
+  diversity/correlation, freshness, and path-delay generations rather than
+  conjuncting every contributing source claim;
+- incompatible, unknown-rule, stale-generation, or capacity-exhausted
+  condition construction returns explicit unsafe/insufficient status rather
+  than a narrower interval or stronger/weaker formula;
 - generic validated-observation inputs with no NTP packet, association,
   transport, poll, or wire type dependency;
 - bounded source cardinality and tie behavior;
@@ -2632,8 +2715,8 @@ Verification:
 
 - published algorithm examples, Byzantine groups, disjoint/split intervals,
   malicious majorities, impossible-guarantee cases, identical endpoints,
-  permutations, assumption loss/substitution/incompatibility/capacity, and
-  property tests.
+  permutations, assumption loss/substitution/incompatibility/capacity,
+  threshold truth tables, conjunct-all regression cases, and property tests.
 
 Exit criteria:
 
@@ -2651,8 +2734,8 @@ diversity policy.
 Deliverables:
 
 - engine-owned clustering, combining, preferred-source choice, and uncertainty
-  output over generic observations, preserving the exact hard-bound assumption
-  composition from `v0.60.0`;
+  output over generic observations, preserving the exact canonical condition
+  and reviewed derivation report from `v0.60.0`;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
@@ -2697,7 +2780,8 @@ Deliverables:
   without adding protocol types or duplicate quorum logic to core/engine;
 - opaque, engine-constructed `AdmittedLeapCandidate` binds candidate
   identifier/hash, exact evidence set or digest, authority, policy and
-  membership generations, evidence and decision generations, assumptions,
+  membership generations, evidence and decision generations, the exact
+  `v0.7.2` canonical condition/`BoundAssumptionsId` and derivation report,
   non-claims, expiry, and the expiry's full `MonotonicClockId`;
 - the handoff exposes bounded activation revalidation but no raw constructor;
   no model installation or concurrent publication occurs here, and
@@ -5422,10 +5506,10 @@ Deliverables:
   mix only through an explicit reviewed conversion policy;
 - explicit `n` admitted sources, maximum faulty diversity groups `f`, required
   overlap, freshness/path-delay bounds, network-adversary scope, and
-  the exact contributing `v0.7.2` assumption identities and their canonical
-  composed identifier in every result; orchestration consumes the engine
-  composition report and never reconstructs assumptions from prose or source
-  metadata;
+  the exact `v0.7.2` threshold/fault condition, contributing atom/condition
+  identities, proof rule, and canonical `BoundAssumptionsId` in every result;
+  orchestration consumes the engine derivation report and never reconstructs
+  assumptions from prose or source metadata;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site correlation
   claims with assertion provenance, configured/measured/authenticated/inferred/
   unknown assurance, expiry, and generation;
@@ -5448,7 +5532,8 @@ Verification:
   guarantees, forged diversity, unknown correlation, common upstreams,
   partitions, stale/mixed-generation sources, withdrawal under queue pressure,
   hard/statistical mixing attempts, assumption loss/substitution/conflicting
-  generations/bounded-set exhaustion, policy/membership reload during
+  generations/expression exhaustion, incorrect conjunct-all/threshold formulas,
+  policy/membership reload during
   withdrawals, in-flight crypto, pending servo proposals, and helper
   authorization, stale-result rejection, atomic replacement, and interval
   properties. Navheim is represented only by protocol-neutral fixtures here.
@@ -5711,9 +5796,10 @@ Deliverables:
 - EOP and external scale-offset publication accepts only the matching
   `v0.52.3` opaque `AdmittedEopSnapshot` or
   `AdmittedScaleOffsetSnapshot` proof and atomically rechecks every bound
-  content/source/configured-authority/retrieval-claim/verified-evidence/
-  assurance-basis/provider/policy/validity/expiry/rollback/conversion-
-  generation/withdrawal field at the same commit boundary;
+  content/source/configured-authority/retrieval-claim/artifact-integrity-or-
+  configured-platform-trust/assurance-basis/verifier-provider/policy/validity/
+  expiry/rollback/conversion-generation/withdrawal field at the same commit
+  boundary;
 - withdrawal, expiry, policy or membership reload, evidence-generation change,
   or candidate replacement between admission and commit invalidates the
   transaction; generation comparison and commit share one linearized
@@ -5743,10 +5829,11 @@ Verification:
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
 - old/new admitted/raw leap candidate, EOP and scale-offset component proof,
-  evidence/policy/membership/conversion generation, retrieval claim, verified
-  assurance basis, provider/configured authority, expiry, rollback, withdrawal,
-  conversion context, UTC result, and clock snapshot interleavings across
-  verification/admission/recheck/commit/publication;
+  evidence/policy/membership/conversion generation, retrieval claim, artifact-
+  integrity or configured-platform-trust assurance, verifier/provider versus
+  source authority, expiry, rollback, withdrawal, conversion context, UTC
+  result, and clock snapshot interleavings across verification/admission/
+  recheck/commit/publication;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -5926,6 +6013,10 @@ Deliverables:
 - compatible extensions for atomic instants, durations,
   hard/statistical uncertainty, scales/models/generations, provenance,
   capability reports, observation events, and discontinuities;
+- every IPC, persistence, C, WASM, log/evidence, and language-binding encoding
+  of a bound condition preserves the `v0.7.3` unresolved/resolved type-state;
+  identifier-only forms require the exact verified registry generation and no
+  binding directly constructs admitted condition identities or hard claims;
 - compatibility/freeze ledger proving deterministic field order/encoding,
   bounds, version negotiation, unknown field/criticality rules, canonicality,
   and maximum message sizes retain the early kernel semantics;
@@ -5940,7 +6031,9 @@ Verification:
 
 - golden cross-language vectors, noncanonical/duplicate/unknown fields,
   version skew, truncation, integer/range extremes, schema migration,
-  deterministic re-encoding, C/WASM/JNI-or-C/Swift-or-C fixtures, and fuzzing.
+  deterministic re-encoding, forged/cross-generation assumption identifiers,
+  missing/rolled-back registries, C/WASM/JNI-or-C/Swift-or-C fixtures, and
+  fuzzing.
 
 Exit criteria:
 
@@ -6193,13 +6286,14 @@ Deliverables:
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   exact open/closed/unbounded interval and finite-estimate semantics,
   non-authoritative `HardBoundClaim`, content-addressed
-  `BoundAssumptionsId` composition/incompatibility through consensus,
+  `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
+  through consensus, and unresolved-to-resolved external condition type-state,
   process/machine lifecycle, monotonic domains, dependency-correct layered
   leap admission with `AdmittedLeapCandidate` precommit revalidation,
   caller-serialized independently trusted time-data ingestion,
-  untrusted `RetrievalClaim` versus verifier-issued
-  `VerifiedArtifactEvidence`, `AdmittedEopSnapshot`/
-  `AdmittedScaleOffsetSnapshot` proofs, and
+  untrusted `RetrievalClaim`, verifier-issued `ArtifactIntegrityEvidence`
+  versus distinct `ConfiguredPlatformTrustEvidence`, configured-role
+  `AdmittedEopSnapshot`/`AdmittedScaleOffsetSnapshot` proofs, and
   all-component concurrent publication,
   competing discipline ownership, honest ahead recovery, embedded concurrency,
   stable `ServiceCredentialContextId` invalidation without live-clock churn,
@@ -6644,7 +6738,9 @@ Deliverables:
   retention-deadline upper-bound/correlation/holdover/suspend campaigns,
   every interval endpoint combination at certificate/revocation/EOP/era/replay/
   poll/leap/smear boundaries, hard-bound assumption loss/substitution/
-  incompatible-generation/capacity campaigns through consensus,
+  incorrect `All`/`Any`/threshold rewrite, incompatible-generation/capacity,
+  untrusted-reference/registry-rollback/cache-poisoning campaigns through
+  consensus and every external schema/binding,
   audit/configuration rollback, helper audit-full/latch/gap recovery, and
   virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
@@ -6761,8 +6857,9 @@ Deliverables:
   behavior documented without stronger implied claims;
 - interval examples cover open/closed/half-open sets, unbounded algebra,
   finite trusted estimates, empty/singleton/adjacent cases, rational domains,
-  `HardBoundClaim` non-authority semantics, immutable assumption composition/
-  incompatibility, and no quantum adjustment;
+  `HardBoundClaim` non-authority semantics, bounded logical conditions for
+  intersection/union/conversion/consensus, unresolved external-reference
+  resolution, incompatibility, and no quantum adjustment;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

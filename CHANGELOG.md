@@ -88,12 +88,19 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   assigned conversion-data admission constructors to the engine boundary; and
   deferred EOP withdrawal events to the generic lifecycle.
 - Strengthened the resulting boundaries with a new `v0.7.2` immutable,
-  content-addressed hard-bound assumption composition milestone; separated
-  untrusted `RetrievalClaim` from engine-issued `VerifiedArtifactEvidence` in
-  `v0.52.3`; and split TLS resumption into a provider-bound cryptographic
+  content-addressed hard-bound condition milestone; introduced explicit
+  retrieval, evidence, and admission layers in `v0.52.3`; and split TLS
+  resumption into a provider-bound cryptographic
   `ResumptionCredentialGeneration` at `v0.75.2` before fresh connection,
   exporter, and NTS association generations at `v0.75.3`, with horizons owned
   by their actual layers.
+- Corrected the hard-bound model so `v0.7.2` expresses intersection, union,
+  conversion, and Byzantine consensus with bounded canonical `All`, `Any`, and
+  threshold/fault conditions rather than a flat conjunction; added `v0.7.3`
+  unresolved-to-resolved type-state for serialized condition identities; and
+  corrected `v0.52.3` so `ArtifactIntegrityEvidence` remains independent from
+  configured source role/authority while non-cryptographic OS trust uses
+  distinct `ConfiguredPlatformTrustEvidence`.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

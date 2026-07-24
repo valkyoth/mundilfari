@@ -10,10 +10,13 @@ Rules:
   unbounded endpoints, finite trusted estimates, and hard-claim/statistical
   non-substitution lives in core before era, fraction, or EOP consumers; later
   uncertainty algebra extends rather than duplicates these types.
-- Hard-bound assumption content is immutable, bounded, content-addressed, and
-  composition-owned by core; engine consensus consumes the exact shared
-  identities and reports incompatibility/exhaustion instead of reconstructing
-  or replacing assumptions.
+- Hard-bound conditions are immutable, bounded, content-addressed logical
+  expressions owned by core: intersection uses `All`, union/hull uses `Any`,
+  conversion preserves prerequisites, and engine consensus emits reviewed
+  threshold/fault predicates rather than conjuncting every source.
+- External condition identifiers decode only to unresolved core type-state;
+  exact content or an immutable trusted registry generation must resolve them
+  before any hard claim, engine, persistence, IPC, C, or WASM consumer.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.
@@ -50,10 +53,12 @@ Rules:
   policy-issued admitted proofs reach concurrent default-clock publication.
 - Core owns raw EOP/offset structures and the protocol-neutral untrusted
   `RetrievalClaim`; platform implementations emit only those claims. Engine's
-  provider-neutral verifier alone creates opaque `VerifiedArtifactEvidence`
-  and admitted values after configured provider/authority checks, and never
-  depends on platform; facade composes policy/default publication without
-  recreating verification or admission.
+  provider-neutral verifier alone creates opaque `ArtifactIntegrityEvidence`
+  without granting source authority, or distinct
+  `ConfiguredPlatformTrustEvidence` for non-cryptographic OS trust. Engine
+  applies configured source authority/role only when constructing admitted
+  values and never depends on platform; facade composes policy/default
+  publication without recreating verification or admission.
 - Generic interval quorum, falseticker rejection, clustering, combining, and
   diversity are engine primitives implemented before NTP composition; NTP
   crates own association/filter metadata but no copy of those algorithms.

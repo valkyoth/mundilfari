@@ -57,10 +57,12 @@ the release branch between review and tagging.
   consumers. Open/closed endpoints are exact and never simulated by adjusting
   one quantum; trusted estimates are finite. A hard-bound claim states
   mathematical containment, not source honesty. Its immutable content-
-  addressed assumptions are conjunctively preserved through intersection and
-  consensus; expansion/conversion cannot replace them, and incompatibility or
-  bounded-capacity exhaustion fails explicitly. Statistical estimates require
-  explicit policy before contributing a bound.
+  addressed bounded condition uses `All` for intersection, `Any` for union/
+  hull, added model/rounding prerequisites for conversion, and a reviewed
+  threshold/fault predicate for consensus; simplification cannot silently
+  strengthen or weaken it. External identifiers remain unresolved until exact
+  canonical content or a trusted immutable registry generation is verified.
+  Statistical estimates require explicit policy before contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
   invalidation propagates through consensus, servo, clock, persistence, and
   audit state.
@@ -136,12 +138,15 @@ the release branch between review and tagging.
   accepts only opaque admitted leap, EOP, and scale-offset forms and exposes
   conversion/clock state consistently. Raw or merely authenticated artifacts
   remain expert-only; platform/custom adapters emit untrusted retrieval claims,
-  engine verification produces opaque evidence, and configured authority is
-  independently required. Configured platform trust is named distinctly from
-  cryptographic proof. A candidate never authenticates the transport or
-  signature that delivered itself, redirects preserve admitted authority,
-  remote retrieval is explicit, and offline/manual ingestion uses the same
-  candidate pipeline.
+  engine verification produces opaque artifact-integrity evidence without
+  source authority, and configured source role/authority is applied only at
+  admission. Correctly verified wrong-role artifacts remain unauthorized.
+  Non-cryptographic configured platform trust uses distinct evidence and is
+  never named verification or proof; attestation callbacks retain provider
+  generation/capability and cannot return a trusted boolean. A candidate never
+  authenticates the transport or signature that delivered itself, redirects
+  preserve admitted authority, remote retrieval is explicit, and offline/
+  manual ingestion uses the same candidate pipeline.
 - The helper consumes one canonical pre-daemon policy ceiling and discipline
   audit/gap schema; later daemon configuration and exporters may extend those
   types but cannot replace, reinterpret, or widen them.

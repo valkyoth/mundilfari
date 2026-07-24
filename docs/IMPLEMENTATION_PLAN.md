@@ -343,13 +343,24 @@ Included, excluded, and algebraically unbounded endpoints represent open,
 closed, and half-open sets exactly; no code simulates exclusion by adding or
 subtracting a domain quantum. Trusted estimates use only finite intervals.
 `HardBoundClaim` describes mathematical containment under named assumptions,
-not source honesty or authority. Its bounded immutable assumption set has a
-canonical content-addressed identity and semantic generation; callers cannot
-choose aliases. Intersection and consensus conjunct exact sets, union/
-expansion/conversion preserve every prerequisite, incompatible or over-capacity
-sets fail explicitly, and no geometric operation may substitute or discard an
-assumption identity. Era resolution, fractional residuals, and EOP all reuse
-the kernel. The later uncertainty phase adds asymmetric budgets,
+not source honesty or authority. Its bounded immutable canonical condition
+uses atom, `All`, `Any`, threshold, maximum-fault, and reviewed derived-rule
+nodes under a content-addressed identity and semantic/rule-registry generation;
+callers cannot choose aliases. Intersection uses `All`, union/hull uses `Any`,
+conversion adds model/rounding through `All`, and consensus emits the reviewed
+`n`/`f` threshold/fault predicate rather than conjuncting every source.
+Simplification is sound-rule-only and all expression/evaluation work is
+bounded.
+
+External decoding yields only unresolved references/conditions. Exact digest
+algorithm, namespace, canonical content, schema/rule/registry generation,
+collision, rollback, and capacity checks produce an opaque resolved condition;
+no IPC, persistence, C, WASM, or network input directly deserializes a trusted
+condition identity or hard claim. The early core resolver accepts already-
+admitted immutable registry evidence and owns no crypto, storage, platform, or
+engine authority; later provider/persistence layers preserve the type-state.
+Era resolution, fractional residuals, and EOP all reuse the kernel. The later
+uncertainty phase adds asymmetric budgets,
 covariance, confidence/model evidence, richer algebra, and observation
 integration without replacing these types or implicitly promoting statistical
 ranges into guaranteed bounds.
@@ -392,15 +403,16 @@ transactional replacement for an isolated caller-owned conversion model.
 Generic provenance/lifecycle is added after the observation foundations.
 Authority/correlation/diversity/quorum admission belongs to the engine, which
 alone constructs an opaque `AdmittedLeapCandidate` binding the candidate,
-evidence, policy/membership/decision generations, assumptions, and typed
-expiry. TrustedClock publication consumes that handoff and atomically rechecks
-every binding immediately before commit; withdrawal, expiry, replacement, or
-generation change closes the transaction. A raw expert replacement cannot
-alter TrustedClock or the default facade. Early “atomic” means one indivisible
-caller-serialized model transaction, not a concurrent publication claim. A
-single authenticated server cannot schedule a leap merely because its packet
-is authentic. Source smear behavior is evidence, while local smear-versus-step
-policy affects presentation only and never decides leap truth.
+evidence, policy/membership/decision generations, exact canonical bound
+condition and derivation report, and typed expiry. TrustedClock publication
+consumes that handoff and atomically rechecks every binding immediately before
+commit; withdrawal, expiry, replacement, or generation change closes the
+transaction. A raw expert replacement cannot alter TrustedClock or the default
+facade. Early “atomic” means one indivisible caller-serialized model
+transaction, not a concurrent publication claim. A single authenticated server
+cannot schedule a leap merely because its packet is authentic. Source smear
+behavior is evidence, while local smear-versus-step policy affects presentation
+only and never decides leap truth.
 
 ### 4.4 Era resolution
 
@@ -555,8 +567,11 @@ Consensus policy states its mathematical fault assumptions: admitted source
 count `n`, maximum faulty diversity groups `f`, required interval coverage,
 freshness and path-delay bounds, network-adversary reach, and whether correct
 source intervals are assumed to contain true time. Source weights cannot
-override the quorum. An indistinguishable malicious majority is an explicit
-residual risk, not a Byzantine-resilience claim.
+override the quorum. Results encode these as the reviewed bounded threshold/
+fault condition tied to policy, membership, and correlation generations—not
+as a conjunction that assumes every source is correct. An indistinguishable
+malicious majority is an explicit residual risk, not a Byzantine-resilience
+claim.
 
 ### 6.2 Resource governance
 
@@ -782,25 +797,31 @@ clock authority. Core's untrusted `RetrievalClaim` carries bytes/digest,
 claimed source/provider generation, platform metadata, claimed capabilities,
 and signature/attestation material. Platform implementations may emit only
 that claim. Engine's provider-neutral verifier privately creates
-`VerifiedArtifactEvidence` after checking the registered provider, applicable
-signature/attestation, digest, freshness, capability, and configured authority;
-OS-managed inputs explicitly name configured-platform-trust rather than
-cryptographic proof. Forged adapters, cloned identities, privileged enum
-variants, or `integrity: true` cannot cross this boundary.
+`ArtifactIntegrityEvidence` after checking the admitted verifier provider,
+signature/digest/attestation, freshness, capability, generation, rollback
+evidence, and structured assurance result—but not data-family source authority
+or role. A correctly verified wrong-role signer retains integrity evidence and
+is rejected only at admission. OS-managed inputs without cryptographic
+verification use distinct `ConfiguredPlatformTrustEvidence`, never something
+named verified artifact evidence. Platform-attestation callbacks retain
+provider identity/generation/capability and non-claims and cannot collapse to a
+trusted boolean. Forged adapters, cloned identities, privileged enum variants,
+or `integrity: true` cannot cross this boundary.
 
 Opaque `AdmittedEopSnapshot` and `AdmittedScaleOffsetSnapshot` proofs then bind
-content/model, configured authority, retrieval and verified-evidence identity/
-assurance, admission-policy generation, validity/expiry, rollback evidence,
+content/model, configured source authority/role, retrieval and artifact-
+integrity or configured-platform-trust evidence identity/assurance, verifier
+provider, admission-policy generation, validity/expiry, rollback evidence,
 conversion generation, and withdrawal state. A valid signature from an
-unconfigured signer remains authentic but unauthorized. Raw snapshots stay
-usable only in isolated expert conversion contexts. Concurrent TrustedClock
-publication accepts these proofs and the separate engine-issued
+unconfigured or wrong-role signer remains authentic but unauthorized. Raw
+snapshots stay usable only in isolated expert conversion contexts. Concurrent
+TrustedClock publication accepts these proofs and the separate engine-issued
 `AdmittedLeapCandidate`, revalidating all bindings in the commit transaction.
 Engine consumes normalized core claims and never depends on platform; it alone
-owns verified/admitted constructors and revalidation, while the facade composes
-ergonomic policy/default publication. Dependencies and compile tests prevent
-core, platform, protocol, or custom adapter crates from acquiring verification
-or admission authority.
+owns artifact-integrity/configured-platform-trust/admitted constructors and
+revalidation, while the facade composes ergonomic policy/default publication.
+Dependencies and compile tests prevent core, platform, protocol, or custom
+adapter crates from acquiring verification or admission authority.
 
 Remote time data cannot authenticate itself: a candidate never validates the
 transport or credential interval that delivered it. Artifact signatures,
@@ -973,11 +994,11 @@ its broader pre-1.0 completeness contract:
 | Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
-| Foundational intervals, hard/statistical classes, immutable assumption composition, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.2`, `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
+| Foundational intervals, bounded logical hard-bound conditions, untrusted-reference resolution, richer uncertainty, withdrawals | `v0.7.1`–`v0.7.3`, `v0.14.0`–`v0.15.1`, engine closure `v0.60.0`–`v0.61.0`, `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers, serialized commit, independent trust, untrusted retrieval versus verified evidence, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
+| Hosted time-data providers, serialized commit, independent trust, retrieval versus integrity/platform-trust evidence versus source authorization, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
