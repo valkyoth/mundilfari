@@ -603,42 +603,43 @@ Exit criteria:
 - leap handling is explicit and no UTC value is forced through POSIX rules;
 - `v0.12.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.12.1 - Leap Announcement Admission And Activation
+### v0.12.1 - Leap Model Candidate Validation
 
 Status: planned.
 
-Goal: decide how leap evidence may stage and atomically change the active UTC
-model without granting one source unilateral authority.
+Goal: define immutable leap-model candidates, pure validation, conflict
+detection, and transactional generation replacement without depending on
+later provenance, lifecycle, engine quorum, or concurrent-publication types.
 
 Deliverables:
 
-- typed evidence classes for authoritative table entries, authenticated
-  protocol announcements, corroborated observations, and unauthenticated
-  hints; authentication alone does not imply leap authority;
-- policy-defined authority, freshness, diversity/quorum, lead-time, conflict,
-  smear-versus-step, and minimum-evidence requirements;
-- cross-family comparison of NTP, PTP, radio, configured-table, and future
-  externally resolved announcements without protocol-type leakage into core;
-- pending, accepted, conflicting, cancelled, withdrawn, expired, and rejected
-  lifecycle states using generic identified events;
-- verify/stage/compare followed by atomic activation of one new conversion-
-  context/leap-model generation, invalidating stale conversions and pending
-  decisions;
-- unauthenticated hints may warn or increase uncertainty but never activate a
-  leap.
+- immutable `LeapModelCandidate` with complete entries, source-independent
+  candidate identifier, proposed generation, effective interval, hash, and
+  structural/model constraints but no authentication/diversity authority;
+- pure bounded validation for ordering, duplicate/conflicting transitions,
+  lead-time representation, positive/negative leap shape, UTC/TAI continuity,
+  and model compatibility;
+- deterministic candidate-to-current comparison with unchanged, extension,
+  conflict, rollback, replacement, and unsupported outcomes;
+- single-thread transactional stage/commit/abort semantics that replace one
+  model generation indivisibly and invalidate stale conversion contexts;
+- “atomic activation” at this stage means one indivisible model-generation
+  transaction, not lock-free or concurrent-reader publication;
+- no protocol type, provenance policy, generic lifecycle event, authentication
+  class, source quorum, or engine dependency.
 
 Verification:
 
-- one authenticated malicious server, correlated aliases, diverse agreement,
-  NTP/PTP/radio/table conflict, false positive/negative leap, late
-  announcement, cancellation/withdrawal, source loss, smear/step disagreement,
-  concurrent readers, atomic activation, stale generation, and synthetic
-  negative-leap campaigns.
+- immutable candidate/model properties, malformed ordering, duplicates,
+  conflicting entries, false positive/negative and synthetic negative leaps,
+  extension/rollback/replacement comparisons, stage/abort/commit failure
+  injection, stale conversion generation, and explicit compile/dependency
+  tests proving no provenance/lifecycle/engine/concurrency coupling.
 
 Exit criteria:
 
-- no single protocol packet or authenticated endpoint can schedule a leap
-  outside explicit authority and diversity policy;
+- core can validate and transactionally install only a caller-admitted
+  candidate without implementing source admission itself;
 - `v0.12.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.13.0 - POSIX And Smear Policy
@@ -756,6 +757,41 @@ Exit criteria:
   mechanism;
 - `v0.15.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.15.2 - Leap Evidence Provenance And Lifecycle
+
+Status: planned.
+
+Goal: represent identified leap evidence and its lifecycle using the completed
+generic observation/provenance foundations without deciding source quorum.
+
+Deliverables:
+
+- evidence classes for authoritative table assertions, authenticated protocol
+  announcements, corroborating observations, and unauthenticated hints;
+- candidate identifier/hash, source/authority identity, protocol, provenance,
+  authentication/integrity class, capture/validity, uncertainty, generation,
+  sequence, and correlation assertions;
+- generic upsert/withdraw/discontinuity mapping for pending, corrected,
+  cancelled, expired, conflicted, and rejected leap evidence;
+- bounded reserved invalidation behavior and deterministic projection from
+  identified evidence sets into one or more `LeapModelCandidate` values;
+- unauthenticated hints may warn or increase uncertainty but carry no
+  activation authority;
+- no diversity/quorum decision or concurrent publication implementation.
+
+Verification:
+
+- exhaustive evidence-class construction, forged/unknown provenance,
+  authentication-without-authority, duplicate/reordered generations,
+  cancellation/withdrawal, expiry, conflict, queue pressure, correlated
+  assertions, candidate-hash mismatch, and no-engine dependency tests.
+
+Exit criteria:
+
+- leap assertions have complete generic provenance and retraction semantics
+  before engine policy can admit a candidate;
+- `v0.15.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.16.0 - Monotonic Clock Correlation
 
 Status: planned.
@@ -853,8 +889,9 @@ Goal: audit the complete time model before protocols depend on it.
 Deliverables:
 
 - arithmetic and conversion audit;
-- leap-announcement authority/diversity/activation and monotonic-domain
-  suspend/rate/scope/generation audit;
+- leap-candidate validation/transaction and evidence-provenance/lifecycle
+  boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
+  authority/diversity admission remains deferred to `v0.61.1`;
 - hard/statistical uncertainty, error-budget, observation-lifecycle,
   formatting, and error-taxonomy audit;
 - Kani-style bounded proofs where useful;
@@ -1143,6 +1180,10 @@ Deliverables:
 - explicit algorithm/provider identity, assurance class, failure behavior,
   nonce requirements, per-key operation/byte limits, atomic exhaustion
   accounting, and fail-closed generation rollover;
+- capability-qualified `SecretMemoryProtection` report separating redaction
+  only, best-effort zeroization, page locking, core-dump exclusion,
+  hardware-backed/non-exportable keys, and externally held key operations;
+  capabilities are combinable and never inferred from a secret-container type;
 - test-only versus production-approved provider provenance and constructors;
 - no protocol field semantics, TLS, certificate, storage, or clock policy in
   provider traits;
@@ -1152,8 +1193,9 @@ Verification:
 
 - deterministic mock/KAT providers, wrong algorithm/key/generation/direction,
   short output, entropy/nonce failure, usage-limit races and exhaustion,
-  redaction, feature/no_std/MSRV matrices, and compile-time protocol-type
-  isolation.
+  redaction, claimed/unavailable/failing zeroization/page-lock/core-dump/
+  hardware/external-key capabilities, feature/no_std/MSRV matrices, and
+  compile-time protocol-type isolation.
 
 Exit criteria:
 
@@ -1382,12 +1424,16 @@ Deliverables:
 - feature/transitive/native/MSRV/license inventory;
 - safe `mundilfari-platform` facade plus narrowly scoped OS-family
   `mundilfari-platform-*-sys` crates for necessary unsafe;
+- safe capability adapters for platform page locking and core-dump exclusion,
+  with OS-specific failure/revocation reporting and no implicit guarantee;
 - isolated safe wrappers and replacement boundaries with no protocol policy.
 
 Verification:
 
 - ABI size/alignment checks, supported target builds, cargo-deny/audit, and
-  forbidden dependency leakage tests.
+  forbidden dependency leakage tests; page-lock/core-dump capability,
+  permission/resource failure, fork/exec/restore, and unsupported-platform
+  tests.
 
 Exit criteria:
 
@@ -1627,7 +1673,8 @@ Deliverables:
   durability semantics, and bounded schema migration;
 - checksum separated from authenticated integrity and confidentiality;
 - secret-bearing snapshot provider boundary, redaction, and best-effort
-  clearing without overstated guarantees;
+  clearing without overstated guarantees, plus the exact
+  `SecretMemoryProtection` capability retained in snapshot/persistence reports;
 - authenticated integrity/confidentiality requested only through the
   `v0.24.1` provider contracts, with unavailable production provider reported
   as a capability limitation;
@@ -1693,6 +1740,51 @@ Exit criteria:
   target after evidence of competing adjustment;
 - `v0.39.2 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.39.3 - Helper Policy And Minimal Discipline Audit Contract
+
+Status: planned.
+
+Goal: freeze the minimal helper policy ceiling and canonical discipline audit
+types before any daemon/helper implementation can invent private formats.
+
+Deliverables:
+
+- stable typed `HelperPolicyCeiling` with policy identity/generation,
+  provenance, integrity/rollback capability, target/ownership scope,
+  per-request and cumulative phase/frequency limits, rate/settling limits,
+  expiry monotonic domain, permitted operation classes/handles, fault-latch
+  thresholds, and recovery authority;
+- verify/stage/semantic-and-capability-validate/atomic-activate policy
+  transaction; workers may select only within the active ceiling and cannot
+  widen it;
+- minimal canonical `DisciplineAuditRecord` carrying strict sequence,
+  monotonic domain, TAI interval/model generation, process/machine/session,
+  policy/authorization/target/proposal identities and generations, requested/
+  applied/residual result, accepted/rejected/fault decision, and reason;
+- canonical explicit audit gap/loss record with first/last affected sequence,
+  count/range, cause, storage generation, and recovery evidence;
+- audit capacity is reserved before an adjustment is authorized; audit-full
+  rejects new requests, while an unexpected post-operation audit failure
+  latches the helper and must emit a gap/recovery record before reauthorization;
+- minimal types use the `v0.22.1` schema and `v0.39.1` persistence foundation;
+  later configuration syntax, exporters, retention, chaining, sealing, and
+  witnessing may extend but never replace or reinterpret them.
+
+Verification:
+
+- policy identity/provenance/integrity/rollback/generation changes,
+  stage/activation races, attempted worker widening, ownership/target mismatch,
+  every numerical/rate/settling boundary, exact canonical vectors, audit
+  sequence/reorder/duplicate, full storage before authorization, write failure
+  after application, reserved gap record exhaustion, fault latch/recovery, and
+  later-compatible unknown fields.
+
+Exit criteria:
+
+- the daemon can only consume a pre-reviewed helper ceiling and audit contract,
+  never create an implementation-private authority or evidence format;
+- `v0.39.3 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.40.0 - Platform And Privilege Security Gate
 
 Status: planned.
@@ -1705,7 +1797,8 @@ Deliverables:
   review, granular permission model, and privilege-separation plan;
 - RTC/counter/MMIO/GPIO/frequency/actuator, namespace identity, discipline,
   ownership/competing-adjuster, lifecycle discontinuity, early canonical-
-  schema/crypto-provider, and persistence boundary review;
+  schema/crypto-provider, persistence, helper-policy-ceiling, and minimal
+  discipline-audit boundary review;
 - proof that core, engine, facade, protocol, crypto-state, IPC-schema, and safe
   platform crates still forbid unsafe code;
 - resolved critical/high platform findings;
@@ -2028,6 +2121,50 @@ Exit criteria:
   rollback, or partial-activation behavior;
 - `v0.52.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.52.2 - Remote Time-Data Trust Bootstrap
+
+Status: planned.
+
+Goal: require an independently established trust path for remotely obtained
+leap, EOP, and scale-offset artifacts without circularly trusting the
+candidate data.
+
+Deliverables:
+
+- candidate data is never used to validate the transport session, certificate,
+  signature time, or credential context that delivered that same candidate;
+- every remote artifact requires at least one explicitly admitted independent
+  path: signed artifact identity under a pinned/admitted verification key,
+  pinned transport SPKI/key, or HTTPS whose complete credential context was
+  validated using an already admitted trusted-time interval/model generation;
+- typed transport and artifact authorities, signing/transport identities,
+  source URI, redirect chain, retrieval generation, and evidence carried into
+  the common candidate pipeline;
+- redirects cannot silently change artifact authority, signer, pinned
+  identity, scheme, host policy, or retrieval authorization;
+- signing/transport key activation, overlap, expiry, compromise, revocation,
+  rollback, emergency replacement, and offline trust-root update policy;
+- offline/manual and OS-managed ingestion use the identical bounded
+  verify → stage → compare → activate pipeline and cannot bypass artifact
+  identity/provenance checks;
+- the early milestone accepts caller-supplied authenticated fetch evidence;
+  no built-in production TLS claim exists before `v0.72.0`/`v0.75.1`.
+
+Verification:
+
+- circular bootstrap attempt where candidate time would validate its own TLS
+  chain, pinned signer/SPKI success/failure, already-admitted-time HTTPS,
+  wrong/expired/revoked/rotated signer, compromised/rolled-back key, redirect
+  authority/scheme/host/signature changes, replayed/older artifact, offline
+  and OS-managed parity, partial download, transport success with artifact
+  failure, and current-model retention.
+
+Exit criteria:
+
+- no remotely or manually obtained time-data candidate can establish the trust
+  used to authenticate itself;
+- `v0.52.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.53.0 - Documented Vendor Extension Framework
 
 Status: planned.
@@ -2289,6 +2426,48 @@ Exit criteria:
 - multiple names are never assumed to be independent sources;
 - `v0.61.0 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.61.1 - Leap Evidence Authority And Diversity Admission
+
+Status: planned.
+
+Goal: admit leap-model candidates through protocol-neutral engine authority,
+correlation, diversity, and conflict policy after provenance/lifecycle and
+generic quorum foundations exist.
+
+Deliverables:
+
+- engine policy consuming `v0.15.2` leap evidence and producing an admitted,
+  rejected, pending, split, or insufficient decision for a validated
+  `v0.12.1` candidate;
+- explicit authority, authentication/integrity, freshness, lead-time,
+  correlation, diversity/quorum, smear-versus-step, and minimum-evidence
+  requirements; authentication alone never grants leap authority;
+- policy-defined treatment of authoritative pinned tables, authenticated
+  announcements, corroborated evidence, unauthenticated hints, cancellations,
+  withdrawals, and conflicting candidate hashes/generations;
+- generic evidence adapters allow future NTP/PTP/radio/external sources
+  without adding protocol types or duplicate quorum logic to core/engine;
+- admitted decision carries exact evidence set, policy/membership generation,
+  candidate identifier/hash, assumptions, non-claims, and expiry;
+- no model installation or concurrent publication: the caller passes the
+  admitted candidate to the `v0.12.1` transaction, with concurrent visibility
+  completed only at `v0.137.1`.
+
+Verification:
+
+- one authenticated malicious server, correlated aliases, diverse agreement,
+  authoritative-table versus NTP/PTP/radio fixture conflict, false leap,
+  late/withdrawn/cancelled evidence, source churn, smear/step disagreement,
+  policy/membership reload, malicious majority, impossible quorum, and
+  candidate/decision generation mismatch.
+
+Exit criteria:
+
+- no single protocol packet or authenticated endpoint can admit a leap outside
+  explicit authority and diversity policy, and no duplicate selection
+  algorithm exists outside the engine;
+- `v0.61.1 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.62.0 - Poll Control And Full NTP Client
 
 Status: planned.
@@ -2536,6 +2715,9 @@ Deliverables:
 
 - current Rustls, production crypto-provider, MAC, AEAD, digest, entropy,
   secret-container, certificate, and X.509 reviews;
+- production `SecretMemoryProtection` capability mapping for redaction,
+  zeroization, page locking, core-dump exclusion, hardware/non-exportable, and
+  externally held keys, with unsupported protections explicit non-claims;
 - exact feature/transitive/native/MSRV/license inventories;
 - conformance to the `v0.24.1` provider traits without widening them or
   exposing time-protocol semantics;
@@ -2615,6 +2797,8 @@ Deliverables:
 
 - client/server adapter behind `std` and `rustls` features;
 - application-provided crypto provider and trust configuration;
+- secret-memory/provider capability report propagated without upgrading
+  Rustls or platform guarantees;
 - RFC 9325 deployment policy and RFC 9525 service-identity verification;
 - explicit certificate-revocation capability report and deployment non-claim
   where the selected provider/configuration supplies no live revocation;
@@ -2639,6 +2823,49 @@ Exit criteria:
 
 - Rustls supplies TLS only; all NTS behavior remains Mundilfari-owned;
 - `v0.75.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.75.1 - Credential Validation Context Generations
+
+Status: planned.
+
+Goal: bind retained TLS/NTS security state to the exact credential, identity,
+revocation, and trusted-time context under which it was validated.
+
+Deliverables:
+
+- typed `CredentialValidationContextId` and generation covering trust-anchor
+  set, service-identity policy, certificate-validation policy, provider/
+  algorithm configuration, revocation configuration/evidence, trusted-time
+  interval, conversion/leap-model generation, and process/machine generation;
+- resumption tickets, exporter contexts, NTS associations, cookie jars, and
+  retained peer credential evidence carry the exact context identifier;
+- each context change has an explicit action:
+  `InvalidateImmediately`, `RevalidateBeforeUse`, or policy-bounded
+  `ContinueUntil`, with strict defaults for trust removal, revocation,
+  identity-policy tightening, time-model rollback, or definite expiry;
+- `TemporalValidity` evaluates the whole validated chain and all supported
+  time-bearing revocation evidence, including CRL/OCSP `thisUpdate`,
+  `nextUpdate`, produced/validity times, and freshness policy;
+- partial overlap anywhere in the chain/revocation intervals is
+  `Indeterminate`; strict mode requires every admitted interval wholly valid;
+- revocation checking remains a reported capability/non-claim when the
+  provider/configuration cannot supply it.
+
+Verification:
+
+- trust-root add/remove/rotation, service-identity policy change, validation-
+  policy tightening/loosening, revocation configuration change and newly
+  received revocation, CRL/OCSP before/inside/partial/expired/future intervals,
+  chain member expiry, resumption after context change, certificate expiry
+  during cookie retention, time/leap-model rollback/replacement, process/
+  machine generation change, and every invalidation/revalidation/continued-
+  use action.
+
+Exit criteria:
+
+- no retained TLS/NTS state outlives or bypasses the credential-validation
+  context and temporal/revocation evidence that authorized it;
+- `v0.75.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.76.0 - NTS AEAD And Extension Protection
 
@@ -2680,7 +2907,7 @@ Deliverables:
 
 - NTS-KE plus protected NTP orchestration;
 - fixed-capacity cookie jar, generation, endpoint, local discard policy, use,
-  and replenish;
+  replenish, and `CredentialValidationContextId`;
 - local discard deadline/policy age clearly distinguished from any
   authenticated server expiration supplied by a future protocol revision;
 - non-`Copy`, redacted-debug, non-automatic-serialization secret types;
@@ -2691,13 +2918,16 @@ Deliverables:
 - one-use/replenishment, replay/failure/rekey state, common secure persistence
   with capability-qualified rollback evidence, atomic per-key exhaustion,
   fail-closed rekey, key-rotation overlap, and best-effort clearing boundary
-  without overstated guarantees.
+  without overstated guarantees;
+- context invalidation/revalidation propagates to retained NTS association,
+  exporter, resumption, and cookie state before further use.
 
 Verification:
 
 - public server interop, cookie exhaustion/reuse prevention, local age expiry,
   replay, server restart, key rotation, endpoint migration, process fork,
-  VM/container restore, log-capture redaction, tamper, and long simulation.
+  VM/container restore, credential-context rotation/revocation/time rollback,
+  log-capture redaction, tamper, and long simulation.
 
 Exit criteria:
 
@@ -2866,6 +3096,9 @@ Deliverables:
   privacy/unlinkability, logging, cluster-key rollback/compromise, certificate
   revocation capability, interval-valued temporal validity, and generic
   process/machine lifecycle-generation audit;
+- credential-validation context binding across trust anchors, identity policy,
+  chain/revocation intervals, trusted-time/leap-model generations, resumption,
+  exporter, association, and cookie state;
 - provider assurance and secret lifecycle/redaction/rollback/clearing review;
 - fixed-capacity codec, machine, AEAD provider, cookie jar, and Rustls adapter
   boundary audit;
@@ -5039,6 +5272,12 @@ Deliverables:
 - documented memory-ordering/publication model for one internally consistent
   snapshot across instant, hard/statistical uncertainty, scale/context model,
   source set, validity, and generation;
+- concurrent publication of an engine-admitted `LeapModelCandidate` makes the
+  new leap/conversion generation and dependent clock snapshot visible as one
+  synchronized transition; no reader observes half old/half new model state;
+- clarifies that `v0.12.1` atomicity was only a single-thread transactional
+  generation replacement, while this milestone supplies concurrent-reader
+  visibility and ordering;
 - explicit `Send`/`Sync` policy for every public engine/provider type;
 - bounded queues and cancellation/invalidation ordering with withdrawals
   reserved from silent loss;
@@ -5054,6 +5293,8 @@ Verification:
 
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
+- old/new leap candidate, conversion context, UTC result, and clock snapshot
+  interleavings across admission/commit/publication/withdrawal;
 - stress tests for readers/writers, generation consistency, callback reentry,
   starvation, suspend/reset, forced CPU migration, cache-line contention,
   retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
@@ -5287,6 +5528,9 @@ Deliverables:
 
 - unprivileged workers/consensus, bounded `DisciplineProposal`, policy-issued
   authorization, and a dedicated minimal helper with no protocol dependencies;
+- exact consumption of the frozen `v0.39.3` `HelperPolicyCeiling` and
+  `DisciplineAuditRecord`/gap types, with no daemon-private policy or audit
+  schema;
 - pre-opened socketpair/fixed endpoint, OS peer credentials, fixed-version
   maximum-length canonical-schema messages, sequence/typed-monotonic-domain
   expiry/source-generation replay defense, and pre-opened allowlisted clock
@@ -5305,7 +5549,9 @@ Deliverables:
   `v0.23.1` lifecycle and close-on-exec/non-inheritance policy;
 - fault latching after configured repeated rejected, saturated,
   contradictory, or feedback-missing requests, with bounded fail-closed audit
-  behavior when storage is unavailable/full;
+  behavior when storage is unavailable/full: reserve audit capacity before
+  authorization, reject when full, and latch on unexpected post-operation
+  audit loss until an explicit gap/recovery record is admitted;
 - Linux reference plus supported platform service designs.
 
 Verification:
@@ -5414,6 +5660,9 @@ Deliverables:
 - source/consensus/servo/holdover/daemon health;
 - bounded labels, cardinality, audit schema, redaction, retention, and export
   traits;
+- exporters, retention, chaining, sealing, and witnessing extend the frozen
+  `v0.39.3` discipline record/gap contract without replacing or reinterpreting
+  its fields;
 - every audit record carries strict record sequence, explicit gap/loss events,
   monotonic clock identity/domain, TAI estimate interval, scale/model/policy/
   membership/configuration generations, and process/machine instance;
@@ -5449,6 +5698,8 @@ Deliverables:
 
 - bounded configuration for sources, trust, diversity, protocols, clocks,
   steps/slew, holdover, resources, platform privileges, and logging;
+- configuration syntax maps to the existing typed `v0.39.3`
+  `HelperPolicyCeiling`; it does not introduce a second helper-policy model;
 - configuration identity, provenance, integrity, rollback capability,
   generation, applicable process/machine/target identity, and audit linkage;
 - verify/parse → stage → semantic/capability/resource/helper-ceiling validate
@@ -5488,10 +5739,13 @@ Deliverables:
 - privilege, IPC, config, C/WASM, observability, and cross-protocol threat
   reports;
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
-  process/machine lifecycle, monotonic domains, leap/time-data activation,
+  process/machine lifecycle, monotonic domains, dependency-correct layered
+  leap admission/publication, independently trusted time-data activation,
   competing discipline ownership, honest ahead recovery, embedded concurrency,
-  certificate temporal validity, concurrent snapshot, canonical external-
-  schema, configuration/audit semantics, and language-binding review;
+  full-chain `CredentialValidationContextId` invalidation,
+  capability-qualified secret memory, concurrent snapshot, canonical external
+  schema, frozen helper-policy/discipline-audit semantics, and language-binding
+  review;
 - resolved critical/high product findings.
 
 Verification:
@@ -5867,8 +6121,14 @@ Deliverables:
 - dependency/provider/algorithm inventory and update check;
 - transcript, exporter, AEAD, signature, certificate, entropy, cookie, and
   secret lifecycle review;
+- independent verification of every claimed `SecretMemoryProtection`
+  capability and explicit unsupported/non-composable protection non-claims;
+- `CredentialValidationContextId` coverage for every retained TLS/NTS state,
+  trust/identity/revocation/provider/time/leap/lifecycle change, full validated
+  chain, CRL/OCSP temporal evidence, and invalidate/revalidate/continue action;
 - interval-valued certificate temporal-validity and bootstrap review proving
-  strict validation never uses a midpoint/preferred projection;
+  strict validation never uses a midpoint/preferred projection or a candidate
+  artifact to authenticate its own retrieval;
 - generic provider-boundary assurance, per-key atomic usage/exhaustion,
   fail-closed rekey, and proof that persistence/protocol consumers bypass no
   admitted provider contract;
@@ -5897,8 +6157,9 @@ Deliverables:
 - persistence crash/rollback/migration campaigns and concurrent snapshot/
   withdrawal/cancellation stress;
 - fork/exec/VM/container restore invalidation, competing clock discipliners,
-  time-data/leap activation, audit/configuration rollback, and virtual-clock
-  ahead/freeze/catch-down/fault recovery campaigns;
+  credential-context invalidation, independent time-data trust and layered
+  leap activation, audit/configuration rollback, helper audit-full/latch/gap
+  recovery, and virtual-clock ahead/freeze/catch-down/fault recovery campaigns;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
   claimed HFT-oriented configurations, including cache-line layout, bounded
   retry behavior, CPU migration, and per-core/socket/NUMA placement;
@@ -6004,6 +6265,9 @@ Deliverables:
 - `query_once()` versus `TrustedClock::now()` acquisition semantics and
   `estimate_now()` truth-seeking semantics, ahead-recovery states, monotonic
   domain identity, and cross-language range behavior documented;
+- secret-memory capability/non-claim, credential-validation-context,
+  independent time-data trust, layered leap admission/publication, and
+  helper-policy/audit-full behavior documented without stronger implied claims;
 - task, protocol, deployment, migration, incident, and hardware guides.
 
 Verification:

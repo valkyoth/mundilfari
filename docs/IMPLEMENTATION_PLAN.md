@@ -361,10 +361,14 @@ and invertibility limitations. A smear is never labeled true UTC.
 
 Leap announcements are evidence, not model updates. Authoritative signed or
 locally pinned tables, authenticated protocol announcements, and
-unauthenticated hints remain distinct. Activation requires explicit policy,
-admitted authority/diversity, conflict resolution, and one atomic conversion-
-model generation change. A single authenticated server cannot schedule a leap
-merely because its packet is authentic.
+unauthenticated hints remain distinct. The core first owns only immutable
+candidate validation and a single-thread transactional generation replacement.
+Generic provenance/lifecycle is added after the observation foundations;
+authority/correlation/diversity/quorum admission belongs to the engine; and
+concurrent visibility belongs to TrustedClock publication. Early “atomic”
+means one indivisible model-generation transaction, not a lock-free
+publication claim. A single authenticated server cannot schedule a leap merely
+because its packet is authentic.
 
 ### 4.4 Era resolution
 
@@ -673,6 +677,16 @@ per-key usage-accounting contracts are established before persistence or
 protocol consumers. Test providers are explicitly not production-approved.
 Production implementations require named provider-assurance admission; the
 NTS phase separately admits Rustls, certificates, and TLS-specific policy.
+Secret handling reports independent capabilities for redaction, best-effort
+zeroization, page locking, core-dump exclusion, hardware-backed/non-exportable
+keys, and externally held operations. A container type never implies these
+protections, and unsupported capabilities remain non-claims.
+
+TLS/NTS retained state is bound to a credential-validation context generation
+covering trust anchors, service identity, validation/revocation policy and
+evidence, whole-chain temporal intervals, trusted-time/leap-model generation,
+and execution lifecycle. A context change explicitly invalidates, requires
+revalidation, or permits only policy-bounded continuation.
 
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
@@ -695,12 +709,23 @@ without disturbing the current model. Expiry, rollback capability,
 withdrawal, and refresh failure remain visible in capability reports and
 `system_defaults()`.
 
+Remote time data cannot authenticate itself: a candidate never validates the
+transport or credential interval that delivered it. Artifact signatures,
+pinned verification/SPKI identity, or HTTPS under an already admitted trusted-
+time context provide an independent trust path. Redirects preserve artifact
+authority and signer identity. Offline/manual input follows the same candidate
+pipeline.
+
 Configuration has identity, provenance, integrity, rollback capability, and
 generation; it is staged and fully validated before atomic activation. Secrets
 are opaque provider references, never inline values. Helper policy is an
-independent ceiling. Audit records bind strict sequence/gap events to a
-monotonic domain and TAI/model estimate; append-only storage is not called
-tamper-evident unless chaining, sealing, or external witnessing proves it.
+independent ceiling. The stable typed ceiling and minimal discipline
+audit/gap record are frozen with the discipline/persistence foundation before
+the daemon; later configuration syntax and observability extend them rather
+than inventing private replacements. Audit records bind strict sequence/gap
+events to a monotonic domain and TAI/model estimate; append-only storage is
+not called tamper-evident unless chaining, sealing, or external witnessing
+proves it.
 
 ## 8. Standards Governance
 
@@ -852,25 +877,25 @@ its broader pre-1.0 completeness contract:
 | Concern | Owning versions |
 | --- | --- |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
-| Leap evidence admission and atomic model activation | `v0.12.1`, time-data orchestration `v0.52.1`, product gate `v0.148.0` |
+| Layered leap candidate/evidence/engine/publication admission | `v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
 | Typed monotonic domains and execution lifecycle generations | `v0.16.0`, `v0.23.1`, `v0.24.0`, platform `v0.30.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
-| Runtime capability, RTC/MMIO/discipline ownership/persistence | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers and controlled activation | loaders `v0.52.0`, orchestration `v0.52.1`, product gate `v0.148.0` |
+| Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
+| Hosted time-data providers, activation, and independent trust bootstrap | `v0.52.0`–`v0.52.2`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
 | Generic engine quorum/diversity and NTP orchestration | `v0.60.0`–`v0.62.0`, cross-family composition `v0.133.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| Crypto production admission, interval certificate validity, NTS/bootstrap lifecycle | `v0.72.0`–`v0.81.0` |
+| Crypto/secret protection, credential-context generations, NTS/bootstrap | `v0.72.0`–`v0.81.0`, final review `v0.162.0` |
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
 | Hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | `v0.137.0`–`v0.145.0` |
-| Privilege helper, atomic configuration, sequenced/tamper-qualified audit | `v0.142.0`, `v0.146.0`–`v0.148.0` |
+| Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 
 No gap analysis is adopted as a replacement matrix. The existing registry

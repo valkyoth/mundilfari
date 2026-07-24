@@ -68,6 +68,13 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   recovery, interval certificate validity, leap-announcement admission,
   hosted time-data orchestration, no_std atomic/critical-section/ISR profiles,
   schema depth/tag budgets, and configuration/audit integrity.
+- Latest dependency/trust audit integrated without replacing prior scope:
+  leap candidate validation, evidence lifecycle, engine authority, and
+  concurrent publication now have dependency-correct versions; remote
+  time-data cannot establish the trust used to authenticate itself; TLS/NTS
+  retained state follows full credential-context generations; canonical helper
+  policy/audit types precede the daemon; and secret-memory protection claims
+  are capability-qualified.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.

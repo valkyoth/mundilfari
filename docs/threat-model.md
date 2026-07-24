@@ -74,6 +74,7 @@ Additional boundaries:
 - continuous time to UTC, POSIX, local civil, or smeared time;
 - monotonic time to persisted civil evidence;
 - TLS authentication to NTS time-protocol authorization;
+- remote time-data transport/authentication to candidate-data admission;
 - packet authentication to delay/asymmetry risk;
 - claimed clock quality to measured quality;
 - platform timestamps to correct packet identity;
@@ -116,14 +117,16 @@ Additional boundaries:
 | Repeated bounded discipline abuse | helper-local cumulative phase/frequency windows, rate/settling limits, independent policy ceiling, session/domain binding, fault latch, bounded fail-closed audit |
 | Servo integrates an unapplied proposal | correlated actual-actuation feedback, target generation, residual/quantization handling, anti-windup, missing-feedback fault |
 | Competing clock adjustment | explicit discipline ownership capability, independent external-change detection, target-generation discontinuity, proposal invalidation, servo reacquisition |
-| Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/session/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
+| Privilege escalation | protocol-free minimal helper consuming the pre-daemon canonical policy ceiling/audit contract, peer credentials, expiry/replay/session/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
 | Crypto provider misuse or exhausted key | early protocol-neutral provider contract, provider assurance, atomic per-key usage limits, fail-closed entropy/rekey/exhaustion |
-| Secret disclosure | redaction, bounded lifetime, controlled exposure, admitted clearing |
+| Secret disclosure or overstated memory protection | redaction, bounded lifetime, controlled exposure, and capability-qualified zeroization/page-lock/core-dump/hardware/external-key reports; unsupported or failed protections remain explicit non-claims |
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |
 | Specification drift | official revision registry, errata review, draft isolation, source hashes |
 | Malicious or partial time-data update | explicit provider authorization, bounded verify/stage/compare/atomic activation, rollback/withdrawal/expiry state, current model retained on failure |
+| Circular remote time-data bootstrap | a candidate never validates the transport, certificate, signature time, or credential context that delivered itself; require an admitted signer/pin or HTTPS under already admitted time, preserve redirect authority, and route offline/manual ingestion through the same pipeline |
 | Certificate midpoint acceptance | interval-valued temporal validity; strict validation requires the entire trusted interval within certificate validity |
+| Stale retained TLS/NTS credentials after trust change | context-generation binding across trust anchors, identity policy, full chain, revocation evidence, provider configuration, trusted-time/leap model, and process/machine lifecycle; explicit invalidate, revalidate, or bounded-continuation action |
 | Deep canonical-schema exhaustion | maximum depth/item counts, iterative or bounded recursion, common non-resettable work budget, stable tag namespaces |
 | False audit tamper-evidence claim | strict sequence/gap records, domain and TAI/model generations, append-only distinct from chained/sealed/witnessed tamper evidence |
 | Configuration rollback or secret leakage | provenance/integrity/rollback generation, staged atomic activation, opaque secret references, independent helper ceiling |

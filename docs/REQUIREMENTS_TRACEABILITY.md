@@ -61,7 +61,7 @@ and tests are rechecked.
 | implementation cannot bypass document/test review | reviewed implementation hash plus machine-readable requirement, exact-standard, clause, errata, and test linkage | `v0.3.0`; every common gate |
 | hard versus statistical uncertainty | distinct types, confidence/model semantics, bounded error budgets | `v0.14.0`–`v0.15.0`; engine closure `v0.133.0`–`v0.136.0` |
 | unambiguous canonical atomic timeline | TAI origin/SI-second semantics, generic TAI/UTC mapping, realization evidence separation | `v0.7.0`, `v0.12.0`; gate `v0.17.0` |
-| leap evidence cannot unilaterally change UTC | authority/diversity/conflict lifecycle and atomic model activation | `v0.12.1`; consumers and `v0.148.0` |
+| leap evidence cannot unilaterally change UTC | pure candidate validation and single-thread transaction; evidence lifecycle/provenance; engine authority/diversity admission; generation-consistent concurrent publication | `v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`; audit `v0.148.0` |
 | monotonic values are domain typed | suspend/rate/scope/process/machine/namespace/generation identity | `v0.16.0`, `v0.24.0`, `v0.30.0` |
 | generic evidence withdrawal | source-neutral upsert/withdraw/discontinuity lifecycle | `v0.15.1`; every source and engine milestone |
 | cloned execution invalidates inherited state | generic fork/exec/checkpoint/restore process and machine generations | `v0.23.1`; consumers and final fault review |
@@ -71,12 +71,15 @@ and tests are rechecked.
 | one discipline authority boundary | proposal/policy API, actual-actuation feedback, cumulative helper envelope | `v0.39.0`, `v0.134.4`, helper `v0.142.0` |
 | competing discipliners are detected | ownership capability, external-change discontinuity, proposal invalidation and reacquisition | `v0.39.2`, `v0.134.4`, `v0.161.0` |
 | common secure persistence | bounded versioned state with capability-qualified rollback freshness | `v0.39.1`; consumers and final audits |
-| controlled hosted time-data updates | explicit provider, verify/stage/compare/atomic activation, no hidden download | `v0.52.1`, `v0.148.0` |
+| helper policy and audit types precede the daemon | stable policy ceiling, canonical discipline/audit-gap records, reserve-before-actuation full-store behavior | `v0.39.3`; consumers `v0.142.0`, `v0.146.0`, `v0.147.0` |
+| controlled hosted time-data updates | explicit provider, verify/stage/compare/atomic activation, no hidden download, and an independent non-circular artifact/transport trust path | `v0.52.1`–`v0.52.2`, `v0.148.0` |
 | one generic fusion implementation | early engine quorum/diversity, later cross-protocol orchestration only | `v0.60.0`–`v0.61.0`, `v0.133.0` |
 | stable PTP security ownership | stable Security TLV/association/replay/key lifecycle or external-only non-claim | `v0.107.2`, gate `v0.108.0` |
 | consensus configuration identity | atomic policy/membership generations carried into results/proposals | `v0.133.0` |
 | safe facade panic contract | recoverable caller/environment/resource failures return structured errors | `v0.138.0`, `v0.160.0`, `v0.166.0` |
 | interval-valued certificate validation | full trusted interval must lie within certificate validity in strict mode | `v0.75.0`, `v0.80.0`, `v0.162.0` |
+| retained TLS/NTS state follows credential-context changes | tickets, exporters, associations, cookies, and peer evidence bind trust, identity, revocation, full-chain temporal, time/leap, and lifecycle generations | `v0.75.1`, consumers `v0.77.0`–`v0.81.0`; audit `v0.162.0` |
+| secret-memory claims are capability-qualified | redaction, zeroization, page locking, core-dump exclusion, hardware/non-exportable, and external-key protections remain separate capabilities and non-claims | `v0.24.1`, `v0.33.0`, `v0.72.0`; audit `v0.162.0` |
 | consistent concurrent reads | generation-consistent hosted publication and explicit no_std concurrency profiles | `v0.137.1`–`v0.137.2` |
 | honest monotonic application-clock recovery | truth bounds may revise, preferred projection cannot retain false synchronized status | `v0.137.3`, `v0.166.0` |
 | configuration and audit integrity | atomic generated configuration; domain/model-sequenced audit with honest tamper-evidence capability | `v0.146.0`–`v0.148.0` |

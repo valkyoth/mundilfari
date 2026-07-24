@@ -31,11 +31,18 @@ Rules:
 - Facade/application crates compose protocol, engine, and platform.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
+- Leap-candidate structure and pure validation live in core; generic evidence
+  lifecycle/provenance uses shared source types; leap authority, correlation,
+  diversity, and quorum live only in engine; hosted concurrent publication
+  lives only in the composition layer.
 - Generic interval quorum, falseticker rejection, clustering, combining, and
   diversity are engine primitives implemented before NTP composition; NTP
   crates own association/filter metadata but no copy of those algorithms.
 - Protocol crate feature sets contain no clock-adjustment or privileged
   authority feature.
+- The helper and daemon share the canonical pre-daemon policy-ceiling and
+  discipline-audit types; neither may introduce a private replacement schema,
+  and daemon configuration may only narrow the helper ceiling.
 - Monotonic values and lifecycle events use shared core domain/generation
   types; protocol crates do not invent private fork/checkpoint handling.
 - `no_std` concurrency selects single-thread, target-atomic, caller critical-
@@ -52,6 +59,9 @@ Rules:
   a runtime, privileged operations, or system-clock modification.
 - Capability APIs distinguish code compiled, resource available, caller
   authorized, and component healthy; a Cargo feature proves only the first.
+- Secret-memory APIs report redaction, zeroization, page locking, core-dump
+  exclusion, hardware/non-exportable keys, and external-key operations as
+  separate provider/platform capabilities; container types imply none of them.
 
 The local gate is:
 

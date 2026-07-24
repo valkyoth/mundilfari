@@ -61,6 +61,13 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   certificate validation, leap-evidence consensus, controlled hosted
   time-data updates, explicit bare-metal concurrency profiles, bounded schema
   tag/depth governance, and atomic configuration/sequenced audit semantics.
+- Integrated the latest dependency and trust review without replacing the
+  existing roadmap: split leap candidate validation, evidence lifecycle,
+  engine admission, and concurrent publication into dependency-correct
+  milestones; bound retained TLS/NTS state to credential-validation context
+  generations; added non-circular remote time-data bootstrap; froze helper
+  policy/audit types before the daemon; and made secret-memory protections
+  capability-qualified rather than implied.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.
