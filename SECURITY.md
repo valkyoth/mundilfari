@@ -113,15 +113,30 @@ the release branch between review and tagging.
   status stays in `n` and cannot lower the threshold, so contributor shortage
   is insufficient/unsafe. Duplicate roots count distinctly only through
   explicit correlation/diversity admission.
+  A complete witness is membership/verification state, not aggregate clock
+  authority. Batch-state, consensus, and published authorities have distinct,
+  non-substitutable identities. Consensus records exactly the bounded support
+  used by its proof, separately from unused eligible membership. Aggregate
+  validity is the conservative minimum of every required deadline in one
+  monotonic domain; mixed domains reject unless translated through current
+  admitted correlations whose identity, generation, uncertainty, and expiry
+  become dependencies. Loss of any used support invalidates the old authority
+  even if another quorum could be recomputed.
   Aborted refreshes report prior authority as retained, invalidated, or absent.
   Operational failure cannot clear or extend an otherwise still-current prior
   batch; genuine dependency invalidation revokes it even without replacement.
   An internal invariant fault invalidates prior authority. Complete-new commit
   and prior retirement are one transaction, with no partial replacement.
-  Fixed-size `PriorAuthorityObservation` binds disposition, prior identity/
-  generation, exact monotonic observation interval, unchanged deadline or
-  invalidation generation/reason, and engine/publication generation at that
-  linearization point. `Retained` never claims authority through caller receipt.
+  Fixed-size `PriorAuthorityObservation` binds a tagged batch/consensus/
+  publication subject, disposition, prior identity/generation, measured
+  monotonic coverage or typed unavailability, unchanged deadline or
+  invalidation generation/reason, and engine/publication generation.
+  Measurement occurs after callbacks/fallible work under commit serialization:
+  a pre-commit interval is expanded by a reviewed current bound for every
+  remaining check/write/swap/preemption/recording step through linearization.
+  Missing capability, sampling failure, or an incomparable domain cannot
+  publish new authority or report `Retained`. `Retained` never claims authority
+  through caller receipt.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,

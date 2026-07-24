@@ -168,6 +168,17 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   generation, monotonic interval, deadline/invalidation, and publication data
   to their refresh linearization point; delayed return never makes `Retained`
   a current-authority claim.
+- Complete membership, aggregate batch state, exact-support consensus, and
+  published snapshots now have distinct non-substitutable authority
+  identities. Validity is the conservative minimum of all required deadlines
+  in one monotonic domain; mixed domains require admitted correlation evidence
+  or fail. Losing any contributor actually used by a proof invalidates that
+  authority even if a different quorum could be formed.
+- Refresh timing now has an implementable contract: after callbacks and
+  fallible work, commit serialization protects a pre-commit interval expanded
+  by a reviewed bound for all remaining work through linearization. Fixed-size
+  measured/unavailable stamps make capability, sampling, and domain failure
+  explicit; unavailable observations never retain or create authority.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

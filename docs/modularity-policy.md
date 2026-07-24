@@ -61,10 +61,17 @@ Rules:
   latter can represent `Unprocessed`, and it cannot enter quorum. Engine also
   owns the distinction between original configured membership and current
   accepted-bound interval contributors, unchanged quorum thresholds, and the
-  retained/invalidated/absent prior-authority refresh transaction plus its
-  fixed-size linearization observation. Concurrent publication supplies its
-  generation and one-point replacement but cannot redefine the observation as
-  authority through receipt.
+  retained/invalidated/absent prior-authority refresh transaction. A complete
+  witness is not aggregate authority: engine separately owns
+  `BatchAuthorityState`, exact-support `ConsensusAuthority`, one-domain
+  conservative validity, and admitted monotonic-correlation dependencies.
+  Losing used proof support invalidates that authority; an unused alternative
+  requires a new decision/identity. The fixed-size observation tags batch,
+  consensus, or published authority and records measured coverage or typed
+  unavailability using the reviewed serialized pre-commit/remaining-work
+  algorithm. Concurrent publication owns `PublishedAuthoritySnapshotId`, its
+  generation, and one-point replacement, but cannot redefine batch/consensus
+  identities or the observation as authority through receipt.
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - Safe OS, transport, timestamp, PHC, PPS, and device wrappers live in
   `mundilfari-platform`.

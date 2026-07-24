@@ -61,7 +61,10 @@ grep -q 'accepted-bound interval contributors' docs/modularity-policy.md
 grep -q 'retained/invalidated/absent prior-authority' docs/modularity-policy.md
 grep -q '`CompleteMemberStatus` and `AbortMemberDiagnostic` are disjoint' docs/modularity-policy.md
 grep -q 'cannot enter quorum' docs/modularity-policy.md
-grep -q 'fixed-size linearization observation' docs/modularity-policy.md
+grep -q '`BatchAuthorityState`, exact-support `ConsensusAuthority`' docs/modularity-policy.md
+grep -q 'conservative validity, and admitted monotonic-correlation' docs/modularity-policy.md
+grep -q 'measured coverage or typed' docs/modularity-policy.md
+grep -q '`PublishedAuthoritySnapshotId`' docs/modularity-policy.md
 grep -q 'cannot extend arena lifetimes' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
 grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md

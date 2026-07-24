@@ -484,15 +484,48 @@ reducing the threshold; aborted/unprocessed outcomes cannot invoke quorum. A
 shortage is `Insufficient`/`Unsafe`. Membership removal or reclassification is
 an atomic new generation with complete reassessment.
 
+Completeness is also not aggregate clock authority. Engine creates a distinct
+`BatchAuthorityState` whose identity and one-domain `AuthorityValidity` bind the
+complete witness plus every accepted member and transitive policy, membership,
+evidence, model, lifecycle, and correlation dependency required to assert that
+state. Later fusion creates a non-substitutable `ConsensusAuthorityId` and
+bounded canonical `ProofSupportSet` containing exactly the contributors and
+correlations used by the proof; concurrent publication creates a separate
+`PublishedAuthoritySnapshotId` that binds that consensus authority. Unused
+eligible alternatives remain membership state, not hidden support for an old
+decision.
+
+Aggregate validity is the conservative minimum of every required deadline in
+one explicit `MonotonicClockId`. Mixed domains are rejected unless each
+deadline is conservatively translated through a current admitted
+`MonotonicDomainCorrelation`, whose identity, generation, uncertainty, and
+expiry become dependencies. Raw cross-domain numeric comparison is forbidden.
+Expiry, withdrawal, replacement, or generation change of any used support
+invalidates the exact authority even if other members could form a quorum; a
+new complete verification and consensus decision must issue a new identity.
+
 Each refresh returns fixed-size `PriorAuthorityObservation` data describing
-`Retained`, `Invalidated`, or `Absent` at the refresh linearization point.
-It binds the prior identity/generation, exact-domain `MonotonicReadInterval`,
-unchanged `valid_until`, typed invalidation generation/reason, and observed
-engine/optional publication generation as applicable. Operational aborts leave
-an independently still-current prior batch unchanged, genuine dependency
-invalidation revokes it even without replacement, and an internal invariant
-fault invalidates prior authority. Complete-new commit plus prior retirement
-share the sampled point. `Retained` is historical observation, not authority
+`Retained`, `Invalidated`, or `Absent` at the refresh linearization point. A
+tagged `PriorAuthoritySubject` distinguishes batch, consensus, and published
+authority. `LinearizationObservationStamp::Measured` binds the authority
+domain, a conservative interval covering the boundary, and the reviewed
+remaining-work capability/generation; `Unavailable` binds a typed reason and
+contains no fabricated instant. Operational aborts leave an independently
+still-current prior authority unchanged, genuine dependency invalidation
+revokes it even without replacement, and an internal invariant fault
+invalidates it. Complete-new commit plus prior retirement share the sampled
+point.
+
+The measured algorithm completes callbacks and fallible work, acquires commit
+serialization, reads a pre-commit monotonic interval, and expands its latest
+edge by a current reviewed bound covering all remaining generation checks,
+writes, swap, preemption/critical-section allowance, and observation-record
+publication through linearization. Commit and `Retained` require the expanded
+edge to precede `valid_until` and completion within the bound. Missing
+capability, sampling failure, or an incomparable domain produces
+`Unavailable`, cannot mint new authority, and can never report `Retained`.
+`Absent` measures in the configured refresh domain where possible or reports
+`NoAuthorityObservationDomain`. Every disposition is historical, not authority
 through caller receipt; later use revalidates normally. No failed refresh
 partially replaces state or extends a prior deadline.
 Assessment captures one complete provider/assessor/rule/evidence/policy/arena

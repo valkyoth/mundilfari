@@ -156,6 +156,14 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   identity/generation, monotonic observation interval, deadline/invalidation,
   and engine/publication generation data at the refresh linearization point;
   `Retained` is explicitly not authority through caller receipt.
+- Separated complete batch state, exact-support consensus authority, and
+  published authority identities. Aggregate deadlines now use one monotonic
+  domain with conservative minima and correlation-bound translation or typed
+  rejection; loss of used support invalidates the old decision even when
+  another quorum exists. Refresh observations now use a concrete serialized
+  pre-commit read plus reviewed remaining-work bound and an explicit
+  measured/unavailable stamp, so failed sampling cannot retain or mint
+  authority.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.
