@@ -81,6 +81,12 @@ the release branch between review and tagging.
   handle. Geometry, canonical conditional-claim equality, and fallible
   lease-backed derivation equality are distinct; arena-dependent values have no
   infallible semantic `Eq`/`Hash`.
+  Borrowed claims cannot escape the arena brand. alloc callers may fallibly
+  promote a complete canonical DAG into a bounded frozen
+  `OwnedHardBoundClaim`; promotion reinterns structurally and cannot copy a
+  handle, extend a lifetime, leak storage, or grant authority. Engine-verified
+  proofs and accepted tokens are lifetime-independent from that unverified
+  source arena and retain all invalidating generation dependencies.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,
@@ -96,10 +102,12 @@ the release branch between review and tagging.
 - Assessment issuance captures and rechecks one complete generation vector
   around unlocked provider callbacks. It publishes no mixed-generation result:
   arena traversal first materializes bounded input under a read lease/frozen
-  snapshot and releases every arena lock/lease before those callbacks. Change,
-  eviction, or concurrent import causes bounded retry or indeterminate status,
-  and any accepted token is minted with its assessment at the same engine
-  linearization point. A fresh bounded monotonic interval is sampled there; its
+  snapshot and releases every arena lock/lease before those callbacks.
+  Successful verification owns the proof/token material before the source may
+  drop; failure creates nothing. Change, eviction, or concurrent import causes
+  bounded retry or indeterminate status, and any accepted token is minted with
+  its assessment at the same engine linearization point. A fresh bounded
+  monotonic interval is sampled there; its
   conservative upper edge, including resolution, latency, rate uncertainty,
   and only a reviewed margin for internal work remaining before that
   linearization point, must remain before the deadline. This is not

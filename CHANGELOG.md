@@ -131,6 +131,11 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   state-qualified `Send`/`Sync`, explicit geometry/conditional-claim/fallible-
   derivation comparison, and a dedicated `v0.17.0` pre-protocol audit including
   reduced-state handle and ABA proofs.
+- Added `v0.7.4` for fallible canonical promotion from borrowed hard claims to
+  bounded frozen owned claims; made verified proofs and accepted tokens
+  lifetime-independent from unverified source arenas; and carried explicit
+  ownership into returned clocks, `'static` async tasks, builders, schemas, and
+  C/JNI/Swift context destruction.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

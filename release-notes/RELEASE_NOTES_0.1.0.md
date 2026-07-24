@@ -142,6 +142,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   complete-derivation comparisons are separate, and `v0.17.0` audits identity,
   SHA-256, arena ABA/concurrency, equality, stack, and reduced-state evidence
   before protocols consume them.
+- New `v0.7.4` separates zero-allocation borrowed claims from fallible bounded
+  frozen owned claims. Promotion canonically reinterns the complete DAG;
+  verified proofs/tokens then become independent of the unverified source-arena
+  lifetime while preserving revocation generations. Returned clocks, `'static`
+  tasks, and C/JNI/Swift contexts receive explicit non-self-referential
+  ownership and destruction tests.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

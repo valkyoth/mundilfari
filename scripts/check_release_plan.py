@@ -22,7 +22,7 @@ REVIEW_COVERAGE = {
         "Fundamental Intervals And Uncertainty Classes",
         "Endpoint<T>",
         "FiniteInterval<T>",
-        "HardBoundClaim<T>",
+        "BorrowedHardBoundClaim<'arena, T>",
         "StatisticalRange<T>",
         "BoundAssumptionsId",
         "without plus/minus-quantum adjustment",
@@ -64,10 +64,10 @@ REVIEW_COVERAGE = {
         "no protocol type",
         "cannot update `TrustedClock`",
     ),
-    "v0.8.0": ("v0.7.1", "v0.7.3", "HardBoundClaim<AtomicInstant>"),
+    "v0.8.0": ("v0.7.4", "v0.7.3", "HardBoundClaimView<'_, AtomicInstant>"),
     "v0.9.0": (
         "maximum limb width",
-        "HardBoundClaim<Duration>",
+        "HardBoundClaimView<'_, Duration>",
     ),
     "v0.11.0": ("ConversionContext", "bipm-si-brochure-9-v4.01"),
     "v0.11.1": (

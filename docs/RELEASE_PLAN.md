@@ -413,14 +413,15 @@ Deliverables:
 - unbounded endpoints exist for algebra and coverage calculations, but
   `FiniteInterval<T>` is required in trusted-time estimates, observations,
   era contexts, and admission expiries;
-- non-interchangeable `HardBoundClaim<T>` and `StatisticalRange<T>` wrappers;
-  `HardBoundClaim` states mathematical containment under a source-neutral
-  `BoundAssumptionsId`, not proof that a source is honest or authoritative,
-  while an early `StatisticalRange` is non-guaranteed and cannot be promoted;
-  the identifier is an opaque reference to immutable assumption content, not
-  a caller-selected label, and its complete composition algebra follows in
-  `v0.7.2`;
-- every root `HardBoundClaim<T>` constructor stores a paired, core-owned,
+- non-interchangeable `BorrowedHardBoundClaim<'arena, T>` and
+  `StatisticalRange<T>` wrappers; the borrowed claim states mathematical
+  containment under a source-neutral `BoundAssumptionsId`, not proof that a
+  source is honest or authoritative, while an early `StatisticalRange` is
+  non-guaranteed and cannot be promoted; the identifier is an opaque reference
+  to immutable assumption content, not a caller-selected label, and its
+  complete composition algebra follows in `v0.7.2`;
+- every root `BorrowedHardBoundClaim<'arena, T>` constructor stores a paired,
+  core-owned,
   immutable `UnverifiedBoundDerivation<T>` recipe in its admitted derivation
   arena, binding a bounded
   `ClaimOriginId`, the exact included/excluded output endpoints, claim digest,
@@ -431,7 +432,7 @@ Deliverables:
 - every claim/origin/recipe digest is computed only from the exact `v0.6.1`
   canonical identity profile; canonical claim comparison and arena interning
   compare full structure after digest match and surface collisions explicitly;
-- `HardBoundClaim<'arena, T>` contains a mandatory private typed
+- `BorrowedHardBoundClaim<'arena, T>` contains a mandatory private typed
   `DerivationHandle<'arena, T>` rather than returning a droppable
   `(claim, recipe)` pair. Arena construction introduces a fresh invariant
   generative lifetime brand that cannot be named by callers or escape its
@@ -528,11 +529,10 @@ Deliverables:
   canonical condition, binding digest algorithm, namespace, semantic-schema
   generation, proof-rule-registry generation, and canonical content; callers
   cannot select an identifier that aliases a different expression;
-- exact condition identity is part of `HardBoundClaim<T>` equality, evidence,
-  serialization contract, and cache keys under the `v0.7.1`
-  `same_conditional_claim()` semantics, while geometric interval comparison
-  remains separately queryable and complete derivation equivalence remains
-  fallible and lease-backed;
+- exact condition identity is part of borrowed-claim evidence, serialization
+  contracts, and cache keys under the `v0.7.1` `same_conditional_claim()`
+  semantics, while geometric interval comparison remains separately queryable
+  and complete derivation equivalence remains fallible and lease-backed;
 - interval intersection constructs `All(A, B)`; union or convex hull constructs
   `Any(A, B)`; widening that adds no new dependency retains the input
   condition; conversion/projection constructs `All(input, model, rounding)`;
@@ -673,6 +673,76 @@ Exit criteria:
   derivation becomes proof or authority before complete engine verification;
 - `v0.7.3 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.7.4 - Borrowed And Owned Hard-Claim Ownership
+
+Status: planned.
+
+Goal: preserve zero-allocation lifetime safety while giving hosted engines,
+returned clocks, async tasks, and foreign-language contexts a non-self-
+referential ownership boundary.
+
+Deliverables:
+
+- `BorrowedHardBoundClaim<'arena, T>` remains the zero-allocation no_std form
+  and cannot outlive its invariant generative arena brand; compile-time
+  lifetimes, not runtime checks or leaked storage, enforce this boundary;
+- fallible alloc-enabled `OwnedHardBoundClaim<T>` owns an opaque bounded frozen
+  derivation arena or shares it through an Arc-style owner when the target has
+  the required pointer-atomic capability. Targets without that capability use
+  unique ownership or an explicit caller synchronization profile; no hidden
+  global allocator, unbounded growth, unconditional `Arc`, or `Box::leak`
+  fallback is permitted;
+- borrowed-to-owned `try_promote()` canonically exports and atomically
+  imports/reinterns the complete reachable derivation DAG into fresh owned
+  bounded storage, recomputes `v0.6.1` identities, performs full structural
+  collision checks and heterogeneous-edge validation, and returns failure
+  without a partial owner. It never copies, trusts, transmutes, or lifetime-
+  extends a process-local handle/brand;
+- both forms expose a lease-scoped `HardBoundClaimView<'view, T>` for common
+  core algorithms; owned-to-view borrowing does not manufacture a new arena
+  identity, and promotion does not add evidence, verification, authority,
+  acceptance, or stronger containment semantics;
+- owned frozen arenas cannot evict or reintern; thaw/edit requires a new
+  bounded arena and canonical promotion, so an `OwnedHardBoundClaim` never
+  observes mutable backing content. Clone/share, drop, and last-owner
+  destruction semantics are explicit and preserve bounded resource reports;
+- the ownership contract reserves engine promotion: at `v0.60.1`, successful
+  verification produces lifetime-independent engine-owned
+  `VerifiedBoundDerivation<T>` and `PolicyAcceptedHardBound<T>` values carrying
+  the required canonical identities and lifecycle/generation dependencies,
+  never a borrow or handle into the unverified source arena;
+- dropping a borrowed or owned source arena after successful engine promotion
+  does not itself invalidate the engine-owned proof/token; evidence, model,
+  policy, source, lifecycle, assessment, and deadline generation changes still
+  invalidate it. Dropping before completed promotion leaves no verified or
+  accepted value;
+- no_std engines explicitly borrow caller-provided arena and engine storage and
+  expose those lifetimes. The std/alloc facade owns only frozen promoted claim
+  state and engine-owned proof/token state, avoiding self-referential structs;
+- external schemas continue to carry complete unverified canonical records,
+  never either Rust ownership wrapper. FFI context ownership and language-
+  handle destruction rules are completed at `v0.140.1`/`v0.144.0`.
+
+Verification:
+
+- compile-fail borrowed-claim escape, locally branded return, self-referential
+  owner construction, lifetime transmute, and use-after-source-drop cases;
+- successful/failing borrowed-to-owned promotion, source drop after promotion,
+  drop before promotion, forced digest collision, cross-store import,
+  zero/full capacity, allocation/import exhaustion, rollback atomicity, unique
+  versus shared owner targets, cross-thread frozen ownership, clone/drop/last-
+  owner destruction, and no_std no-alloc dependency tests;
+- returned self-contained owned-state builder and `'static` closure/thread
+  fixtures, plus placeholder async/ABI ownership fixtures consumed by the later
+  facade/async/binding milestones.
+
+Exit criteria:
+
+- callers can choose an explicit borrowed or fallible owned storage model
+  without self-reference, lifetime forgery, hidden leaking, or loss of the
+  canonical derivation required for later engine verification;
+- `v0.7.4 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.8.0 - Epoch And Era Framework
 
 Status: planned.
@@ -682,9 +752,10 @@ Goal: make epoch identity and rollover resolution explicit.
 Deliverables:
 
 - typed epochs, custom epoch identifiers, and bounded `EraContext` carrying an
-  admissible finite `v0.7.1` `HardBoundClaim<AtomicInstant>` with explicit
-  endpoint semantics, the `v0.7.2` canonical condition identity, resolved
-  through `v0.7.3` for any external context, and maximum-distance policy;
+  admissible finite `v0.7.4`
+  `HardBoundClaimView<'_, AtomicInstant>` with explicit endpoint semantics, the
+  `v0.7.2` canonical condition identity, resolved through `v0.7.3` for any
+  external context, and maximum-distance policy;
 - every successful era-resolution hard claim preserves and extends the input
   `UnverifiedBoundDerivation` with the exact era context, raw/truncated value,
   resolver operation, selected era, output endpoints, and claim digest;
@@ -713,7 +784,7 @@ Deliverables:
 
 - binary, decimal, scaled-nanosecond, and bounded exact-fraction adapters;
 - caller-selected rounding, exact rational quantum, and lower/upper residual
-  `v0.7.1` `HardBoundClaim<Duration>` whose open/closed endpoints follow
+  `v0.7.4` `HardBoundClaimView<'_, Duration>` whose open/closed endpoints follow
   directed rounding without quantum adjustment and whose `v0.7.2`
   `All(input, model, rounding)` condition preserves every conversion and
   rounding precondition;
@@ -1331,13 +1402,18 @@ Deliverables:
   and the prohibition on unstable Rust identity inputs are release blockers;
 - foundational instant/duration interval and hard/statistical type-separation
   audit proving every era, fraction, EOP, and later uncertainty consumer uses
-  the `v0.7.1` types without provisional duplicates;
+  the `v0.7.1`/`v0.7.4` types without provisional duplicates;
 - derivation-arena audit covering capacity, canonical DAG sharing,
   lifetime-brand generativity, same-address ABA resistance, nonwrapping
   generation exhaustion, destruction/reinitialization, eviction/read leases,
   concurrent import, mutable/frozen/read-only `Send`/`Sync`, heterogeneous edge
   safety, and geometry/conditional-claim/fallible-derivation equality
   semantics;
+- `v0.7.4` ownership/promotion audit proving borrowed claims cannot escape,
+  owned frozen arenas avoid self-reference, promotion is fallible/atomic/
+  canonical and does not grant authority, target-dependent unique versus
+  Arc-style sharing is honest, and no lifetime extension, handle copying, or
+  storage leak bypasses the boundary;
 - leap-candidate validation/transaction and evidence-provenance/lifecycle
   boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
   authority/diversity admission remains deferred to `v0.61.1`;
@@ -1357,7 +1433,9 @@ Verification:
 - full foundation corpus, independent differential oracles, fuzzing, MSRV, and
   no_std target matrix; SHA-256 KAT/differential corpus, identity-schema golden
   vectors, arena ABA/wraparound/concurrency state machines, equality/collision
-  cases, and reduced-state proof artifacts are mandatory.
+  cases, borrowed/owned promotion and source-drop/owner-drop state machines,
+  compile-fail lifetime-escape corpus, and reduced-state proof artifacts are
+  mandatory.
 
 Exit criteria:
 
@@ -3062,9 +3140,10 @@ whose assumptions are currently supported and accepted by engine policy.
 
 Deliverables:
 
-- `ResolvedBoundCondition` proves only canonical structure/content and
-  `HardBoundClaim<T>` remains usable for conditional, diagnostic, or untrusted
-  data; neither type implies that any atom currently holds;
+- `ResolvedBoundCondition` proves only canonical structure/content and a
+  `v0.7.4` borrowed or owned `HardBoundClaimView<'_, T>` remains usable for
+  conditional, diagnostic, or untrusted data; neither representation implies
+  that any atom currently holds;
 - bounded `ConditionAssessment` with explicit `Supported`, `Contradicted`,
   `Indeterminate`, `Expired`, and `Withdrawn` status, exact
   `BoundAssumptionsId`, policy/membership/source/correlation/evidence
@@ -3104,6 +3183,11 @@ Deliverables:
   conversion operation, exact input and output endpoints, rounding direction
   and policy, conversion-model identity and generation, canonical output
   condition, and output claim digest;
+- successful verification materializes an engine-owned, lifetime-independent
+  `VerifiedBoundDerivation<T>` containing the canonical proof/claim identities,
+  verified operation/model/rule inputs, and every lifecycle/generation
+  dependency needed for revalidation. It contains no borrow, brand, handle,
+  pointer, or owner reference to the borrowed/owned unverified source arena;
 - engine verification resolves the claim's mandatory typed
   `DerivationHandle<'arena, T>` against the exact admitted arena brand/
   generation. It obtains an immutable read lease or frozen pinned snapshot,
@@ -3145,13 +3229,20 @@ Deliverables:
   expired/indeterminate diagnostics and never mints a current assessment or
   accepted token;
 - opaque, non-forgeable `PolicyAcceptedHardBound<T>` is constructed only when
-  a finite `HardBoundClaim<T>`, its exact `VerifiedBoundDerivation<T>` and
-  resolved condition, a snapshot-consistent current `Supported` assessment,
-  and the selected engine policy all agree; it binds the interval/claim and
+  a finite borrowed/owned `HardBoundClaimView<'_, T>`, its exact
+  `VerifiedBoundDerivation<T>` and resolved condition, a snapshot-consistent
+  current `Supported` assessment, and the selected engine policy all agree; it
+  binds the interval/claim and
   verified-derivation identities/digests/generations, condition and assessment
   identity/generation, policy/membership/source/correlation generations,
   per-atom support basis, assurance/non-claims, evaluation domain, and
   conservative expiry/re-evaluation deadline;
+- `PolicyAcceptedHardBound<T>` is likewise engine-owned and lifetime-
+  independent from the unverified source arena. Completed promotion permits
+  that source arena/owner to drop without revoking the token, while every bound
+  evidence/model/policy/source/lifecycle/assessment/deadline generation remains
+  revalidated and can revoke it; failed or interrupted promotion mints neither
+  verified proof nor accepted token;
 - accepted-token identity/equivalence includes the exact conditional claim,
   verified-derivation identity and generation, condition/assessment identity
   and generation, policy/membership/source/correlation generations, and
@@ -3193,6 +3284,10 @@ Verification:
   unlocked assessment work, proof that no arena lock/lease crosses external
   callbacks, imported-record partial reinterning, cross-thread profile
   enforcement, and DAG node/edge/work exhaustion;
+- borrowed and owned claim inputs, source-arena drop after successful engine
+  promotion, source drop before/during promotion, proof/token inspection after
+  source drop, canonical-identity/generation dependency preservation, and
+  proof that engine-owned results contain no source brand/handle/owner;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -6546,6 +6641,11 @@ Deliverables:
 
 - `query_once()` acquisition distinct from `TrustedClock::now()` virtual-clock
   reads, plus strict `TrustedClock::system_defaults(...)`;
+- std/alloc builders return a self-contained `TrustedClock` owning engine-
+  promoted/frozen claim state and lifetime-independent verified/accepted state;
+  the returned clock never borrows a locally created derivation arena or uses a
+  self-referential/leaked owner. no_std builders instead expose the exact
+  caller-storage lifetime in the clock type;
 - blocking strict facade keeps the two `v0.137.0` contracts type-distinct:
   `now()` returns linearization-time authority with `observed_at` and
   `valid_until`, while `now_through_completion()` exists/succeeds only with a
@@ -6582,6 +6682,8 @@ Verification:
   public interop, timeout/cancel, system-policy snapshot/diff, hidden-network/
   fallback refusal, strict refusal for contradicted/indeterminate/expired/
   withdrawn/stale accepted bounds, conditional diagnostic preservation,
+  return-from-builder and source-arena-drop self-contained clock tests,
+  compile-fail no_std clock lifetime escape,
   delayed hosted return with valid linearization metadata, unavailable/stale/
   violated WCET capability and contract non-substitution,
   no-trusted-boolean misuse compile tests, and iterator/builder/callback/
@@ -6602,13 +6704,17 @@ Deliverables:
 
 - canonical poll APIs, `core::future` adapters, cancellation, deadlines, and
   user-executor integration;
-- optional owned buffers under `alloc`;
+- optional owned buffers and `v0.7.4` `OwnedHardBoundClaim<T>` state under
+  `alloc`; adapters intended for `'static` spawning own every promoted claim,
+  engine proof/token, buffer, cancellation, and transport dependency rather
+  than extending a borrowed arena lifetime;
 - no Tokio or runtime dependency.
 
 Verification:
 
 - custom executor, embedded-style polling, Tokio adapter example outside the
-  graph, cancellation races, wake discipline, and feature matrix.
+  graph, `'static` spawn with owned claims, compile-fail borrowed-claim spawn,
+  cancellation/drop races, wake discipline, and feature matrix.
 
 Exit criteria:
 
@@ -6631,6 +6737,9 @@ Deliverables:
   lease policy, worst-case claim/handle size, stack usage, generation-
   exhaustion behavior, and fallible bounded alloc-backed alternatives are
   visible rather than hidden inside a client builder;
+- explicit borrowed builder families carry caller arena/engine-storage
+  lifetimes, while fallible owned builders accept frozen-arena capacity/share
+  policy, atomically promote through `v0.7.4`, and return self-contained owners;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6640,7 +6749,9 @@ Verification:
 - zero/minimum/maximum capacity, stack-size reports, no allocator link,
   derivation-arena DAG sharing/exhaustion/eviction reports, same-storage brand
   recreation, read/write lease and `Send`/`Sync` compile tests, embedded
-  targets, examples, and compile-fail overflow cases.
+  targets, examples, and compile-fail overflow cases; allocation/import
+  exhaustion, partial-promotion rollback, returned-owner drop order, and
+  compile-fail borrowed-result escape.
 
 Exit criteria:
 
@@ -6679,7 +6790,12 @@ Deliverables:
 - explicit compatibility contracts for daemon IPC, secure persistence, C,
   WASM, logs/evidence, and language bindings;
 - Java/Kotlin and Swift either use tested JNI/Swift shims or the documented C
-  ABI with platform integration/range fixtures.
+  ABI with platform integration/range fixtures;
+- external-language opaque contexts own any bounded promoted/frozen arena and
+  engine state. Language claim/clock handles retain or borrow that context by
+  documented ABI ownership rules, can never contain a Rust arena borrow, and
+  cannot outlive or be used after context destruction; schemas never encode
+  Rust owner/refcount/brand state.
 
 Verification:
 
@@ -6689,7 +6805,10 @@ Verification:
   missing/rolled-back registries, forged/stale serialized assessments and
   accepted-bound tokens, derivation replay/rollback/cross-engine copy,
   missing-input/stale-rule-or-model substitution, direct verified-type decode
-  refusal, C/WASM/JNI-or-C/Swift-or-C fixtures, and fuzzing.
+  refusal, C/WASM/JNI-or-C/Swift-or-C fixtures, context-first/child-first/
+  arbitrary destruction order, double release, use after context close, shared
+  frozen-owner threads, allocation/promotion failure without leaked or
+  partially initialized handles, and fuzzing.
 
 Exit criteria:
 
@@ -6810,6 +6929,10 @@ Deliverables:
 
 - versioned opaque handles, caller buffers, error codes, ownership, threading,
   and panic containment;
+- one explicit context owns bounded promoted/frozen claim arenas and engine
+  state; child claim/clock handles are reference-counted or context-borrowed by
+  the documented ABI contract, Rust arena borrows exist only during individual
+  calls, and context close invalidates children before freeing backing storage;
 - canonical external-schema values/events with explicit high/low limbs for
   wide instants and
   `OutOfRange` on every narrowing conversion;
@@ -6821,6 +6944,9 @@ Verification:
 - C/C++ consumers on Linux/Windows/macOS, canonical golden vectors,
   null/length/alias misuse, ABI layout, symbol version, sanitizer, and fuzz
   tests;
+- context/child destruction in every order, double close, concurrent close/use,
+  child use after context close, last-owner release, allocation/import
+  exhaustion, and no partially returned handle;
 - Java/Kotlin JNI-or-C and Swift-or-C ownership/range/platform fixtures for the
   documented binding route.
 
@@ -6957,8 +7083,12 @@ Deliverables:
 - generic withdrawal, hard/statistical uncertainty, secure persistence,
   exact open/closed/unbounded interval and finite-estimate semantics,
   `CanonicalIdentityV1` domain separation/fixed profile/structural collision
-  handling and schema reuse, non-authoritative `HardBoundClaim` with mandatory
-  typed arena handle and bounded shared heterogeneous derivation DAG,
+  handling and schema reuse, non-authoritative `BorrowedHardBoundClaim`/
+  `OwnedHardBoundClaim` forms with mandatory typed arena handles, bounded
+  shared heterogeneous derivation DAG,
+  canonical fallible promotion into frozen ownership, no self-reference/
+  lifetime extension/storage leaking, and lifetime-independent engine proof/
+  token state with complete invalidation generations,
   content-addressed
   `BoundAssumptionsId` bounded `All`/`Any`/threshold/fault-rule semantics
   through consensus, bounded core `UnverifiedBoundDerivation` preservation
@@ -7303,6 +7433,9 @@ Deliverables:
   stable tag/range collision review;
 - allocator-failure behavior and abort-on-OOM non-claims for every alloc path,
   proving untrusted sizes are bounded before allocation;
+- borrowed-to-owned claim promotion allocation/import/canonicalization limits,
+  atomic rollback, unique/shared frozen-owner accounting, clone/drop/last-owner
+  behavior, and proof that promotion failure leaks no arena or partial handle;
 - full corpus minimization and panic/timeout triage;
 - whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
   cancellation, state transitions, capacity/resource failure, unavailable
@@ -7339,6 +7472,9 @@ Deliverables:
   review;
 - safe-wrapper length/alignment/discriminant/ownership/lifetime/kernel-size
   validation;
+- C/JNI/Swift context/child ownership, retain/close/destruction order,
+  concurrent close/use, per-call Rust arena borrows, and proof that no foreign
+  handle embeds or outlives a borrowed branded claim;
 - sanitizer/Miri coverage, MMIO volatile/alignment/order/endian/reset review,
   and remediated findings.
 
@@ -7432,6 +7568,10 @@ Deliverables:
   canonical-identity cross-type/unit/scale/endpoint/operation/schema confusion,
   forced digest collisions and schema second-representation drift,
   derivation-arena exhaustion/eviction/stale/cross-store/wrong-domain handles,
+  borrowed-claim lifetime escape/self-reference/leak attempts, owned-promotion
+  allocation/import exhaustion and rollback, source drop before/during/after
+  engine promotion, `'static` owned-task cancellation/drop, returned-clock
+  ownership, and FFI arbitrary/concurrent context-child destruction,
   missing/truncated/over-budget early recipes, narrowed/spliced/substituted
   derivations, serialized-record replay/rollback/cross-engine restore and stale
   input/rule/model/lifecycle reverification, mixed-generation assessment
@@ -7475,6 +7615,9 @@ Deliverables:
   roaming, captive networks, and battery-budgeted resynchronization;
 - representative allocator-free `*-unknown-none` and browser-WASM evidence,
   not only hosted cross-target compilation;
+- owned-claim unique versus Arc-style frozen sharing is compiled/tested only
+  where pointer atomics and the declared synchronization profile support it;
+  other targets expose unique ownership or an explicit non-claim;
 - single-thread, `target_has_atomic`, caller critical-section, and claimed
   ISR-safe no_std concurrency profiles with priority-inversion,
   interrupt-latency, stack, and WCET evidence;
@@ -7568,9 +7711,13 @@ Deliverables:
   intersection/union/conversion/consensus, unresolved external-reference
   resolution, canonical identity preimages/algorithm/structural collision
   checks/schema reuse, mandatory typed derivation handles and bounded no_std/
-  alloc arena sizing/DAG behavior, early non-authoritative derivation recipes
-  and complete-record export/unverified restore type-state, verified root/
-  derived claim proofs, runtime assessment
+  alloc arena sizing/DAG behavior, borrowed versus owned claim lifetimes,
+  fallible canonical promotion/frozen unique-or-shared ownership, no self-
+  reference/leak/lifetime-extension boundary, early non-authoritative
+  derivation recipes and complete-record export/unverified restore type-state,
+  lifetime-independent verified root/derived claim proofs and accepted tokens
+  with source-drop versus evidence-generation invalidation semantics, runtime
+  assessment
   statuses and issuance linearization, structured independent origin/
   integrity/authority/lineage support axes with transitive configured
   assumptions, policy-accepted-bound lifetime, provider-owned monotonic
@@ -7586,6 +7733,8 @@ Deliverables:
   uncertainty provenance, scalar inflation, migration/frequency/suspend/reset
   behavior, and completion capability/non-claim for every supported target;
 - task, protocol, deployment, migration, incident, and hardware guides.
+- returned-clock, `'static` async, no_std caller-storage, and C/JNI/Swift
+  context/child ownership and destruction-order guides.
 
 Verification:
 
