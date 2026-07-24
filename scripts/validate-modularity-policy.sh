@@ -33,3 +33,6 @@ grep -q 'mundilfari-engine.workspace = true' crates/mundilfari/Cargo.toml
 ! grep -q 'mundilfari-platform' crates/mundilfari-core/Cargo.toml
 ! grep -q 'mundilfari-platform' crates/mundilfari-engine/Cargo.toml
 ! grep -q 'mundilfari-engine' crates/mundilfari-platform/Cargo.toml
+! grep -q 'linux-clock-adjust' docs/IMPLEMENTATION_PLAN.md
+grep -q 'Generic interval quorum, falseticker rejection' docs/modularity-policy.md
+grep -q 'Protocol crate feature sets contain no clock-adjustment' docs/modularity-policy.md

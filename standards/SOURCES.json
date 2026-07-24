@@ -247,7 +247,7 @@
       "status": "revision-review",
       "redistribution": "local-only",
       "acquisition": "manual",
-      "milestone": "v0.157.0",
+      "milestone": "v0.156.0",
       "official_url": "https://www.bipm.org/en/time-ftp/cggtts-standard",
       "local_filename": "bipm-cggtts"
     },

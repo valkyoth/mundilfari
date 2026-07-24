@@ -65,8 +65,8 @@ def main() -> None:
 ### v0.153.0 - GNSS Event Lifecycle And Withdrawal
 ### v0.154.0 - Generic PPS To Navheim Correlation Bridge
 ### v0.155.0 - Navheim Frequency And Time-Transfer Evidence
-### v0.156.0 - Navheim Interoperability And Security Gate
-### v0.157.0 - CGGTTS Interchange
+### v0.156.0 - CGGTTS Interchange
+### v0.157.0 - Navheim Interoperability And Security Gate
 {checker.HARDENING_PHASE}
 No new feature or protocol scope is introduced after `v0.157.0`.
 """
@@ -75,6 +75,17 @@ No new feature or protocol scope is introduced after `v0.157.0`.
         "CGGTTS" in error
         for error in checker.validate_navheim_order(
             "### v0.10.0 - CGGTTS Interchange\n" + roadmap
+        )
+    )
+    assert any(
+        "security gate" in error
+        for error in checker.validate_navheim_order(
+            roadmap.replace(
+                "### v0.156.0 - CGGTTS Interchange\n"
+                "### v0.157.0 - Navheim Interoperability And Security Gate",
+                "### v0.156.0 - Navheim Interoperability And Security Gate\n"
+                "### v0.157.0 - CGGTTS Interchange",
+            )
         )
     )
 

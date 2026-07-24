@@ -47,6 +47,8 @@ the release branch between review and tagging.
 - Parsing does not grant semantic validity or clock authority.
 - Authentication, accuracy, uncertainty, freshness, and traceability are
   independent properties.
+- `AtomicInstant` is the canonical TAI coordinate; realization and trust
+  evidence are separate and equality never manufactures either.
 - Guaranteed hard bounds and statistical covariance/confidence are distinct;
   statistical estimates require explicit policy before contributing a bound.
 - Every source can withdraw evidence or publish a discontinuity, and that
@@ -60,6 +62,19 @@ the release branch between review and tagging.
 - Navheim evidence never grants clock authority without independent
   Mundilfari source and discipline policy.
 - Large, backward, or post-startup clock steps require explicit policy.
+- The privileged helper independently limits cumulative adjustment and request
+  rate, binds authorization to a session/clock domain, and latches repeated
+  faults; per-request bounds alone are insufficient.
+- Servo state consumes correlated actual-actuation feedback and cannot assume
+  that a proposal was applied exactly.
+- Persisted authentication, confidentiality, corruption detection, and
+  rollback freshness are separate capabilities; ordinary mutable local state
+  never receives a strong rollback-protection claim.
+- Protocol and persistence consumers use the shared bounded crypto-provider
+  contract with per-key usage limits and fail-closed entropy/rekey behavior.
+- Safe facade APIs return structured errors for caller, capacity, platform,
+  authorization, cancellation, and resource failures; allocator aborts and
+  internal invariant bugs are documented non-claims, not recoverable errors.
 - Delay attacks remain in scope even when a protocol is authenticated.
 - Official specifications, revisions, and verified errata precede protocol
   claims.

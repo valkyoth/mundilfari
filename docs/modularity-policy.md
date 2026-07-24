@@ -31,6 +31,11 @@ Rules:
 - Facade/application crates compose protocol, engine, and platform.
 - All generic source fusion, servo, and holdover algorithms live only in
   engine.
+- Generic interval quorum, falseticker rejection, clustering, combining, and
+  diversity are engine primitives implemented before NTP composition; NTP
+  crates own association/filter metadata but no copy of those algorithms.
+- Protocol crate feature sets contain no clock-adjustment or privileged
+  authority feature.
 - Navheim never depends on Mundilfari, preventing an integration cycle.
 - Stable crates do not expose experimental-draft types.
 - Non-generated Rust files may not exceed 500 lines.

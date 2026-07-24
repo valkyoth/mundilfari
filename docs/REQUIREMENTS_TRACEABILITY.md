@@ -60,12 +60,19 @@ and tests are rechecked.
 | every behavior testable | deterministic polling, bounded providers, fixtures, simulation, fuzz and hardware plan | owning milestone plus final closure |
 | implementation cannot bypass document/test review | reviewed implementation hash plus machine-readable requirement, exact-standard, clause, errata, and test linkage | `v0.3.0`; every common gate |
 | hard versus statistical uncertainty | distinct types, confidence/model semantics, bounded error budgets | `v0.14.0`–`v0.15.0`; engine closure `v0.133.0`–`v0.136.0` |
+| unambiguous canonical atomic timeline | TAI origin/SI-second semantics, generic TAI/UTC mapping, realization evidence separation | `v0.7.0`, `v0.12.0`; gate `v0.17.0` |
 | generic evidence withdrawal | source-neutral upsert/withdraw/discontinuity lifecycle | `v0.15.1`; every source and engine milestone |
+| canonical schema precedes persistence | no_std bounded kernel before storage, later compatibility/binding freeze | `v0.22.1`, `v0.39.1`, `v0.140.1` |
+| crypto provider precedes consumers | MAC/AEAD/digest/entropy/key contracts, assurance and usage accounting | `v0.24.1`; production admission `v0.72.0`; audit `v0.162.0` |
 | complete platform foundations | RTC, counters, MMIO, GPIO, frequency capture, actuators, namespace identity | `v0.38.1`–`v0.40.0`; `v0.161.0` |
-| one discipline authority boundary | proposal/policy API and internal applied-result backends | `v0.39.0`, helper `v0.142.0` |
-| common secure persistence | bounded versioned crash/rollback-safe state boundary | `v0.39.1`; consumers and final audits |
+| one discipline authority boundary | proposal/policy API, actual-actuation feedback, cumulative helper envelope | `v0.39.0`, `v0.134.4`, helper `v0.142.0` |
+| common secure persistence | bounded versioned state with capability-qualified rollback freshness | `v0.39.1`; consumers and final audits |
+| one generic fusion implementation | early engine quorum/diversity, later cross-protocol orchestration only | `v0.60.0`–`v0.61.0`, `v0.133.0` |
+| stable PTP security ownership | stable Security TLV/association/replay/key lifecycle or external-only non-claim | `v0.107.2`, gate `v0.108.0` |
+| consensus configuration identity | atomic policy/membership generations carried into results/proposals | `v0.133.0` |
+| safe facade panic contract | recoverable caller/environment/resource failures return structured errors | `v0.138.0`, `v0.160.0`, `v0.166.0` |
 | consistent concurrent reads | generation-consistent publication and latency evidence | `v0.137.1` |
-| canonical external representation | one bounded schema for IPC/persistence/C/WASM/logs/bindings | `v0.140.1` |
+| canonical external representation | early bounded kernel plus compatibility freeze for IPC/persistence/C/WASM/logs/bindings | `v0.22.1`, `v0.140.1` |
 | exact-commit pentest before every tag | release-plan exit sentences and readiness validator | every tag |
 | GitHub CodeQL default setup only | documented repository setting; no advanced workflow | every release review |
 | no unsafe in safe crates | workspace lint and unsafe inventory policy | `v0.161.0` |

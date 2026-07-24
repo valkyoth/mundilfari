@@ -16,27 +16,50 @@ REVIEW_COVERAGE = {
     "v0.2.0": ("transitive normative", "WireComplete"),
     "v0.3.0": ("per-source implementation evidence",),
     "v0.7.0": ("mathematical floor",),
+    "v0.12.0": ("TAI-to-UTC", "realization-evidence"),
     "v0.9.0": ("maximum limb width",),
     "v0.11.0": ("ConversionContext", "bipm-si-brochure-9-v4.01"),
     "v0.11.1": ("iers-conventions-2010-tn36", "non-definitive working updates"),
     "v0.11.2": ("iau-2000-resolutions", "iau-2006-resolution-b3"),
     "v0.15.1": ("silently dropped",),
+    "v0.21.0": ('unsafe_code = "forbid"', "drop exactly once"),
+    "v0.22.1": ("Canonical Schema Kernel", "no Rust-layout"),
+    "v0.24.1": ("per-key operation/byte limits", "production-approved"),
+    "v0.29.0": ("schema, state, and provider-contract foundations",),
     "v0.30.0": ("compiled, available, authorized",),
     "v0.38.2": ("volatile access",),
     "v0.39.0": ("AppliedAdjustment", "TOCTOU"),
-    "v0.39.1": ("torn-write",),
+    "v0.39.1": ("torn-write", "RollbackProtection", "mutable local state/key"),
     "v0.53.0": ("unknown critical",),
+    "v0.56.0": ("no production-assurance claim until",),
+    "v0.59.0": ("association-local filtering only",),
     "v0.60.0": ("maximum faulty diversity groups",),
+    "v0.61.0": ("engine-owned", "without either reimplementing"),
+    "v0.62.0": ("facade/application composition",),
+    "v0.72.0": ("v0.24.1", "TLS/Rustls/certificate admission"),
+    "v0.76.0": ("operation and byte limits", "entropy/nonce failure"),
     "v0.78.1": ("draft-ietf-ntp-nts-keyexchange-pool-01",),
     "v0.79.1": ("amplification",),
     "v0.91.0": ("PTPv3",),
     "v0.101.0": ("no source fusion",),
+    "v0.107.2": ("Stable PTP Authentication", "authenticated-but-delayable"),
     "v0.107.1": ("draft-ietf-ntp-over-ptp-08",),
     "v0.114.0": ("fixed-capacity Sans-I/O",),
-    "v0.133.0": ("maximum faulty diversity groups", "assertion provenance"),
+    "v0.133.0": (
+        "maximum faulty diversity groups",
+        "assertion provenance",
+        "ConsensusPolicyGeneration",
+        "second intersection",
+    ),
+    "v0.134.4": ("ActuationFeedback", "anti-windup"),
     "v0.137.1": ("memory-ordering", "maximum read-latency"),
-    "v0.140.1": ("canonical encoding",),
-    "v0.142.0": ("OS peer credentials",),
+    "v0.138.0": ("safe-facade contract", "whole-facade fuzzing"),
+    "v0.140.1": ("compatibility/freeze ledger",),
+    "v0.142.0": ("OS peer credentials", "cumulative phase", "fault latching"),
+    "v0.157.0": ("CGGTTS coverage",),
+    "v0.160.0": ("whole-safe-facade fuzzing",),
+    "v0.164.0": ("Android/iOS lifecycle evidence",),
+    "v0.166.0": ("safe-facade panic contract",),
     "v0.165.0": ("no unclassified", "family/bundle"),
     "v0.167.0": ("signed exact-commit attestation",),
 }
@@ -137,6 +160,12 @@ def validate_navheim_order(text: str) -> list[str]:
         errors.append("the Navheim companion must not be introduced early")
     if "CGGTTS Interchange" not in navheim_section:
         errors.append("the final Navheim feature phase must contain CGGTTS")
+    cggtts = navheim_section.find("### v0.156.0 - CGGTTS Interchange")
+    gate = navheim_section.find(
+        "### v0.157.0 - Navheim Interoperability And Security Gate"
+    )
+    if cggtts < 0 or gate < 0 or gate <= cggtts:
+        errors.append("the final Navheim security gate must follow CGGTTS")
     if "No new feature or protocol scope is introduced after `v0.157.0`." not in text:
         errors.append("missing post-Navheim feature freeze")
     return errors

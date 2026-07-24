@@ -314,13 +314,18 @@ Deliverables:
 
 - private signed seconds plus normalized attoseconds where seconds is the
   mathematical floor, including negative fractional instants;
+- exact zero at `1958-01-01 00:00:00 TAI`, with every represented second an
+  SI second on the continuous TAI coordinate; the type is not scale-neutral,
+  UTC, POSIX, monotonic, or a realization identifier;
 - checked instant/duration arithmetic and ordering;
-- documented origin and no implicit `SystemTime` conversion.
+- coordinate equality separated from realization/source/model/uncertainty
+  evidence, and no implicit `SystemTime` conversion.
 
 Verification:
 
-- invariant, negative one-half representation, normalization, subtraction,
-  negation, ordering, extreme-range, and arithmetic tests.
+- origin/epoch vectors, invariant, negative one-half representation,
+  normalization, subtraction, negation, ordering, coordinate-equality versus
+  evidence cases, extreme-range, and arithmetic tests.
 
 Exit criteria:
 
@@ -578,6 +583,9 @@ Deliverables:
 - UTC civil values capable of representing second 60;
 - versioned leap table, provenance, activation, and hash;
 - leap announcement and conflict model;
+- explicit generic TAI-to-UTC and UTC-to-TAI conversion against the canonical
+  `AtomicInstant` origin, including realization metadata and typed ambiguous,
+  missing-table, stale-table, and out-of-coverage outcomes;
 - checked UTC/UT1 conversion using the admitted EOP model and matching
   conversion-context generations;
 - explicit UTC-before-1972 non-claim until a historical frequency-offset model
@@ -585,8 +593,10 @@ Deliverables:
 
 Verification:
 
-- every historical leap boundary, second 60, invalid leap dates, table
-  replacement, rollback, and negative-leap synthetic tests.
+- canonical TAI/UTC origin and published offset vectors, every historical leap
+  boundary, second 60, invalid leap dates, table replacement, rollback,
+  outside-coverage behavior, realization-evidence non-equivalence, and
+  negative-leap synthetic tests.
 
 Exit criteria:
 
@@ -891,7 +901,11 @@ Deliverables:
 
 - fixed vector, queue, map, set, string, and byte buffer;
 - explicit capacity errors and deterministic iteration;
-- no hidden heap use.
+- no hidden heap use;
+- an explicit `unsafe_code = "forbid"` representation decision for each
+  collection: safe `[Option<T>; N]`/equivalent storage or a separately audited
+  dependency, with initialized/drop-state, layout, stack-cost, and destructor
+  evidence.
 
 Alloc-enabled companions use fallible `try_*` construction and
 `try_reserve`-style growth, or caller-supplied storage. APIs that cannot
@@ -900,7 +914,9 @@ non-claim and are never the only network-facing path.
 
 Verification:
 
-- zero/full capacity, reuse, order, duplicate, removal, and model comparison.
+- zero/full capacity, reuse, order, duplicate, removal, drop exactly once,
+  panic-during-drop containment where applicable, stack-limit/layout reports,
+  dependency feature audit where selected, and model comparison.
 
 Exit criteria:
 
@@ -935,6 +951,39 @@ Exit criteria:
 
 - protocol crates share one security-reviewed API shape;
 - `v0.22.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.22.1 - Canonical Schema Kernel
+
+Status: planned.
+
+Goal: define the allocation-free canonical encoding kernel before any
+persistent or external state consumer exists.
+
+Deliverables:
+
+- one `no_std`, caller-buffer schema envelope with schema identity, version,
+  criticality, canonical field order, duplicate/unknown-field rules, and
+  explicit maximum record/message size;
+- canonical bounded integers including signed high/low wide limbs, byte
+  strings, sequences, identifiers, generations, and nested values;
+- required-length and atomic encode-or-error behavior with no Rust-layout,
+  serde-data-model, filesystem, IPC, or language-runtime dependency;
+- import/export value traits for protocol, engine, and platform consumers;
+- compatibility rules that later schema work may extend but never silently
+  reinterpret.
+
+Verification:
+
+- golden bytes, every truncation, duplicate/noncanonical/unknown critical
+  field, integer extremes, required-length/short-buffer atomicity,
+  deterministic re-encoding, version skew, no-allocation, and arbitrary-byte
+  fuzz/property tests.
+
+Exit criteria:
+
+- persistence and IPC can share one reviewed encoding kernel without freezing
+  Rust memory layout;
+- `v0.22.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.23.0 - Poll And Timer State Machines
 
@@ -983,6 +1032,38 @@ Exit criteria:
 
 - protocol crates do not expose OS socket or file types;
 - `v0.24.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.24.1 - Generic Cryptographic Provider Contracts
+
+Status: planned.
+
+Goal: establish protocol-neutral cryptographic capability boundaries before
+any persistence or wire consumer requests cryptographic work.
+
+Deliverables:
+
+- `no_std` caller-buffer contracts for MAC, AEAD, digest, entropy, secret
+  containers, opaque key identifiers, and key generation;
+- explicit algorithm/provider identity, assurance class, failure behavior,
+  nonce requirements, per-key operation/byte limits, atomic exhaustion
+  accounting, and fail-closed generation rollover;
+- test-only versus production-approved provider provenance and constructors;
+- no protocol field semantics, TLS, certificate, storage, or clock policy in
+  provider traits;
+- redacted diagnostics and common error-taxonomy mapping.
+
+Verification:
+
+- deterministic mock/KAT providers, wrong algorithm/key/generation/direction,
+  short output, entropy/nonce failure, usage-limit races and exhaustion,
+  redaction, feature/no_std/MSRV matrices, and compile-time protocol-type
+  isolation.
+
+Exit criteria:
+
+- every later crypto consumer depends on one bounded provider contract while
+  no test provider can be mistaken for production assurance;
+- `v0.24.1 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.25.0 - Work And Resource Budgets
 
@@ -1085,6 +1166,9 @@ Goal: audit the shared parser, state, budget, test, and simulator foundation.
 Deliverables:
 
 - parser/resource audit and unsafe-free confirmation;
+- canonical-schema kernel and generic crypto-provider contract audit,
+  including canonicality, assurance, redaction, entropy, usage accounting,
+  exhaustion, and proof that test providers are not production constructors;
 - API stability and code-size review;
 - fuzz corpus and complexity-oracle report.
 
@@ -1094,7 +1178,8 @@ Verification:
 
 Exit criteria:
 
-- shared foundations are approved for untrusted protocol input;
+- shared wire, schema, state, and provider-contract foundations are approved
+  for untrusted protocol input and later security consumers;
 - `v0.29.0 implementation stop reached. Run pentest for this exact commit.`
 
 ## Phase 3: Platform Foundations
@@ -1120,7 +1205,10 @@ Verification:
 
 - host matrix, monotonic nondecrease, conversion bounds, suspend documentation,
   capability-state transitions, denied authorization, unavailable devices, and
-  mock fault tests.
+  mock fault tests;
+- Android/iOS application lifecycle tests for background suspension/resume,
+  network roaming and path changes, captive-network transitions, and
+  battery-budgeted resynchronization.
 
 Exit criteria:
 
@@ -1421,23 +1509,35 @@ calibration, holdover, policies, and trusted-clock snapshots.
 
 Deliverables:
 
-- versioned canonical envelope and schema identity with explicit maximum
-  record size and unknown-version behavior;
+- state values encoded exclusively through the completed `v0.22.1` canonical
+  schema kernel, with explicit maximum record size and unknown-version
+  behavior; persistence adds no second envelope or serializer model;
 - crash-consistent atomic replacement, partial/torn-write detection, explicit
   durability semantics, and bounded schema migration;
 - checksum separated from authenticated integrity and confidentiality;
 - secret-bearing snapshot provider boundary, redaction, and best-effort
   clearing without overstated guarantees;
-- monotonic generation/rollback detection, boot/session binding, corruption,
-  replay, and discontinuity handling;
+- authenticated integrity/confidentiality requested only through the
+  `v0.24.1` provider contracts, with unavailable production provider reported
+  as a capability limitation;
+- typed `RollbackProtection` capabilities: `None`, `BestEffortLocal`,
+  `BootSessionBound`, `TrustedMonotonicCounter`, `HardwareSealed`, and
+  `RemoteWitnessed`; no mutable local state/key is described as strong
+  rollback protection;
+- restored state carries its rollback capability and freshness evidence,
+  separately from authentication, confidentiality, and corruption detection;
+- monotonic generation where the selected trust root supports it,
+  boot/session binding, corruption, replay, and discontinuity handling;
 - caller-supplied storage/no_std backend traits plus reviewed hosted file
-  adapter.
+  adapter; protocols import/export bounded values and perform no file I/O.
 
 Verification:
 
 - failure injection at every write/rename/sync boundary, partial/torn records,
-  corruption, wrong key, rollback, copied boot/session state, unknown schema,
-  migration chains, size exhaustion, concurrent readers, and recovery.
+  corruption, wrong key, rollback under every capability, attacker-restored
+  state plus ordinary local key, copied boot/session state, trusted-counter/
+  sealed/remote-witness faults, unknown schema, migration chains, size
+  exhaustion, concurrent readers, and recovery.
 
 Exit criteria:
 
@@ -1455,7 +1555,8 @@ Deliverables:
 - machine-readable unsafe inventory, per-block invariants, safe-wrapper/ABI
   review, granular permission model, and privilege-separation plan;
 - RTC/counter/MMIO/GPIO/frequency/actuator, namespace identity, discipline,
-  discontinuity, and persistence boundary review;
+  discontinuity, early canonical-schema/crypto-provider, and persistence
+  boundary review;
 - proof that core, engine, facade, protocol, crypto-state, IPC-schema, and safe
   platform crates still forbid unsafe code;
 - resolved critical/high platform findings;
@@ -1851,7 +1952,9 @@ Deliverables:
 
 - RFC 7821 UDP checksum-complement behavior;
 - RFC 7822 extension-field framing and RFC 9748 registry updates;
-- RFC 8573 AES-CMAC update using the RFC 4493 primitive boundary;
+- RFC 8573 AES-CMAC update requesting MAC operations only through the
+  `v0.24.1` provider contract and recording algorithm/key/provider assurance
+  and usage generation;
 - unknown extension preservation and criticality;
 - ambiguity resolution between extensions and legacy MACs.
 
@@ -1862,7 +1965,8 @@ Verification:
 
 Exit criteria:
 
-- extension parsing follows all incorporated NTP updates;
+- extension parsing follows all incorporated NTP updates; AES-CMAC behavior is
+  provider-neutral and has no production-assurance claim until `v0.72.0`;
 - `v0.56.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.57.0 - SNTP Client
@@ -1924,7 +2028,9 @@ Deliverables:
 
 - reach register, poll state, sample window, root distance, dispersion, jitter;
 - stale/restart/KoD state and bounded sample storage;
-- monotonic timers.
+- monotonic timers;
+- NTP association-local filtering only: no multi-source quorum, falseticker
+  rejection, clustering, combining, diversity, or discipline authority.
 
 Verification:
 
@@ -1936,17 +2042,21 @@ Exit criteria:
 - source state is deterministic and restart-safe;
 - `v0.59.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.60.0 - Intersection And Falseticker Rejection
+### v0.60.0 - Generic Interval Quorum And Falseticker Rejection
 
 Status: planned.
 
-Goal: implement interval intersection and candidate admission.
+Goal: implement protocol-neutral interval intersection and candidate admission
+inside `mundilfari-engine` before any multi-source NTP composition.
 
 Deliverables:
 
-- correctness interval construction, intersection, survivor count, and
+- engine-owned correctness interval construction, intersection, survivor
+  count, and
   falseticker evidence under explicit `n`, maximum faulty diversity groups
   `f`, required overlap, freshness, and path-delay assumptions;
+- generic validated-observation inputs with no NTP packet, association,
+  transport, poll, or wire type dependency;
 - bounded source cardinality and tie behavior;
 - no source weighting yet.
 
@@ -1958,23 +2068,28 @@ Verification:
 
 Exit criteria:
 
-- malicious outliers cannot enter the survivor set by simple averaging;
+- malicious outliers cannot enter the survivor set by simple averaging and no
+  protocol crate owns a copy of the quorum algorithm;
 - `v0.60.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.61.0 - Clustering Combining And Diversity
+### v0.61.0 - Generic Clustering Combining And Diversity
 
 Status: planned.
 
-Goal: select and combine survivors under diversity policy.
+Goal: select and combine validated survivors under protocol-neutral engine
+diversity policy.
 
 Deliverables:
 
-- clustering, system-peer choice, combining, and uncertainty output;
+- engine-owned clustering, combining, preferred-source choice, and uncertainty
+  output over generic observations;
 - operator, network, path, geography, protocol, authority, and upstream
   correlation attributes;
 - operator/upstream/ASN/path/grandmaster/receiver/oscillator/site diversity
   groups and a rule that weights never override the fault quorum;
-- split-brain result.
+- split-brain result;
+- reusable bounded APIs that NTP and later cross-protocol consensus compose
+  without either reimplementing the algorithms.
 
 Verification:
 
@@ -1994,8 +2109,11 @@ Goal: integrate complete NTPv4 client operation.
 
 Deliverables:
 
-- source lifecycle, burst, poll adaptation, reachability, selection, and
-  combined reading;
+- NTP source lifecycle, burst, poll adaptation, reachability, and normalized
+  NTP observation/filter metadata;
+- facade/application composition of NTP associations through the
+  `v0.60.0`–`v0.61.0` engine primitives, producing the combined reading
+  without a protocol-to-engine dependency edge;
 - random source ports/identifiers through supplied entropy;
 - bounded multi-source orchestration.
 
@@ -2198,6 +2316,9 @@ Deliverables:
 
 - RFC/update/errata clause maps and protocol capability matrix;
 - differential simulator and implementation report;
+- proof that NTP association/filter code emits normalized observations while
+  interval quorum, falseticker rejection, clustering, combining, and
+  correlation-aware diversity exist only in `mundilfari-engine`;
 - conservative delay/asymmetry policy with maximum root distance/RTT,
   interval expansion, minimum-delay history labeled as an assumption, and no
   NTS-to-NTP fallback;
@@ -2216,20 +2337,24 @@ Exit criteria:
 
 ## Phase 6: NTS Roughtime And Secure Bootstrap
 
-### v0.72.0 - Generic Security Dependency Policy
+### v0.72.0 - Production Crypto TLS And Dependency Admission
 
 Status: planned.
 
-Goal: admit the minimum generic security boundary needed for secure time.
+Goal: admit production implementations for the already frozen generic crypto
+contracts and the TLS/X.509 boundary needed by secure time.
 
 Deliverables:
 
-- current Rustls, crypto-provider, AEAD, certificate, entropy, and
-  secret-container reviews;
+- current Rustls, production crypto-provider, MAC, AEAD, digest, entropy,
+  secret-container, certificate, and X.509 reviews;
 - exact feature/transitive/native/MSRV/license inventories;
-- provider traits that expose no time-protocol semantics;
+- conformance to the `v0.24.1` provider traits without widening them or
+  exposing time-protocol semantics;
 - sealed audited production constructors or explicit provider-assurance
-  provenance that discipline policy may reject.
+  provenance that discipline policy may reject;
+- TLS/Rustls/certificate admission remains here and cannot be inferred from
+  the earlier generic provider contract.
 
 Verification:
 
@@ -2327,15 +2452,20 @@ Deliverables:
 
 - provider-backed mandatory AES-SIV-CMAC-256;
 - unique identifier, cookie, placeholders, authenticator/encrypted extension;
-- associated data, nonce, padding, directional key, and NAK policy.
+- associated data, nonce, padding, directional key, and NAK policy;
+- per-direction/key-generation operation and byte limits with atomic
+  accounting, exhaustion-before-use checks, and fail-closed rekey;
+- entropy/nonce/provider failure is terminal for the attempted construction
+  and never falls back to reuse or a weaker algorithm;
 - request/response sizing through placeholders and bounded amplification/work
   accounting before encryption or allocation.
 
 Verification:
 
 - RFC and AEAD vectors, tamper at every region, nonce/padding boundaries,
-  wrong direction/key, unknown encrypted fields, and constant-time failure
-  review.
+  wrong direction/key, unknown encrypted fields, operation/byte limit races,
+  exact exhaustion, entropy/nonce failure, failed rekey, and constant-time
+  failure review.
 
 Exit criteria:
 
@@ -2360,8 +2490,9 @@ Deliverables:
   stable client correlators;
 - fork/process-generation-aware entropy and request identity;
 - one-use/replenishment, replay/failure/rekey state, common secure persistence
-  with rollback detection, key-rotation overlap, and best-effort clearing
-  boundary without overstated guarantees.
+  with capability-qualified rollback evidence, atomic per-key exhaustion,
+  fail-closed rekey, key-rotation overlap, and best-effort clearing boundary
+  without overstated guarantees.
 
 Verification:
 
@@ -2384,7 +2515,9 @@ Deliverables:
 
 - cookie construction/key rotation, stateless validation where applicable;
 - cluster/server cookie-key provider with explicit key IDs, generation,
-  distribution boundary, overlap, compromise recovery, and rollback refusal;
+  distribution boundary, per-key operation/byte limits, atomic exhaustion,
+  overlap, fail-closed rekey, compromise recovery, and rollback refusal
+  qualified by the selected persistence capability;
 - cookie plaintext/privacy/unlinkability review and minimum correlator policy;
 - bounded expensive-work admission and rate limits;
 - rekey overlap, NAK, algorithm, endpoint, and certificate policy.
@@ -3246,6 +3379,42 @@ Exit criteria:
   never converts unauthenticated correction data into an accuracy claim;
 - `v0.107.1 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.107.2 - Stable PTP Authentication And Security Associations
+
+Status: planned.
+
+Goal: implement only the stable PTP authentication and security-association
+behavior admitted from the exact locked IEEE 1588 revision.
+
+Deliverables:
+
+- clause-mapped Security TLV and integrity/authentication semantics from the
+  admitted stable revision, with unknown revision/profile behavior rejected;
+- security-association identity isolated by PTP domain, port, peer,
+  direction, algorithm, key, and generation;
+- replay windows and sequence-ID wrap behavior;
+- key activation, overlap, rollover, usage exhaustion, revocation, and
+  fail-closed association replacement through the generic provider boundary;
+- explicit multiport/domain isolation and downgrade policy;
+- authenticated-but-delayable residual-risk evidence: authentication never
+  claims bounded network delay, truthful BMCA data, or delay-attack immunity;
+- explicit external-security-only non-claim for any PTP revision/profile whose
+  stable internal mechanism is not admitted.
+
+Verification:
+
+- exact licensed vectors and independent implementation interop, malformed/
+  duplicate/wrong-order Security TLVs, replay at and across sequence wrap,
+  wrong domain/port/direction/association, key overlap/revocation/exhaustion,
+  multiport isolation, downgrade, delayed authenticated messages, provider
+  failure, fuzzing, and long rotation soak.
+
+Exit criteria:
+
+- stable internal PTP authentication is implemented and named precisely, or
+  the affected mode remains explicitly external-security-only;
+- `v0.107.2 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.108.0 - PTP Family Security And Hardware Gate
 
 Status: planned.
@@ -3255,7 +3424,8 @@ Goal: complete PTP profile conformance, hardware evidence, and security review.
 Deliverables:
 
 - revision/profile clause maps and support matrix;
-- NTS4PTP and NTP-over-PTP revision, downgrade, correction, and trust review;
+- stable PTP authentication/security-association, NTS4PTP, and NTP-over-PTP
+  revision, downgrade, correction, key-lifecycle, and trust review;
 - delay/topology/threat and accuracy evidence report;
 - strict-discipline admission requiring an admitted PTP security mechanism,
   MACsec/IPsec-equivalent trusted boundary, statically trusted isolated timing
@@ -4360,15 +4530,19 @@ Exit criteria:
 
 ## Phase 11: Consensus Servos Facade And Applications
 
-### v0.133.0 - Generic Source Consensus
+### v0.133.0 - Cross-Protocol Consensus Orchestration
 
 Status: planned.
 
-Goal: combine validated observations from different protocol families.
+Goal: orchestrate validated observations from different protocol families
+through the already reviewed generic quorum and diversity algorithms.
 
 Deliverables:
 
-- normalization, uncertainty expansion, correlated groups, supported interval,
+- normalization and uncertainty expansion feeding the existing
+  `v0.60.0`–`v0.61.0` engine quorum/clustering/combining primitives, with no
+  second intersection, falseticker, clustering, or combining implementation;
+- cross-protocol correlation groups, supported interval,
   authentication/diversity policy, split-brain, and evidence;
 - exact conversion-context/model generation on every normalized input;
   mixed generations are rejected or explicitly re-normalized before quorum;
@@ -4384,6 +4558,12 @@ Deliverables:
   unknown assurance, expiry, and generation;
 - conservative correlation for unknown/untrusted diversity and policy that
   prevents custom providers from self-declaring arbitrary independence;
+- typed `ConsensusPolicyId`/`ConsensusPolicyGeneration` and source-membership
+  generation covering `n`, `f`, admitted sources, correlation, weighting,
+  freshness, path-delay, and authentication rules;
+- atomic policy/membership replacement, invalidation of pending or completed
+  results from stale generations, and exact policy/membership generations in
+  every result and downstream proposal;
 - weights that cannot override the fault quorum;
 - bounded sources and stable result ordering;
 - no clock change authority.
@@ -4394,8 +4574,10 @@ Verification:
   coalitions and malicious majorities, Sybil/correlation cases, impossible
   guarantees, forged diversity, unknown correlation, common upstreams,
   partitions, stale/mixed-generation sources, withdrawal under queue pressure,
-  hard/statistical mixing attempts, and interval properties. Navheim is
-  represented only by protocol-neutral fixtures here.
+  hard/statistical mixing attempts, policy/membership reload during
+  withdrawals, in-flight crypto, pending servo proposals, and helper
+  authorization, stale-result rejection, atomic replacement, and interval
+  properties. Navheim is represented only by protocol-neutral fixtures here.
 
 Exit criteria:
 
@@ -4490,7 +4672,8 @@ Deliverables:
 
 - typed step/slew/rate proposals, thresholds, maximum correction, backward and
   post-startup step policy, target identity/generation, and expiry;
-- requested versus predicted applied/residual values and saturation evidence;
+- requested versus predicted applied/residual values and saturation evidence,
+  clearly labeled as prediction until actual feedback arrives;
 - proposal-only engine output consumed by `mundilfari-discipline`;
 - invalidation when input, target, authorization, or correlation generations
   change.
@@ -4506,6 +4689,41 @@ Exit criteria:
 - engine policy can propose but never directly apply a clock change;
 - `v0.134.3 implementation stop reached. Run pentest for this exact commit.`
 
+### v0.134.4 - Actuation Feedback And Servo Anti-Windup
+
+Status: planned.
+
+Goal: close the protocol-neutral control loop using what the target actually
+applied rather than continuing from proposal predictions.
+
+Deliverables:
+
+- an `ActuationFeedback` event carrying proposal identity/generation,
+  requested and actually applied correction, quantization, clamping, partial
+  application, rejection, residual, actuation/observation timestamps, target
+  generation, and discontinuity state;
+- authenticated correlation of `AppliedAdjustment` to exactly one proposal
+  and target generation, with duplicate/stale/forged feedback rejected;
+- PLL, FLL, hybrid, and discipline-proposal state consuming feedback before
+  further integration, with anti-windup/reset behavior for saturation,
+  rejection, partial application, delayed feedback, and discontinuity;
+- bounded missing-feedback timeout and degraded/faulted outcomes;
+- persistence/audit representation through the common schema without granting
+  the engine adjustment authority.
+
+Verification:
+
+- exact, quantized, clamped, partial, rejected, delayed, duplicate, missing,
+  reordered, wrong-proposal, wrong-target-generation, and discontinuous
+  feedback traces; repeated saturation, integrator-windup adversarial cases,
+  actuator mock faults, and closed-loop analytical/simulator comparison.
+
+Exit criteria:
+
+- no servo integrates an assumed adjustment after actual actuation evidence is
+  available or required;
+- `v0.134.4 implementation stop reached. Run pentest for this exact commit.`
+
 ### v0.135.0 - Precision Kalman-Style Estimator
 
 Status: planned.
@@ -4516,6 +4734,8 @@ Deliverables:
 
 - bounded fixed-point estimator consuming generic precision observations,
   including but not coupled to PTP;
+- actuation feedback, saturation, residual, and target-generation changes
+  consumed before prediction/update continues;
 - covariance as model-derived statistical uncertainty carrying confidence,
   units, model identity/generation, outlier, delay/asymmetry, and reset
   behavior;
@@ -4609,14 +4829,19 @@ Deliverables:
 - no lock held while calling user transport, crypto, persistence, provider, or
   audit callbacks;
 - documented read guarantee: lock-free, wait-free, or bounded locking, with
-  maximum read-latency and PHC cross-timestamp benchmark targets.
+  maximum read-latency and PHC cross-timestamp benchmark targets;
+- documented cache-line layout/false-sharing controls, bounded reader retry
+  count and failure outcome, CPU migration assumptions/detection, and
+  per-core/socket/NUMA placement conditions for every HFT-oriented claim.
 
 Verification:
 
 - Loom/Shuttle-style repository-only model tests for publication,
   invalidation, queues, cancellation, persistence swap, and helper IPC state;
 - stress tests for readers/writers, generation consistency, callback reentry,
-  starvation, suspend/reset, and HFT-oriented maximum/p99 latency benchmarks.
+  starvation, suspend/reset, forced CPU migration, cache-line contention,
+  retry exhaustion, and per-core/cross-core/cross-NUMA HFT-oriented maximum/
+  p99 latency benchmarks.
 
 Exit criteria:
 
@@ -4640,13 +4865,20 @@ Deliverables:
 - facade capability report replacing repository-foundation booleans with
   compiled, available, authorized, and healthy states;
 - explicit protocol/security defaults, timeout, endpoint, and report;
-- no silent fallback or automatic system-clock change.
+- no silent fallback or automatic system-clock change;
+- a safe-facade contract returning structured errors rather than panicking for
+  malformed caller input, unsupported ranges, insufficient storage,
+  unavailable devices, denied privileges, cancellation, or resource
+  exhaustion;
+- allocator-abort-on-OOM non-claims and internal invariant-bug scope separated
+  from recoverable public failures.
 
 Verification:
 
 - compile examples, error ergonomics, feature combinations, local simulators,
   public interop, timeout/cancel, system-policy snapshot/diff, hidden-network/
-  fallback refusal, and misuse compile tests.
+  fallback refusal, misuse compile tests, and iterator/builder/callback/
+  formatting/state-transition panic tests plus whole-facade fuzzing.
 
 Exit criteria:
 
@@ -4700,20 +4932,21 @@ Exit criteria:
 - Core-tier protocol use is practical and documented;
 - `v0.140.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.140.1 - Canonical External Schema
+### v0.140.1 - Schema Compatibility Freeze And Binding Expansion
 
 Status: planned.
 
-Goal: define one versioned non-Rust-layout schema for IPC, persistence,
-bindings, logs, and evidence exchange.
+Goal: freeze compatibility for the `v0.22.1` canonical kernel and expand it
+across IPC, persistence, bindings, logs, and evidence exchange.
 
 Deliverables:
 
-- canonical encoding for atomic instants, high/low integer limbs, durations,
+- compatible extensions for atomic instants, durations,
   hard/statistical uncertainty, scales/models/generations, provenance,
   capability reports, observation events, and discontinuities;
-- deterministic field order/encoding, bounds, version negotiation, unknown
-  field/criticality rules, canonicality, and maximum message sizes;
+- compatibility/freeze ledger proving deterministic field order/encoding,
+  bounds, version negotiation, unknown field/criticality rules, canonicality,
+  and maximum message sizes retain the early kernel semantics;
 - schema owns no serde/Rust-memory-layout semantics and works in `no_std`
   caller buffers;
 - explicit compatibility contracts for daemon IPC, secure persistence, C,
@@ -4772,18 +5005,31 @@ Deliverables:
 - helper-enforced phase/frequency/slew/step bounds, privilege reduction,
   syscall sandboxing, separated raw-capture authority where possible, and an
   append-only accepted/rejected request audit;
+- helper-local cumulative phase and frequency budgets per named time window,
+  maximum request rate, minimum settling interval, and an independent policy
+  ceiling that worker configuration cannot expand;
+- helper-generated session nonce, boot/session generation, clock-domain
+  identity for monotonic expiries, and newly authorized generations for
+  recovery;
+- fault latching after configured repeated rejected, saturated,
+  contradictory, or feedback-missing requests, with bounded fail-closed audit
+  behavior when storage is unavailable/full;
 - Linux reference plus supported platform service designs.
 
 Verification:
 
 - IPC fuzzing, peer-credential spoofing, replay/expiry/generation schedules,
   arbitrary path/clock-ID/ioctl/FD refusal, compromised-worker simulation,
+  repeated individually valid maximum adjustments, cumulative budget and rate
+  boundaries, settling violations, worker policy-expansion attempts, wrong
+  session/domain, fault-latch/re-authorize recovery, audit-full/unavailable,
   socket/file permissions, restart, downgrade, service sandbox, VM clock
   tests, and soak.
 
 Exit criteria:
 
-- daemon compromise outside the helper cannot issue arbitrary privileged calls;
+- a compromised worker cannot exceed the independently configured discipline
+  envelope or issue arbitrary privileged calls;
 - `v0.142.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.143.0 - CLI
@@ -5008,7 +5254,9 @@ implicit context.
 
 Deliverables:
 
-- exact native-scale and TAI mapping with checked arithmetic;
+- exact native-scale mapping into the already defined canonical TAI
+  `AtomicInstant` and generic `v0.12.0` TAI/UTC conversion model, with no
+  adapter-local epoch or TAI arithmetic;
 - explicit UTC realization, leap-model, rounding, and quantization evidence;
 - fail-closed Navheim/Mundilfari scale-model disagreement.
 
@@ -5123,32 +5371,7 @@ Exit criteria:
 - receiver frequency evidence never grants oscillator-control authority;
 - `v0.155.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.156.0 - Navheim Interoperability And Security Gate
-
-Status: planned.
-
-Goal: approve the complete companion boundary before GNSS may influence a
-clock.
-
-Deliverables:
-
-- full stable Navheim event coverage and version-compatibility report;
-- independent scale/leap model disagreement evidence;
-- resolved critical/high conversion, invalidation, PPS, downgrade, and
-  dependency-direction findings.
-
-Verification:
-
-- Navheim replay/simulator/receiver matrix, all companion fuzz/property
-  suites, no_std/MSRV/feature graphs, long-duration timing, hardware PPS, and
-  focused pentest.
-
-Exit criteria:
-
-- GNSS clock use is evidence-backed without any duplicated GNSS decoder;
-- `v0.156.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.157.0 - CGGTTS Interchange
+### v0.156.0 - CGGTTS Interchange
 
 Status: planned.
 
@@ -5174,6 +5397,33 @@ Exit criteria:
 
 - Mundilfari owns only CGGTTS interchange while Navheim owns the GNSS solution
   behind it;
+- `v0.156.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.157.0 - Navheim Interoperability And Security Gate
+
+Status: planned.
+
+Goal: approve the complete companion and CGGTTS boundary before GNSS may
+influence a clock.
+
+Deliverables:
+
+- full stable Navheim event and CGGTTS coverage plus version-compatibility
+  report;
+- independent scale/leap model disagreement evidence;
+- resolved critical/high conversion, invalidation, PPS, CGGTTS, downgrade,
+  and dependency-direction findings.
+
+Verification:
+
+- Navheim replay/simulator/receiver and CGGTTS laboratory matrix, all
+  companion/CGGTTS fuzz/property suites, no_std/MSRV/feature graphs,
+  long-duration timing, hardware PPS, and focused pentest.
+
+Exit criteria:
+
+- GNSS and CGGTTS clock use is evidence-backed without any duplicated GNSS
+  decoder;
 - `v0.157.0 implementation stop reached. Run pentest for this exact commit.`
 
 ## Phase 13: Final Conformance Hardening And Production Admission
@@ -5236,6 +5486,9 @@ Deliverables:
 - allocator-failure behavior and abort-on-OOM non-claims for every alloc path,
   proving untrusted sizes are bounded before allocation;
 - full corpus minimization and panic/timeout triage;
+- whole-safe-facade fuzzing across iterators, builders, callbacks, formatting,
+  cancellation, state transitions, capacity/resource failure, unavailable
+  devices, and denied privileges;
 - Kani-style bounded proofs for selected normalization, parser, replay-window,
   budget, and state-transition properties with explicit model limits;
 - remediated superlinear or unbounded paths.
@@ -5291,6 +5544,9 @@ Deliverables:
 - dependency/provider/algorithm inventory and update check;
 - transcript, exporter, AEAD, signature, certificate, entropy, cookie, and
   secret lifecycle review;
+- generic provider-boundary assurance, per-key atomic usage/exhaustion,
+  fail-closed rekey, and proof that persistence/protocol consumers bypass no
+  admitted provider contract;
 - resolved critical/high findings and timing evidence.
 
 Verification:
@@ -5316,7 +5572,8 @@ Deliverables:
 - persistence crash/rollback/migration campaigns and concurrent snapshot/
   withdrawal/cancellation stress;
 - maximum/p99 TrustedClock read and PHC cross-timestamp latency evidence for
-  claimed HFT-oriented configurations;
+  claimed HFT-oriented configurations, including cache-line layout, bounded
+  retry behavior, CPU migration, and per-core/socket/NUMA placement;
 - documented measured accuracy envelopes and failures.
 
 Verification:
@@ -5340,6 +5597,8 @@ Deliverables:
 
 - Rust `1.90.0..=1.97.1`, Linux, Windows, BSD, macOS, Android, iOS, embedded,
   WASM, and future-Aesynx readiness report;
+- Android/iOS lifecycle evidence for background suspension/resume, path
+  roaming, captive networks, and battery-budgeted resynchronization;
 - representative allocator-free `*-unknown-none` and browser-WASM evidence,
   not only hosted cross-target compilation;
 - every supported feature combination and published crate package check;
@@ -5404,6 +5663,10 @@ Goal: freeze production public APIs and documentation.
 Deliverables:
 
 - all public items documented with security invariants and examples;
+- explicit safe-facade panic contract: caller input, supported-range,
+  capacity, platform, authorization, cancellation, and resource failures
+  return structured errors, with allocator-abort and internal-invariant
+  non-claims documented separately;
 - semver/feature/public dependency review;
 - generated facade capability report replacing foundation-ready booleans and
   distinguishing compiled, available, authorized, and healthy states;

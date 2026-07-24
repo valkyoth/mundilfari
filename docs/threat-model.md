@@ -89,6 +89,7 @@ Additional boundaries:
 | Replay | nonces, sequence/origin matching, replay windows, monotonic state, used-cookie tracking |
 | Malicious source | diverse sources, interval consensus, Khronos, maximum offset and uncertainty |
 | Malicious majority or Sybil diversity | explicit `n`/`f` fault assumptions, provenance/assurance/expiry for operator/upstream/path/site claims, conservative unknown correlation, split result, no impossible Byzantine claim |
+| Policy or membership changes race consensus | atomic policy/membership generations, stale pending/result invalidation, exact generations in downstream evidence |
 | Delay/asymmetry attack | maximum delay/root distance, multi-path comparison, assumption-labeled delay history, topology policy, uncertainty growth |
 | Downgrade | pinned protocol policy; no silent NTS-to-NTP or secure-to-legacy fallback |
 | Amplification | bounded response ratio, validation before response, rate and work limits |
@@ -104,8 +105,11 @@ Additional boundaries:
 | PTP manipulation | authenticated mechanism or trusted boundary/corroboration for strict discipline, topology identity, correction/delay monitoring, redundant grandmasters and paths |
 | Timestamp misassociation | packet identity, sequence, error-queue, ancillary bounds, drop detection |
 | Torn concurrent clock snapshot | generation-consistent publication, explicit memory model, model checking, bounded read latency |
-| Persisted-state corruption or rollback | canonical bounded schema, torn-write detection, authenticated integrity where required, boot/session generation and rollback checks |
-| Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
+| Persisted-state corruption or rollback | early canonical bounded schema, torn-write detection, authenticated integrity where required, explicit rollback capability, no strong freshness claim from mutable local state/key |
+| Repeated bounded discipline abuse | helper-local cumulative phase/frequency windows, rate/settling limits, independent policy ceiling, session/domain binding, fault latch, bounded fail-closed audit |
+| Servo integrates an unapplied proposal | correlated actual-actuation feedback, target generation, residual/quantization handling, anti-windup, missing-feedback fault |
+| Privilege escalation | protocol-free minimal helper, peer credentials, expiry/replay/session/generation checks, allowlisted handles, independent numerical bounds, syscall sandbox, audit |
+| Crypto provider misuse or exhausted key | early protocol-neutral provider contract, provider assurance, atomic per-key usage limits, fail-closed entropy/rekey/exhaustion |
 | Secret disclosure | redaction, bounded lifetime, controlled exposure, admitted clearing |
 | Weak entropy | OS/hardware entropy trait; fail closed; no time/PID/address fallback |
 | Dependency compromise | minimal optional graph, deny/audit, SBOM, immutable pins, admission review |

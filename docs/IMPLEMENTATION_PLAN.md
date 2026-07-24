@@ -70,7 +70,8 @@ Mundilfari implements itself:
 - uncertainty, quality, provenance, and clock correlation;
 - bounded wire parsing and encoding for every Mundilfari-owned time protocol;
 - protocol validation, state machines, timers, clients, and servers;
-- NTP filtering, selection, combining, poll control, and Khronos behavior;
+- NTP association-local filtering, poll control, and Khronos behavior, with
+  protocol-neutral selection/combining supplied by `mundilfari-engine`;
 - NTS-KE records, exporter contexts, cookies, and NTP extension construction;
 - PTP messages, datasets, BMCA, port state machines, profiles, and monitoring;
 - generic PPS capture, IRIG, radio, media, industrial, and non-GNSS space
@@ -114,7 +115,6 @@ dns-system = ["std"]
 rustls = ["std", "dep:rustls"]
 linux-timestamping = ["std"]
 linux-phc-read = ["std"]
-linux-clock-adjust = ["std"]
 client = []
 server = []
 ```
@@ -125,6 +125,10 @@ system-clock modification. A feature reports that code was compiled; it never
 asserts that a device exists, a process is authorized, or a source is healthy.
 Runtime capability reports distinguish `Compiled`, `Available`, `Authorized`,
 and `Healthy`, with reason-bearing failure states.
+
+Adjustment features exist only on the separately named discipline/application
+boundary, never on a protocol crate. Protocol feature matrices fail if an
+adjustment or privileged-authority feature is introduced.
 
 ## 3. Crate Architecture
 
@@ -144,9 +148,11 @@ mundilfari
 uncertainty, provenance, bounded containers, wire cursors, checksums, common
 transport traits, and clock traits.
 
-`mundilfari-engine` owns multi-source consensus, source diversity,
-clock-filter building blocks, servos, holdover, trusted virtual clocks,
-discipline policy, and runtime-neutral orchestration.
+`mundilfari-engine` owns multi-source consensus, source diversity, generic
+observation-filter building blocks, servos, holdover, trusted virtual clocks,
+discipline policy, and runtime-neutral orchestration. A protocol-defined
+association filter may remain in its protocol crate but cannot perform generic
+fusion, quorum, selection, or combining.
 
 `mundilfari-platform` owns safe native sockets, DNS adapters, timestamps, raw
 links, serial and capture adapters, PHC, PPS, platform clock access, and
@@ -270,6 +276,10 @@ All source fusion, servo, and holdover algorithms live in
 `mundilfari-engine`. Protocol and platform crates produce validated
 observations, measurement metadata, discontinuities, and invalidations; they
 never contain a protocol-specific copy of a generic discipline algorithm.
+The first engine quorum/intersection and correlation-aware diversity
+primitives are implemented before the multi-source NTP client composes them.
+Later cross-protocol consensus orchestrates those primitives and does not
+reimplement their mathematics.
 
 ## 4. Canonical Time Model
 
@@ -277,8 +287,10 @@ The canonical model is not `std::time::SystemTime`.
 
 ### 4.1 Continuous instant
 
-`AtomicInstant` uses signed seconds and normalized attoseconds on a documented
-continuous origin:
+`AtomicInstant` is the project TAI coordinate: signed SI seconds plus
+normalized attoseconds since `1958-01-01 00:00:00 TAI`. It is not a
+scale-neutral counter and is not a UTC, POSIX, monotonic, or realization
+identifier:
 
 ```rust
 pub struct AtomicInstant {
@@ -293,6 +305,9 @@ mathematical floor of the represented value, including for negative instants.
 Thus negative one-half second is represented as `(-1, 5e17)`. Fields remain
 private, arithmetic and normalization are checked with wide intermediates,
 and public serialization never freezes the Rust memory layout.
+Coordinate equality means the same TAI coordinate only. Realization,
+traceability, source, model, and uncertainty evidence remain observation
+metadata and are never inferred from `AtomicInstant` equality.
 
 ### 4.2 Native representation
 
@@ -541,8 +556,17 @@ pre-opened socketpair or fixed local endpoint, verifies peer credentials,
 accepts fixed-version and fixed-maximum-length messages, rejects replayed
 sequences and stale monotonic expiries, operates only on pre-opened allowlisted
 clock handles, drops privileges and sandboxes syscalls after initialization,
-and appends an audit result for every accepted or rejected request. Raw capture
-and clock discipline use separate authority where the OS permits it.
+and appends an audit result for every accepted or rejected request. A
+helper-generated session nonce and boot/session generation bind requests to
+one authorized worker session and one named clock domain.
+
+Per-request limits are not the complete policy. The helper independently
+enforces cumulative phase/frequency budgets per time window, request-rate and
+minimum-settling limits, contradiction/saturation counters, and a fault latch
+that only a newly authorized generation can clear. The worker cannot expand
+this envelope. Audit behavior remains bounded and fail-closed when storage is
+unavailable or full. Raw capture and clock discipline use separate authority
+where the OS permits it.
 
 ## 7. Platform Plan
 
@@ -550,6 +574,9 @@ Linux is the first full-feature reference implementation. Windows, BSD, and
 macOS receive native adapters, not Linux emulation. Android and iOS support
 library-safe capabilities within their application sandboxes. Protocol cores
 avoid Unix-only types so Aesynx can later implement the same traits.
+Android/iOS verification includes background suspension/resume, network
+roaming and path changes, captive-network transitions, and battery-budgeted
+resynchronization rather than build-only evidence.
 
 Platform code is staged:
 
@@ -576,23 +603,40 @@ descriptors. Linux PHC uses the kernel PTP-clock and timestamping interfaces;
 MMIO is a distinct embedded adapter with volatile, alignment, endian,
 ownership, ordering, and reset invariants.
 
-All persistent state uses one versioned bounded foundation with
+A no-`std`, caller-buffer canonical schema kernel is completed before any
+persistence consumer. It owns bounded envelopes, version/criticality rules,
+canonical integers and field ordering, but no filesystem behavior. Hosted
+platform adapters own atomic file replacement. Protocol crates export/import
+bounded state values and never perform persistence I/O.
+
+All persistent state uses that one versioned bounded foundation with
 crash-consistent replacement, torn-write detection, explicit durability,
 checksum/authenticated-integrity separation, optional confidentiality,
-generation/rollback and boot/session binding, corruption/version behavior,
-migration, and maximum size. NTS, bootstrap, calibration, holdover, policy,
-and TrustedClock do not invent private state formats.
+capability-qualified freshness/rollback evidence, boot/session binding,
+corruption/version behavior, migration, and maximum size. NTS, bootstrap,
+calibration, holdover, policy, and TrustedClock do not invent private state
+formats.
 
-All external boundaries use one canonical versioned schema rather than Rust
-layout or an implicit serde model. It defines wide integer limbs, scale/model
-identity, hard/statistical uncertainty, observation events, unknown-field
-rules, and bounds for IPC, persistence, C, WASM, logs/evidence, and language
-bindings.
+All external boundaries expand the same canonical versioned schema rather
+than introducing Rust layout or an implicit serde model. It defines wide
+integer limbs, scale/model identity, hard/statistical uncertainty, observation
+events, unknown-field rules, and bounds for IPC, persistence, C, WASM,
+logs/evidence, and language bindings. The later schema milestone freezes
+compatibility and adds cross-language fixtures; it does not replace the early
+kernel.
+
+Generic MAC, AEAD, digest, entropy, secret-container, key-identity, and
+per-key usage-accounting contracts are established before persistence or
+protocol consumers. Test providers are explicitly not production-approved.
+Production implementations require named provider-assurance admission; the
+NTS phase separately admits Rustls, certificates, and TLS-specific policy.
 
 TrustedClock publication is one logically consistent snapshot. Its memory
 ordering, `Send`/`Sync` policy, queue/invalidation ordering, callback lock
 rules, and read-latency guarantee are documented and model-tested; instant,
 uncertainty, scale model, source set, and generation cannot tear.
+Fast-path claims also name cache-line layout, reader retry bounds, CPU
+migration behavior, and per-core/NUMA benchmark conditions.
 
 ## 8. Standards Governance
 
@@ -743,21 +787,22 @@ its broader pre-1.0 completeness contract:
 
 | Concern | Owning versions |
 | --- | --- |
-| Floor-normalized instants, wide math, rational residuals | `v0.5.0`, `v0.7.0`, `v0.9.0`, gate `v0.17.0` |
+| TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Hard/statistical uncertainty, error budgets, generic withdrawal | `v0.14.0`–`v0.15.1`, engine closure `v0.133.0`–`v0.136.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
-| Type-state, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
-| Runtime capability, RTC/counters/MMIO/GPIO/discipline/persistence | `v0.30.0`–`v0.40.0`, final review `v0.161.0` |
+| Type-state, schema/crypto kernels, generation tokens, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
+| Runtime capability, RTC/counters/MMIO/GPIO/discipline/persistence | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
+| Generic engine quorum/diversity and NTP orchestration | `v0.60.0`–`v0.62.0`, cross-family composition `v0.133.0` |
 | NTP fault model, delay defense, bounded servers | `v0.57.0`–`v0.71.0` |
-| NTS assurance, pool key establishment, and secret lifecycle | `v0.72.0`–`v0.81.0` |
-| PTP revision admission, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
+| Crypto production admission, NTS pool establishment, secret lifecycle | `v0.72.0`–`v0.81.0` |
+| PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
-| Cross-family fault model, split bounded servos, holdover | `v0.133.0`–`v0.136.0` |
-| Snapshot concurrency, canonical schema, facade and bindings | `v0.137.0`–`v0.145.0` |
+| Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
+| Snapshot concurrency, schema compatibility, panic-safe facade and bindings | `v0.137.0`–`v0.145.0` |
 | Privilege-separated helper and audit evidence | `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

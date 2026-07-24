@@ -49,6 +49,12 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   uncertainty, generic withdrawals, complete platform/device stops, discipline
   authority, secure persistence, concurrency, canonical schemas, stable
   requirement IDs, NTS/Roughtime edge cases, and source-evidence semantics.
+- Integrated the subsequent sequencing and control-loop review: moved generic
+  quorum/diversity ahead of NTP composition, placed schema and crypto-provider
+  kernels before persistence/MAC consumers, qualified rollback protection,
+  closed actuation feedback and helper cumulative limits, assigned stable PTP
+  security, made the facade panic contract explicit, fixed the TAI origin, and
+  moved the final Navheim security gate after CGGTTS.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

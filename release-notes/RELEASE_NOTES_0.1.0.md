@@ -56,6 +56,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   generic evidence withdrawal, RTC/MMIO/GPIO/counters/actuators, discipline
   authority, secure persistence, NTS/Roughtime edge cases, concurrent
   snapshots, canonical external schemas, and common error classification.
+- Subsequent roadmap audit integrated with explicit early schema/crypto
+  kernels, engine-owned NTP quorum/diversity, rollback capability levels,
+  stable PTP security associations, consensus policy/membership generations,
+  actual actuation feedback, cumulative helper limits, panic-safe facade
+  handling, a defined TAI origin, mobile lifecycle tests, and a final
+  post-CGGTTS Navheim security gate.
 - Overloaded PTP-profile, industrial, wireless, cellular, media, broadcast,
   timestamp, and servo milestones split into smaller independently pentested
   patch releases.
