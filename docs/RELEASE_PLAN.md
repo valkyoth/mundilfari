@@ -429,19 +429,40 @@ Deliverables:
   authority, or current support, and construction succeeds only when the
   recipe is stored and its mandatory handle is attached;
 - every claim/origin/recipe digest is computed only from the exact `v0.6.1`
-  canonical identity profile; claim equality and arena interning compare full
-  canonical structure after digest match and surface collisions explicitly;
-- `HardBoundClaim<T>` contains a mandatory private typed
-  `DerivationHandle<T>` rather than returning a droppable `(claim, recipe)`
-  pair. The handle binds derivation-store identity, store generation, node
-  generation/index, output domain/type, and recipe digest; stale, evicted,
-  foreign-store, wrong-generation, or wrong-domain handles fail closed before
-  transformation, verification, serialization, or acceptance;
+  canonical identity profile; canonical claim comparison and arena interning
+  compare full structure after digest match and surface collisions explicitly;
+- `HardBoundClaim<'arena, T>` contains a mandatory private typed
+  `DerivationHandle<'arena, T>` rather than returning a droppable
+  `(claim, recipe)` pair. Arena construction introduces a fresh invariant
+  generative lifetime brand that cannot be named by callers or escape its
+  scoped owner; the handle binds that brand, store generation, node
+  generation/index, output domain/type, and recipe digest. An address, pointer,
+  storage-buffer location, caller label, randomized hash seed, or wrapping
+  counter is never arena identity;
 - no_std uses a caller-owned fixed-capacity `DerivationArena` over supplied
   slots/buffers; alloc-enabled use has a fallible explicitly bounded arena and
   never unconditional growth. Canonically interned immutable DAG nodes share
   common inputs to avoid exponential copying, and all mutation/eviction rotates
-  generations without making a live handle refer to different content;
+  checked nonwrapping store/node generations without making a live handle refer
+  to different content. Generation exhaustion permanently faults that arena or
+  requires construction under a completely new generative brand; destruction
+  and same-address reinitialization cannot validate an old branded handle;
+- mutable arenas require exclusive write access and are not `Sync`; traversal
+  resolves under an immutable read lease or frozen pinned snapshot that blocks
+  eviction/reinterning until release. Read-only/frozen views are `Send`/`Sync`
+  only when their backing storage/node types and type-level synchronization
+  strategy prove those properties; later target concurrency profiles must
+  preserve this boundary. Handles confer no storage access by themselves and
+  inherit the brand/view transfer restrictions;
+- comparison APIs deliberately separate `same_geometry()` for endpoints,
+  `same_conditional_claim()` for the canonical interval/condition/claim
+  preimage carried by the value, and fallible
+  `try_same_derivation(left_lease, right_lease)` for complete recipe-DAG
+  equivalence across arenas. Arena-dependent representations do not implement
+  infallible semantic `Eq`/`Hash`; digest-keyed interning/caches retain
+  canonical collision buckets and return typed stale-handle/collision/
+  capacity failures. Cross-store equivalence uses the fallible operation or
+  explicit bounded canonical import/reinterning;
 - heterogeneous recipe nodes and edges explicitly tag input/output domains
   (instant, duration, rational, scale-specific, model, and condition) and
   validate operation-specific edge signatures. Geometry-only
@@ -469,10 +490,16 @@ Verification:
   paired root-recipe creation, endpoint/condition/origin/digest substitution,
   recipe-drop/detachment refusal, canonical-identity collision handling,
   API/type size and stack-use reports, zero/full arena and allocation failure,
-  interning/DAG sharing, eviction/stale/cross-store/cross-generation handles,
-  heterogeneous/wrong-domain edges, long shared chains, complete-record export
-  without handle leakage, and dependency tests proving the opaque origin
-  identity does not introduce later provenance/observation coupling.
+  interning/DAG sharing, destruction/recreation in the same storage/address,
+  stale-brand and near-generation-exhaustion refusal, eviction during leased
+  traversal, concurrent import versus read/write leases, mutable/frozen/
+  read-only `Send`/`Sync` compile tests, stale/cross-store/cross-generation
+  handles, heterogeneous/wrong-domain edges, long shared chains, identical
+  geometry with different conditions/derivations, identical recipes in
+  different arenas, stale handles during fallible comparison, forced digest
+  collisions and collision-bucket cache lookup, complete-record export without
+  handle leakage, and dependency tests proving the opaque origin identity does
+  not introduce later provenance/observation coupling.
 
 Exit criteria:
 
@@ -502,8 +529,10 @@ Deliverables:
   generation, proof-rule-registry generation, and canonical content; callers
   cannot select an identifier that aliases a different expression;
 - exact condition identity is part of `HardBoundClaim<T>` equality, evidence,
-  serialization contract, and cache keys, while geometric interval equality
-  remains separately queryable;
+  serialization contract, and cache keys under the `v0.7.1`
+  `same_conditional_claim()` semantics, while geometric interval comparison
+  remains separately queryable and complete derivation equivalence remains
+  fallible and lease-backed;
 - interval intersection constructs `All(A, B)`; union or convex hull constructs
   `Any(A, B)`; widening that adds no new dependency retains the input
   condition; conversion/projection constructs `All(input, model, rounding)`;
@@ -526,10 +555,11 @@ Deliverables:
   canonical output conditions, and rewrites; no API returns a transformed hard
   claim while omitting its recipe;
 - transformation resolves every typed handle in one explicitly selected arena,
-  validates heterogeneous edge signatures, computes condition/claim/recipe
-  identities with `v0.6.1`, interns the canonical output DAG node, and only then
-  returns a new handle-bearing claim. Cross-store composition requires explicit
-  bounded canonical import/reinterning and never trusts a foreign handle;
+  under the required read/write lease, validates heterogeneous edge signatures,
+  computes condition/claim/recipe identities with `v0.6.1`, interns the
+  canonical output DAG node, and only then returns a new handle-bearing claim.
+  Cross-store composition requires explicit bounded canonical
+  import/reinterning and never trusts a foreign handle;
 - recipes have independent fixed depth, node, fan-out, input, byte/storage,
   traversal, cycle-detection, and later verification-work bounds. Internal
   construction is acyclic; overflow, attempted cycles, unavailable inputs, or
@@ -558,8 +588,9 @@ Verification:
   input order, rounding/model/condition substitution, cycle attempts, and
   every independent depth/node/fan-out/storage/traversal/work boundary;
 - arena tests cover canonical DAG reuse, cross-store import/reinterning,
-  eviction/generation races, heterogeneous edge signatures, long diamond DAGs,
-  and failure atomicity when output identity/interning exhausts capacity.
+  eviction/generation/read-lease races, concurrent imports, heterogeneous edge
+  signatures, long diamond DAGs, and failure atomicity when output identity/
+  interning exhausts capacity.
 
 Exit criteria:
 
@@ -1294,15 +1325,29 @@ Goal: audit the complete time model before protocols depend on it.
 Deliverables:
 
 - arithmetic and conversion audit;
+- `CanonicalIdentityV1` preimage/domain-separation/schema-reuse audit plus
+  differential/KAT review of the first-party SHA-256 implementation; structural
+  collision, commutative ordering, collision-bucket cache/interning behavior,
+  and the prohibition on unstable Rust identity inputs are release blockers;
 - foundational instant/duration interval and hard/statistical type-separation
   audit proving every era, fraction, EOP, and later uncertainty consumer uses
   the `v0.7.1` types without provisional duplicates;
+- derivation-arena audit covering capacity, canonical DAG sharing,
+  lifetime-brand generativity, same-address ABA resistance, nonwrapping
+  generation exhaustion, destruction/reinitialization, eviction/read leases,
+  concurrent import, mutable/frozen/read-only `Send`/`Sync`, heterogeneous edge
+  safety, and geometry/conditional-claim/fallible-derivation equality
+  semantics;
 - leap-candidate validation/transaction and evidence-provenance/lifecycle
   boundary plus monotonic-domain suspend/rate/scope/generation audit; engine
   authority/diversity admission remains deferred to `v0.61.1`;
 - hard/statistical uncertainty, error-budget, observation-lifecycle,
   formatting, and error-taxonomy audit;
-- Kani-style bounded proofs where useful;
+- Kani-style reduced-state proofs for handle resolution, brand/generation
+  transitions, eviction exclusion, and collision buckets, plus other bounded
+  proofs where useful;
+- no_std stack/code-size and arena/handle layout evidence for every supported
+  capacity/profile;
 - API and serialization stability review proving no raw Rust layout, `repr(C)`,
   or implicit serialization freezes the internal instant representation;
 - resolved critical/high findings.
@@ -1310,7 +1355,9 @@ Deliverables:
 Verification:
 
 - full foundation corpus, independent differential oracles, fuzzing, MSRV, and
-  no_std target matrix.
+  no_std target matrix; SHA-256 KAT/differential corpus, identity-schema golden
+  vectors, arena ABA/wraparound/concurrency state machines, equality/collision
+  cases, and reduced-state proof artifacts are mandatory.
 
 Exit criteria:
 
@@ -3058,9 +3105,15 @@ Deliverables:
   and policy, conversion-model identity and generation, canonical output
   condition, and output claim digest;
 - engine verification resolves the claim's mandatory typed
-  `DerivationHandle<T>` against the exact admitted arena identity/generation,
-  walks the complete reachable canonical DAG under budget, and fails closed for
-  stale/evicted/foreign/cross-domain handles or geometry-only intervals. Import
+  `DerivationHandle<'arena, T>` against the exact admitted arena brand/
+  generation. It obtains an immutable read lease or frozen pinned snapshot,
+  walks the complete reachable canonical DAG under budget, materializes the
+  bounded verification input, and releases all arena locks/leases before any
+  atom assessor or other external callback. Reacquisition rechecks brand,
+  store/node/eviction generations before issuance; concurrent eviction,
+  reinterning, or import requires exclusive write access and causes bounded
+  retry or indeterminate failure rather than use-after-reuse. Stale/evicted/
+  foreign/cross-domain handles and geometry-only intervals fail closed. Import
   from persistence/IPC must first atomically reintern the complete unverified
   record into a bounded current arena;
 - engine construction either recomputes a root/derived claim or verifies the
@@ -3099,6 +3152,11 @@ Deliverables:
   identity/generation, policy/membership/source/correlation generations,
   per-atom support basis, assurance/non-claims, evaluation domain, and
   conservative expiry/re-evaluation deadline;
+- accepted-token identity/equivalence includes the exact conditional claim,
+  verified-derivation identity and generation, condition/assessment identity
+  and generation, policy/membership/source/correlation generations, and
+  deadline; equal geometry, claim digest, or recipe digest alone cannot make
+  tokens interchangeable or satisfy a cache lookup;
 - policy may reject a `Supported` assessment because its assurance, evidence
   class, lifetime, fault scope, or non-claims are inadequate; no public
   constructor, deserializer, provider, or boolean can manufacture acceptance;
@@ -3129,9 +3187,12 @@ Verification:
   rounding direction/policy, stale or substituted conversion-model/proof-rule
   generation, output-condition mismatch, and verification-work exhaustion;
 - missing/dropped handle construction attempts, stale/evicted/foreign-store/
-  cross-generation/cross-domain handles, geometry-only acceptance attempts,
-  arena mutation during unlocked assessment work, imported-record partial
-  reinterning, and DAG node/edge/work exhaustion;
+  cross-generation/cross-domain handles, stale lifetime brands, same-address
+  arena recreation, near-generation exhaustion, geometry-only acceptance
+  attempts, eviction/import during leased traversal, arena mutation during
+  unlocked assessment work, proof that no arena lock/lease crosses external
+  callbacks, imported-record partial reinterning, cross-thread profile
+  enforcement, and DAG node/edge/work exhaustion;
 - provider replacement/withdrawal, assessor- or proof-rule-registry reload,
   policy reload, callback re-entry, and evidence/generation changes at every
   point between vector capture, unlocked evaluation, verification, final
@@ -3147,6 +3208,8 @@ Verification:
 - forged/stale/cross-condition accepted tokens, supported-but-policy-rejected
   assurance, provider boolean/privileged-variant attempts, assessment-to-use
   and assessment-to-publication races, withdrawal under queue pressure,
+  equal-geometry/equal-claim tokens with different verified-derivation or
+  assessment generations and accepted-token cache non-substitution,
   servo/estimator/holdover/proposal invalidation, deterministic replay, and
   compile-fail private construction/deserialization tests.
 
@@ -6564,8 +6627,10 @@ Deliverables:
   compile-time/runtime capacity errors;
 - first-class sizing/builders for the `v0.7.1` derivation arena: node/edge/
   canonical-byte/work capacity, store identity/generation, eviction policy,
-  worst-case claim/handle size, stack usage, and fallible bounded alloc-backed
-  alternatives are visible rather than hidden inside a client builder;
+  scoped generative-brand creation, mutable/frozen/read-only state, read/write
+  lease policy, worst-case claim/handle size, stack usage, generation-
+  exhaustion behavior, and fallible bounded alloc-backed alternatives are
+  visible rather than hidden inside a client builder;
 - documented allocation behavior per operation for every `alloc` builder;
 - representative SNTP/NTP/PTP/generic-external/IRIG examples;
 - embedded transport integration guide.
@@ -6573,8 +6638,9 @@ Deliverables:
 Verification:
 
 - zero/minimum/maximum capacity, stack-size reports, no allocator link,
-  derivation-arena DAG sharing/exhaustion/eviction reports, embedded targets,
-  examples, and compile-fail overflow cases.
+  derivation-arena DAG sharing/exhaustion/eviction reports, same-storage brand
+  recreation, read/write lease and `Send`/`Sync` compile tests, embedded
+  targets, examples, and compile-fail overflow cases.
 
 Exit criteria:
 

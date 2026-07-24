@@ -136,6 +136,12 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   claims exist. `HardBoundClaim` carries a mandatory typed handle into bounded
   caller-owned or fallible derivation arenas, with canonical shared DAGs and
   complete-record serialization rather than detachable tuples or local handles.
+- Those handles now use invariant generative lifetime brands and nonwrapping
+  generations, while traversal uses read leases/frozen snapshots and releases
+  all arena access before callbacks. Geometry, conditional-claim, and fallible
+  complete-derivation comparisons are separate, and `v0.17.0` audits identity,
+  SHA-256, arena ABA/concurrency, equality, stack, and reduced-state evidence
+  before protocols consume them.
 - `v0.24.0` and hosted, PHC, architectural, embedded, and browser adapters now
   own conservative `read_interval()` production. Default strict reads report
   linearization-time `observed_at`/`valid_until`; a type-distinct

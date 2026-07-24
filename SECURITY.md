@@ -71,10 +71,16 @@ the release branch between review and tagging.
   acyclic, non-authoritative `UnverifiedBoundDerivation` with exact endpoints,
   inputs, operation, rounding, models, condition, and origin/observation
   identity; absence or truncation prevents later acceptance. A hard claim
-  contains a mandatory typed handle into a bounded generation-checked arena;
-  stale/evicted/foreign/wrong-domain handles and geometry-only intervals cannot
-  enter verification, and serialization exports the complete DAG rather than
-  the process-local handle.
+  contains a mandatory lifetime-branded typed handle into a bounded arena.
+  Brands are generative rather than addresses/caller labels; store/node
+  generations never wrap, and exhaustion faults or requires a fresh brand.
+  Mutable arenas require exclusive writes while traversal uses an immutable
+  read lease/frozen snapshot that excludes eviction. Stale/evicted/foreign/
+  wrong-domain handles and geometry-only intervals cannot enter verification,
+  and serialization exports the complete DAG rather than the process-local
+  handle. Geometry, canonical conditional-claim equality, and fallible
+  lease-backed derivation equality are distinct; arena-dependent values have no
+  infallible semantic `Eq`/`Hash`.
   Canonical resolution does not prove current truth: engine assessment reports
   supported, contradicted, indeterminate, expired, or withdrawn with exact
   evidence/generations/deadline and preserves independent evidence-origin,
@@ -89,9 +95,11 @@ the release branch between review and tagging.
   a bound.
 - Assessment issuance captures and rechecks one complete generation vector
   around unlocked provider callbacks. It publishes no mixed-generation result:
-  change causes bounded retry or indeterminate status, and any accepted token
-  is minted with its assessment at the same engine linearization point. A fresh
-  bounded monotonic interval is sampled there after evaluator work; its
+  arena traversal first materializes bounded input under a read lease/frozen
+  snapshot and releases every arena lock/lease before those callbacks. Change,
+  eviction, or concurrent import causes bounded retry or indeterminate status,
+  and any accepted token is minted with its assessment at the same engine
+  linearization point. A fresh bounded monotonic interval is sampled there; its
   conservative upper edge, including resolution, latency, rate uncertainty,
   and only a reviewed margin for internal work remaining before that
   linearization point, must remain before the deadline. This is not

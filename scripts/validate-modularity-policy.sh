@@ -39,8 +39,12 @@ grep -q 'Hard-bound conditions are immutable' docs/modularity-policy.md
 grep -q 'core `CanonicalIdentityV1` kernel exclusively defines' docs/modularity-policy.md
 grep -q 'schema wraps it, crypto providers may reproduce it' docs/modularity-policy.md
 grep -q 'non-authoritative `UnverifiedBoundDerivation` recipes' docs/modularity-policy.md
-grep -q 'mandatory typed arena handle' docs/modularity-policy.md
+grep -q 'mandatory generative lifetime-branded arena handle' docs/modularity-policy.md
 grep -q 'fallible bounded alloc' docs/modularity-policy.md
+grep -q 'Generations never wrap' docs/modularity-policy.md
+grep -q 'read lease/frozen snapshot' docs/modularity-policy.md
+grep -q 'fallible complete-derivation comparisons' docs/modularity-policy.md
+grep -q 'infallible semantic' docs/modularity-policy.md
 grep -q 'External condition identifiers decode only to unresolved' docs/modularity-policy.md
 grep -q '`UnverifiedBoundDerivationRecord`' docs/modularity-policy.md
 grep -q 'directly decodes the opaque verified engine type' docs/modularity-policy.md

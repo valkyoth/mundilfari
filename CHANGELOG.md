@@ -126,6 +126,11 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   clock contracts to `v0.24.0`, hosted/PHC/counter/embedded/browser adapters;
   and separated default linearization-time `observed_at`/`valid_until` results
   from optional reviewed-WCET through-completion authority.
+- Strengthened derivation arenas with invariant generative lifetime brands,
+  checked nonwrapping generations, read-lease/frozen-snapshot traversal,
+  state-qualified `Send`/`Sync`, explicit geometry/conditional-claim/fallible-
+  derivation comparison, and a dedicated `v0.17.0` pre-protocol audit including
+  reduced-state handle and ABA proofs.
 - Split overloaded scale, PTP-profile, industrial, wireless, cellular, media,
   broadcast, timestamp, and servo milestones into independently reviewable
   patch releases while preserving the final Navheim feature phase.

@@ -20,11 +20,15 @@ Rules:
   second identity representation or algorithm.
 - Core hard-claim constructors and transformations own bounded, acyclic,
   non-authoritative `UnverifiedBoundDerivation` recipes. Every hard claim has a
-  mandatory typed arena handle; no_std caller-owned and fallible bounded alloc
-  arenas own canonical heterogeneous DAG nodes. Every interval, era, fraction,
-  scale, civil, uncertainty, and observation layer preserves the exact inputs/
-  outputs/operation/rounding/model/condition/origin needed by the later engine
-  verifier.
+  mandatory generative lifetime-branded arena handle; no_std caller-owned and
+  fallible bounded alloc arenas own canonical heterogeneous DAG nodes.
+  Generations never wrap, mutable access is exclusive, and derivation traversal
+  uses a read lease/frozen snapshot that excludes eviction or reinterning.
+  Geometry, conditional-claim, and fallible complete-derivation comparisons
+  remain distinct; arena-dependent values expose no infallible semantic
+  `Eq`/`Hash`. Every interval, era, fraction, scale, civil, uncertainty, and
+  observation layer preserves the exact inputs/outputs/operation/rounding/
+  model/condition/origin needed by the later engine verifier.
 - External condition identifiers decode only to unresolved core type-state;
   exact content or an immutable trusted registry generation must resolve them
   before any hard claim, engine, persistence, IPC, C, or WASM consumer.
