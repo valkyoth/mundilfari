@@ -11,6 +11,7 @@ authenticated, traceable, fresh, or safe for clock discipline.
 - Correct time arithmetic, scale, epoch, era, leap, and calendar meaning.
 - Integrity and availability of protocol parsing and state machines.
 - Accurate uncertainty, quality, provenance, and authentication reporting.
+- Exact preservation and timely withdrawal of Navheim GNSS timing evidence.
 - Trusted monotonic-to-civil clock correlation.
 - Source-selection, consensus, servo, and holdover state.
 - NTS cookies, exporter keys, TLS credentials, and signing material.
@@ -72,6 +73,7 @@ Additional boundaries:
 - platform timestamps to correct packet identity;
 - ordinary process to privileged helper;
 - third-party dependency to Mundilfari-owned semantics;
+- Navheim timing event to `mundilfari-navheim` observation and invalidation;
 - licensed normative document to independently written implementation.
 
 ## Threats And Baseline Controls
@@ -91,7 +93,8 @@ Additional boundaries:
 | Clock rollback | monotonic guard, default no backward step, virtual application clocks |
 | Excessive clock change | startup-only step policy, slew/frequency limits, faulted state |
 | Loss of sources | holdover state with growing uncertainty and bounded recovery |
-| GNSS/radio spoofing | source fusion, signal/health/authentication indicators, propagation checks |
+| GNSS spoofing or bad upstream evidence | preserve Navheim health/authentication/integrity/provenance, honor invalidation, compare independent clock families |
+| Radio spoofing | source fusion, propagation checks, signal quality, independent corroboration |
 | PTP manipulation | topology identity, correction/delay monitoring, redundant grandmasters and paths |
 | Timestamp misassociation | packet identity, sequence, error-queue, ancillary bounds, drop detection |
 | Privilege escalation | minimal helper, typed commands, authenticated bounded IPC, least privilege |
@@ -141,7 +144,10 @@ Additional boundaries:
 - `no_std` does not imply determinism, bounded execution, or security.
 - OS and hardware timestamps can be wrong, reordered, transformed, or
   associated with the wrong packet.
-- GNSS authentication does not eliminate RF relay or receiver compromise.
+- Navheim authentication evidence does not eliminate RF relay, receiver
+  compromise, adapter mapping faults, or a compromised Navheim dependency.
+- Mundilfari cannot independently repair a bad GNSS interpretation; it can
+  reject, withdraw, cross-check, diversify, and refuse clock authority.
 - Clock steps can break certificates, databases, logs, leases, schedulers, and
   distributed systems even when the new time is more accurate.
 - External standards and certification suites may be inaccessible or licensed.

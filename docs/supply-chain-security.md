@@ -15,9 +15,15 @@ license, advisory, feature, native-code, release, and provenance risk.
 
 ## First-Party Boundary
 
-Mundilfari implements all time semantics and time protocol behavior itself.
-Dependencies must not supply NTP, PTP, NMEA timing, clock selection, leap
-semantics, time-zone semantics, or another part of the project's core purpose.
+Mundilfari implements generic time semantics and every Mundilfari-owned time
+protocol itself. Dependencies must not supply NTP, PTP, clock selection,
+generic leap semantics, time-zone semantics, or another part of that purpose.
+
+Navheim is the deliberate exception for GNSS interpretation. Only the optional
+`mundilfari-navheim` companion may depend on it. Navheim supplies resolved GNSS
+timing evidence; it cannot supply cross-family consensus, servos, holdover,
+clock authority, or privileged discipline. Navheim is admitted only after its
+stable timing release and a full dependency/security review.
 
 Generic TLS, X.509, cryptographic primitives, mandatory AEADs, and OS bindings
 may be admitted when mature third-party code is safer than a new local

@@ -1,8 +1,9 @@
 # Mundilfari Secret Handling Policy
 
-Future NTS cookies, exporter keys, TLS credentials, signing keys, GNSS
-authentication material, timestamp-authority keys, and privileged-helper
-credentials are secret-bearing.
+Future NTS cookies, exporter keys, TLS credentials, signing keys,
+timestamp-authority keys, and privileged-helper credentials are
+secret-bearing. GNSS authentication keys and trust stores belong to Navheim;
+the companion receives only bounded authentication state and provenance.
 
 Rules:
 

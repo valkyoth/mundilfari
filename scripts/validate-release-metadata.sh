@@ -9,6 +9,7 @@ for file in \
     .github/CODEOWNERS .github/FUNDING.yml .github/dependabot.yml \
     .github/workflows/ci.yml .github/workflows/release.yml \
     docs/IMPLEMENTATION_PLAN.md docs/RELEASE_PLAN.md docs/PROTOCOLS.md \
+    docs/NAVHEIM_INTEGRATION.md \
     docs/STANDARDS.md docs/threat-model.md docs/toolchain-policy.md \
     docs/modularity-policy.md docs/unsafe-policy.md \
     docs/supply-chain-security.md docs/github-security-settings.md; do

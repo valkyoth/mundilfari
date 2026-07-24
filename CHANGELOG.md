@@ -6,6 +6,13 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Moved all GNSS message, receiver, rollover, authentication, health, and PPS
+  semantic interpretation to the planned Navheim project.
+- Replaced direct GNSS protocol crates with one future optional
+  `mundilfari-navheim` companion adapter.
+
 ## [0.1.0] - Unreleased
 
 ### Added

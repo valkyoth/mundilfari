@@ -34,6 +34,7 @@ Treat these areas as high risk:
 - clock servos, holdover, and any clock-modification authority;
 - cryptographic, TLS, entropy, or certificate boundaries;
 - raw sockets, timestamp ancillary data, PHC, PPS, and platform FFI;
+- Navheim version admission, GNSS evidence mapping, and invalidation handling;
 - daemon privilege separation and local IPC;
 - CI, release scripts, specifications, dependencies, and generated fixtures.
 
@@ -53,3 +54,8 @@ Before adding or updating a third-party crate:
 - avoid git dependencies;
 - update `Cargo.lock`, SBOM evidence, threat model, and dependency records;
 - run `cargo deny check`, `cargo audit`, and behavior-specific tests.
+
+Navheim is the planned GNSS implementation dependency, but it may appear only
+in `mundilfari-navheim` after the stable upstream timing API passes the complete
+admission process. Do not copy provisional Navheim types or GNSS decoders into
+this workspace.

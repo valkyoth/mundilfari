@@ -49,6 +49,11 @@ the release branch between review and tagging.
   independent properties.
 - No silent downgrade from authenticated to unauthenticated time.
 - Legacy and historical protocols are disabled in secure defaults.
+- GNSS interpretation comes only from admitted Navheim timing evidence;
+  Mundilfari preserves invalidation, health, authentication, integrity,
+  freshness, uncertainty, and provenance without re-decoding it.
+- Navheim evidence never grants clock authority without independent
+  Mundilfari source and discipline policy.
 - Large, backward, or post-startup clock steps require explicit policy.
 - Delay attacks remain in scope even when a protocol is authenticated.
 - Official specifications, revisions, and verified errata precede protocol

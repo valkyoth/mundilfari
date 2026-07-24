@@ -20,6 +20,7 @@ Licensed text is not redistributed without permission.
 | `KnownUnavailable` | known but inaccessible; no implementation claim |
 | `ProprietaryUndocumented` | no public normative specification; not guessed |
 | `TimingOnly` | only time-related services are in scope |
+| `ExternalNavheim` | owned by Navheim and consumed only through the companion adapter |
 
 Every implementation adds exact identifiers, revisions, publication dates,
 official URLs, errata, clause maps, test-vector provenance, and conformance
@@ -92,33 +93,34 @@ for a continuously synchronized local clock.
 | `mundilfari-white-rabbit` | White Rabbit/high-accuracy profile | `LicenceRequired` |
 | `mundilfari-synce` | Synchronous Ethernet messaging/quality | `LicenceRequired` |
 
-## GNSS And Satellite Timing
+## GNSS-Derived And Satellite Timing
 
-All entries are `TimingOnly`; positioning belongs to Navheim.
+Mundilfari implements no GNSS navigation-message or receiver-protocol decoder.
+Navheim is the planned upstream for every GNSS constellation and format. One
+companion crate maps its complete timing evidence into Mundilfari without
+reinterpreting it.
 
 | Crate/family | Time source/protocol | Status |
 | --- | --- | --- |
-| `mundilfari-nmea0183-time` | NMEA 0183 timing sentences | `LicenceRequired` |
-| `mundilfari-nmea2000-time` | NMEA 2000 time PGNs | `LicenceRequired` |
-| `mundilfari-gps-time` | GPS timing/navigation-time fields | `TimingOnly` |
-| `mundilfari-galileo-time` | Galileo timing and OSNMA evidence | `TimingOnly` |
-| `mundilfari-beidou-time` | BeiDou time | `TimingOnly` |
-| `mundilfari-glonass-time` | GLONASS time | `TimingOnly` |
-| `mundilfari-qzss-time` | QZSS time | `TimingOnly` |
-| `mundilfari-navic-time` | NavIC time | `TimingOnly` |
-| `mundilfari-sbas-time` | SBAS time | `TimingOnly` |
-| `mundilfari-rtcm-time` | RTCM time-related messages | `TimingOnly` |
-| `mundilfari-rinex-time` | RINEX time records | `TimingOnly` |
-| `mundilfari-cggtts` | CGGTTS time transfer | `PlannedStable` |
-| `mundilfari-twstft` | two-way satellite time/frequency transfer | `LicenceRequired` |
-| `mundilfari-gpsd` | gpsd timing/PPS integration | `PlannedStable` |
-| vendor timing crates | UBX, TSIP, SiRF, NovAtel, Garmin | `SpecificationRequested` |
+| `mundilfari-navheim` | all validated Navheim GNSS timing observations/events | `ExternalNavheim` |
+| Navheim upstream | GPS, Galileo, BeiDou, GLONASS, QZSS, NavIC, SBAS | `ExternalNavheim` |
+| Navheim upstream | NMEA 0183/2000, RTCM, RINEX, gpsd and vendor receivers | `ExternalNavheim` |
+| Navheim upstream | OSNMA/QZNMA, GNSS PPS meaning and common/all-in-view transfer | `ExternalNavheim` |
+| generic source API | validated observations from appliances, SDKs or custom receivers | `PlannedStable` |
+| `mundilfari-cggtts` | CGGTTS interchange over validated GNSS transfer evidence | `PlannedStable` |
+| `mundilfari-twstft` | two-way communication-satellite time/frequency transfer | `LicenceRequired` |
+
+TWSTFT remains here because it is a time-transfer protocol over communication
+satellites, not GNSS navigation interpretation. Any GNSS receiver semantics or
+common-view result enters through Navheim. CGGTTS owns only the exchange
+format; it consumes already validated transfer evidence and performs no GNSS
+solution or receiver interpretation.
 
 ## Pulse, Serial, Radio, And Physical Timecodes
 
 | Crate/family | Protocol/source | Status |
 | --- | --- | --- |
-| `mundilfari-pps` | pulse-per-second observation/correlation | `PlannedStable` |
+| `mundilfari-pps` | generic physical pulse capture and quality | `PlannedStable` |
 | `mundilfari-frequency-reference` | frequency reference observation | `PlannedStable` |
 | `mundilfari-irig` | selected complete IRIG revision | `LicenceRequired` |
 | `mundilfari-ieee1344` | IEEE 1344 extensions | `LicenceRequired` |

@@ -19,10 +19,13 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - MIT OR Apache-2.0 licensing.
 - Detailed implementation and release plans through an exact `1.0.0` release
   candidate.
-- Initial protocol registry spanning Internet/NTP/NTS, PTP, GNSS timing, PPS,
-  radio, industrial, automotive, wireless, media, space, formats, and trusted
-  timestamp evidence.
-- Strict rule that Mundilfari owns time while Navheim owns navigation.
+- Initial protocol registry spanning Internet/NTP/NTS, PTP, Navheim-derived
+  GNSS observations, PPS, radio, industrial, automotive, wireless, media,
+  space, formats, and trusted timestamp evidence.
+- Strict rule that Navheim determines GNSS time while Mundilfari decides how
+  validated GNSS evidence participates in a larger clock system.
+- Planned optional `mundilfari-navheim` companion crate, blocked until Navheim
+  publishes its independently reviewed stable timing API.
 - `no_std`, dependency layering, 500-line, unsafe, standards, supply-chain,
   threat-model, and secret-handling policies.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, pull request, and manual

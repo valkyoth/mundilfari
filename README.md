@@ -44,13 +44,25 @@ time source.
 
 ## Scope Boundary
 
-Mundilfari owns time. Navheim owns navigation.
+Mundilfari owns generic time and clock behavior. Navheim determines time from
+GNSS.
 
-GNSS work in this repository is limited to timing: time-of-week, eras and week
-rollovers, UTC corrections, leap announcements, PPS correlation, uncertainty,
-health, spoofing indicators, and authentication evidence needed to trust a
-time observation. Coordinates, position, velocity, altitude, pseudorange
-solutions, RTK, PPP, geodesy, and full receiver navigation belong to Navheim.
+Navheim will decode satellite-navigation messages and receiver protocols,
+resolve native GNSS eras and weeks, interpret transmitted UTC/leap models,
+apply satellite and receiver clock corrections, assess signal and receiver
+health, verify navigation authentication, and determine the GNSS meaning of a
+receiver PPS/time mark.
+
+Mundilfari will consume that validated evidence through one optional
+`mundilfari-navheim` companion crate. Mundilfari retains generic atomic and
+civil time types, named GNSS scale identifiers, independent scale-model
+validation, physical PPS capture, source consensus, servos, holdover, and
+clock-discipline policy. It will not contain a second GPS, Galileo, GLONASS,
+BeiDou, QZSS, NavIC, NMEA, RTCM, gpsd, or vendor-receiver decoder.
+
+Navheim is planned and will be completed first. The companion crate is not
+implemented or buildable in `v0.1.0`; its work starts only after Navheim
+publishes a reviewed stable GNSS timing API.
 
 ## Planned Uses
 
@@ -59,8 +71,8 @@ solutions, RTK, PPP, geodesy, and full receiver navigation belong to Navheim.
 - Linux, Windows, BSD, macOS, Android, and iOS applications;
 - servers, websites, observability systems, and distributed databases;
 - an unprivileged synchronization daemon with a minimal privileged helper;
-- NTP, SNTP, NTS, PTP, gPTP, White Rabbit, GNSS timing, PPS, IRIG, radio,
-  broadcast, industrial, automotive, wireless, and space timing;
+- NTP, SNTP, NTS, PTP, gPTP, White Rabbit, Navheim-provided GNSS time, PPS,
+  IRIG, radio, broadcast, industrial, automotive, wireless, and space timing;
 - trusted timestamp evidence, packet inspection, conformance testing, and
   hardware timing laboratories;
 - future Aesynx integration through platform-neutral core traits.
@@ -80,6 +92,11 @@ starts. Crates used by downstream applications are published to crates.io;
 release automation, fuzz drivers, hardware-lab programs, and repository checks
 stay private with `publish = false`.
 
+After Navheim's stable timing API exists, `mundilfari-navheim` becomes an
+optional published integration crate depending on Navheim, `mundilfari-core`,
+and `mundilfari-engine`. Neither the Mundilfari facade nor its default graph
+depends on Navheim.
+
 ## Capability Status
 
 Legend: 🟢 available for the stated scope, 🟡 foundation only, 🔴 planned.
@@ -91,6 +108,7 @@ Legend: 🟢 available for the stated scope, 🟡 foundation only, 🔴 planned.
 | Rust compatibility | 🟢 Policy active | MSRV `1.90.0`; development pinned to stable `1.97.1` |
 | Security and release controls | 🟢 Available | CI, dependency policy, release metadata, pentest handoff, SBOM tooling |
 | Time model | 🟡 Foundation only | Module and crate boundaries are reserved; semantics begin after `v0.1.0` |
+| Navheim GNSS integration | 🔴 Blocked on upstream plan | One optional companion crate after Navheim's stable timing release |
 | Protocol codecs and clients | 🔴 Planned | Implemented in small versions recorded in the release plan |
 | Clock discipline and daemon | 🔴 Planned | No clock modification code exists in `v0.1.0` |
 | Production readiness | 🔴 Planned | Requires complete conformance, audits, hardware evidence, and `v1.0.0` admission |
@@ -162,7 +180,9 @@ Report vulnerabilities privately as described in
 
 The current default graph has no third-party runtime dependencies.
 Mundilfari will not depend on crates that replace its purpose, including
-general time models or NTP/PTP/NMEA protocol implementations.
+general time models or NTP/PTP implementations. Navheim is the deliberate
+upstream for GNSS interpretation, but only `mundilfari-navheim` may depend on
+it; the core, engine, platform, facade, and unrelated protocol crates may not.
 
 Generic dependencies such as Rustls, a required AEAD implementation, audited
 signature primitives, `libc`, or `windows-sys` may be admitted later only when:
@@ -220,6 +240,7 @@ scripts/generate-sbom.sh --check
 - [Release Plan](https://github.com/valkyoth/mundilfari/blob/main/docs/RELEASE_PLAN.md)
 - [Protocol Registry](https://github.com/valkyoth/mundilfari/blob/main/docs/PROTOCOLS.md)
 - [Threat Model](https://github.com/valkyoth/mundilfari/blob/main/docs/threat-model.md)
+- [Navheim Integration Boundary](https://github.com/valkyoth/mundilfari/blob/main/docs/NAVHEIM_INTEGRATION.md)
 - [Crate Version Matrix](https://github.com/valkyoth/mundilfari/blob/main/docs/CRATE_VERSION_MATRIX.md)
 - [Release Runbook](https://github.com/valkyoth/mundilfari/blob/main/docs/release-runbook.md)
 - [Toolchain Policy](https://github.com/valkyoth/mundilfari/blob/main/docs/toolchain-policy.md)

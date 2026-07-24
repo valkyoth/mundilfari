@@ -12,7 +12,7 @@ overrides a normative protocol specification.
 
 Mundilfari implements time representation, transfer, synchronization,
 discipline, verification, and evidence across software, networks, hardware,
-radio, GNSS timing, industrial systems, and precision timing.
+radio, GNSS-derived observations, industrial systems, and precision timing.
 
 The project must make easy work easy without hiding expert controls:
 
@@ -31,40 +31,45 @@ The project does not claim literal knowledge of every proprietary or lost
 protocol. Its completeness contract is the reviewed registry in
 [PROTOCOLS.md](PROTOCOLS.md): every public, legitimately accessible, stable
 time protocol in scope by the baseline date is either implemented before
-`1.0.0` or carries an explicit blocked/unavailable status and non-claim.
+`1.0.0`, consumed through an explicit reviewed upstream boundary, or carries
+an explicit blocked/unavailable status and non-claim.
 
 ## 2. Non-Negotiable Boundaries
 
-### 2.1 Time, not navigation
+### 2.1 Generic time, not GNSS interpretation
 
-Mundilfari owns GNSS timing only. It may decode or preserve non-time fields
-needed to validate the containing message, but it does not expose positioning,
-velocity, altitude, pseudorange, ephemeris navigation, RTK, PPP, geodesy, map,
-route, or receiver-navigation APIs. Those belong to Navheim.
+Navheim determines time from satellite-navigation signals, navigation
+messages, receiver protocols, corrections, and receiver timing outputs.
+Mundilfari consumes Navheim's validated result as one clock source.
 
-Timing crate names make this explicit:
+Mundilfari does not decode GNSS frames, NMEA, RTCM, RINEX, gpsd, or vendor
+receiver protocols. It does not resolve native GNSS weeks or eras, interpret
+transmitted UTC models, calculate satellite or receiver clock corrections,
+verify OSNMA/QZNMA, assess GNSS health, or assign GNSS meaning to a receiver
+PPS edge. It also has no position, velocity, pseudorange, ephemeris, RTK, PPP,
+geodesy, or receiver-navigation API.
 
-- `mundilfari-gps-time`;
-- `mundilfari-galileo-time`;
-- `mundilfari-beidou-time`;
-- `mundilfari-glonass-time`;
-- `mundilfari-nmea0183-time`;
-- `mundilfari-nmea2000-time`;
-- `mundilfari-rtcm-time`.
+One optional published crate, `mundilfari-navheim`, maps the stable Navheim
+timing event API into Mundilfari observations. It is implemented only after
+Navheim is built and publishes a reviewed stable boundary. The detailed
+contract is [NAVHEIM_INTEGRATION.md](NAVHEIM_INTEGRATION.md).
 
 ### 2.2 First-party time semantics
 
 Mundilfari implements itself:
 
 - exact time and duration domains;
-- epochs, eras, rollover, calendars, scales, and leap seconds;
+- protocol-neutral epochs, eras, rollover, calendars, scales, and leap
+  seconds;
 - uncertainty, quality, provenance, and clock correlation;
-- bounded wire parsing and encoding for every time protocol;
+- bounded wire parsing and encoding for every Mundilfari-owned time protocol;
 - protocol validation, state machines, timers, clients, and servers;
 - NTP filtering, selection, combining, poll control, and Khronos behavior;
 - NTS-KE records, exporter contexts, cookies, and NTP extension construction;
 - PTP messages, datasets, BMCA, port state machines, profiles, and monitoring;
-- GNSS timing, PPS correlation, IRIG, radio, media, industrial, and space time;
+- generic PPS capture, IRIG, radio, media, industrial, and non-GNSS space
+  time;
+- exact, fail-closed mapping of Navheim timing evidence in the companion crate;
 - consensus, servo, holdover, virtual clocks, and discipline policy;
 - security decisions specific to time and each protocol.
 
@@ -74,9 +79,10 @@ cryptographic primitives, a required AEAD, OS ABI declarations, or another
 mature non-time facility.
 
 Dependencies that replace the project's purpose remain forbidden: general
-time/date models, NTP/PTP implementations, NMEA time parsers, generic parser
-combinators used instead of first-party bounded wire code, and hidden runtime
-or serialization defaults.
+time/date models, NTP/PTP implementations, generic parser combinators used
+instead of first-party bounded wire code, and hidden runtime or serialization
+defaults. Navheim is the deliberate GNSS implementation boundary, but only
+`mundilfari-navheim` may depend on it.
 
 ### 2.3 `no_std` first
 
@@ -164,7 +170,29 @@ mundilfari-ptp-wire
 └── mundilfari-white-rabbit
 ```
 
-### 3.3 Repository-only packages
+### 3.3 Navheim companion crate
+
+After Navheim's serious stable timing release:
+
+```text
+navheim                 mundilfari-core
+   \                         /
+    +--- mundilfari-navheim -+
+                 |
+          mundilfari-engine
+```
+
+Navheim owns independent GNSS types and never depends on Mundilfari.
+`mundilfari-navheim` depends on both projects, preserves all upstream evidence,
+and may optionally integrate `mundilfari-platform` generic PPS capture.
+Mundilfari's core, engine, platform, facade, and protocol crates never depend
+on Navheim.
+
+The companion maps observations, model changes, ambiguity, gaps,
+discontinuities, invalidations, and security transitions. It cannot decode or
+reinterpret GNSS. Navheim is absent from every default feature graph.
+
+### 3.4 Repository-only packages
 
 The following stay `publish = false` and may require Rust `1.97.1`:
 
@@ -180,7 +208,7 @@ The following stay `publish = false` and may require Rust `1.97.1`:
 A testkit is published only if downstream users need stable public fixtures or
 conformance helpers. Otherwise it remains repository-only.
 
-### 3.4 Dependency direction
+### 3.5 Dependency direction
 
 ```text
 core domains and bounded wire utilities
@@ -202,6 +230,8 @@ Enforced rules:
 - generic crypto adapters do not own time-protocol decisions;
 - platform crates do not contain protocol validation policy;
 - the engine consumes validated observations, not untrusted packets;
+- only `mundilfari-navheim` may depend on Navheim;
+- an upstream invalidation must withdraw the corresponding engine observation;
 - experimental drafts cannot leak draft-only public types into stable crates;
 - profiles depend on base protocol engines, never the reverse;
 - dependency cycles and out-of-layer edges fail the local gate.
@@ -239,14 +269,19 @@ pub struct ProtocolTimestamp<R> {
 }
 ```
 
-NTP binary fractions, PTP scaled nanoseconds, GPS weeks, broadcast counters,
-and device-specific epochs are not destructively rounded on parse.
+NTP binary fractions, PTP scaled nanoseconds, broadcast counters, and
+device-specific epochs are not destructively rounded on parse. A resolved
+Navheim native GNSS instant is mapped without truncation by the companion; it
+is not parsed from GNSS wire data here.
 
 ### 4.3 Explicit scale and context
 
 UTC, TAI, UT1, POSIX, NTP, PTP, GPS, Galileo, BeiDou, GLONASS, terrestrial,
-and coordinate time scales remain distinct. Scale conversion requires the
-appropriate versioned leap, Earth-orientation, and GNSS-offset context.
+and coordinate time scales remain distinct. Mundilfari keeps generic scale
+identifiers and versioned conversion context so GNSS-derived observations can
+be compared with other clocks. Navheim independently resolves native GNSS
+values; disagreement between its result and Mundilfari's admitted scale/leap
+model is visible and fail-closed.
 
 UTC can represent leap second 60. Negative leap seconds are structurally
 supported. POSIX conversion requires an explicit repeat, clamp, reject, or
@@ -254,9 +289,11 @@ smear policy. A smear is never labeled true UTC.
 
 ### 4.4 Era resolution
 
-Truncated or wrapping timestamps require a caller-visible `EraContext`.
-Ambiguous RFC 868, NTP, GPS week, PTP, media, broadcast, uptime, and mission
-epoch values fail rather than silently choosing the nearest era.
+Truncated or wrapping Mundilfari protocol timestamps require a caller-visible
+`EraContext`. Ambiguous RFC 868, NTP, PTP, media, broadcast, uptime, and
+mission epoch values fail rather than silently choosing the nearest era.
+Navheim alone resolves truncated GNSS weeks/days/eras. The companion accepts
+resolved evidence or rejects the observation.
 
 ### 4.5 Observation, not magic timestamp
 

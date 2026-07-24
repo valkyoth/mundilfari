@@ -34,10 +34,13 @@ Every release requires:
 - exact-commit pentest, remediation, and clean retest before tagging;
 - no hidden dependency on one machine, private path, or inaccessible fixture.
 
-Mundilfari implements all time semantics and time-protocol behavior itself.
-Reviewed external crates may provide generic TLS, cryptography, or OS bindings;
-they do not own NTP, NTS, PTP, GNSS timing, time scales, clock algorithms, or
-protocol security policy.
+Mundilfari implements generic time semantics and every Mundilfari-owned
+time-protocol behavior itself. Reviewed external crates may provide generic
+TLS, cryptography, or OS bindings; they do not own NTP, NTS, PTP, generic time
+scales, clock algorithms, or protocol security policy. Navheim is the explicit
+exception for GNSS interpretation and is used only through
+`mundilfari-navheim`; Mundilfari never duplicates its decoders or GNSS trust
+decisions.
 
 ## Required Milestone Format
 
@@ -279,7 +282,8 @@ Goal: make epoch identity and rollover resolution explicit.
 Deliverables:
 
 - typed epochs, custom epoch identifiers, and bounded `EraContext`;
-- resolver traits for RFC 868, NTP, GNSS, PTP, broadcast, and device counters;
+- resolver traits for RFC 868, NTP, PTP, broadcast, and device counters;
+- a resolved-external-instant boundary for Navheim and other providers;
 - ambiguity and missing-context errors.
 
 Verification:
@@ -340,12 +344,14 @@ Exit criteria:
 
 Status: planned.
 
-Goal: represent UTC, TAI, UT1, POSIX, PTP, NTP, and GNSS scales distinctly.
+Goal: represent UTC, TAI, UT1, POSIX, PTP, NTP, and named GNSS scales
+distinctly without interpreting GNSS messages.
 
 Deliverables:
 
 - stable scale identifiers and conversion graph;
-- explicit leap, Earth-orientation, and GNSS-offset contexts;
+- explicit leap, Earth-orientation, and GNSS-offset contexts used to
+  cross-check externally resolved observations;
 - missing-data and stale-data failures.
 
 Verification:
@@ -1247,7 +1253,7 @@ Exit criteria:
 
 Status: planned.
 
-Goal: load leap, IERS/EOP, and GNSS offset data with provenance.
+Goal: load leap, IERS/EOP, and external scale-offset data with provenance.
 
 Deliverables:
 
@@ -1918,211 +1924,285 @@ Exit criteria:
 - secure network time is approved without false accuracy claims;
 - `v0.81.0 implementation stop reached. Run pentest for this exact commit.`
 
-## Phase 7: GNSS Timing PPS And Physical Timecodes
+## Phase 7: Navheim GNSS Integration PPS And Physical Timecodes
 
-### v0.82.0 - NMEA 0183 Timing
+This phase starts only after Navheim has published and independently reviewed
+its complete stable GNSS timing observation/event API. Until then every entry
+through `v0.90.0` is blocked planning work, not a buildable integration claim.
 
-Status: planned.
+### v0.82.0 - Navheim Upstream Admission
 
-Goal: implement bounded NMEA 0183 timing sentences only.
+Status: planned; blocked until Navheim's stable timing release.
+
+Goal: admit one exact stable Navheim release without creating a second GNSS
+implementation.
 
 Deliverables:
 
-- stream framing/checksum and time-relevant ZDA, RMC, GGA/GNS or registry
-  sentences;
-- talker/signal, validity, leap/quality, and raw unrelated field preservation;
-- no coordinate API.
+- license, MSRV, feature, unsafe, maintenance, security, SBOM, and transitive
+  dependency review;
+- frozen ownership and dependency-direction contract;
+- exact mapping inventory for every observation, absence, invalidation,
+  discontinuity, health, authentication, integrity, and provenance state.
 
 Verification:
 
-- licensed vectors/captures, all checksum/framing faults, partial streams,
-  midnight/date ambiguity, invalid status, mixed talkers, and fuzzing.
+- independently inspect Navheim's stable API and release evidence;
+- prove no Mundilfari crate is present in Navheim's graph and no existing
+  Mundilfari default graph gains Navheim.
 
 Exit criteria:
 
-- NMEA timing is useful without becoming a navigation framework;
+- one reviewed Navheim release is approved as the sole GNSS interpretation
+  upstream;
 - `v0.82.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.83.0 - NMEA 2000 Timing
+### v0.83.0 - mundilfari-navheim Crate Boundary
 
-Status: planned.
+Status: planned; blocked on `v0.82.0`.
 
-Goal: implement time-related NMEA 2000 PGNs.
+Goal: establish the optional companion crate and enforce dependency direction.
 
 Deliverables:
 
-- CAN framing boundary and exact licensed timing PGNs;
-- source identity, date/time, local offset, quality, and fast-packet handling;
-- non-time PGNs opaque/out of scope.
+- published `mundilfari-navheim` crate with Navheim, core, and engine
+  dependencies;
+- no default feature from `mundilfari` enables the companion;
+- compile-time layer rules preventing Navheim dependencies elsewhere.
 
 Verification:
 
-- licensed vectors, fast-packet reorder/loss, reserved values, source changes,
-  malformed lengths, and CAN simulator tests.
+- default/all-feature Cargo graphs, package dry-run, no_std capability matrix,
+  forbidden-edge fixtures, and downstream minimal examples.
 
 Exit criteria:
 
-- NMEA 2000 claims are limited to assigned timing PGNs;
+- users not selecting GNSS carry no Navheim code or transitive dependency;
 - `v0.83.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.84.0 - GPS Timing
+### v0.84.0 - Exact GNSS Instant And Scale Mapping
 
 Status: planned.
 
-Goal: implement GPS navigation-message fields required to trust time.
+Goal: map resolved Navheim instants into Mundilfari without truncation or
+implicit context.
 
 Deliverables:
 
-- week/time-of-week, UTC correction, leap announcement, health, issue, signal,
-  parity, and rollover resolution;
-- receiver clock/uncertainty and PPS relation;
-- no position, orbit solution, or pseudorange API.
+- exact native-scale and TAI mapping with checked arithmetic;
+- explicit UTC realization, leap-model, rounding, and quantization evidence;
+- fail-closed Navheim/Mundilfari scale-model disagreement.
 
 Verification:
 
-- official vectors, all rollover epochs, parity failure, stale UTC model,
-  leap transitions, unhealthy source, spoof inconsistency, and captures.
+- every upstream scale, extreme, leap, rollover result, unknown identifier,
+  conversion disagreement, overflow, and round-trip property.
 
 Exit criteria:
 
-- GPS is represented only as a precise timing source;
+- the adapter never decodes or resolves a GNSS week and never invents a UTC
+  mapping;
 - `v0.84.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.85.0 - Galileo Timing And OSNMA
+### v0.85.0 - GNSS Evidence And Observation Mapping
 
 Status: planned.
 
-Goal: implement Galileo timing and time-relevant OSNMA evidence.
+Goal: preserve complete Navheim evidence in generic Mundilfari observations.
 
 Deliverables:
 
-- Galileo scale/UTC fields, rollover, health, CRC, and signal provenance;
-- provider-backed OSNMA verification needed for timing authentication;
-- relay/meaconing risk retained separately.
+- asymmetric uncertainty, capture-domain, receiver/source, freshness, and
+  provenance mapping;
+- separate message correctness, navigation authentication, signal
+  authenticity, solution integrity, and clock-authority properties;
+- reason-bearing handling for pending, unsupported, ambiguous, stale,
+  rejected, and failed values.
 
 Verification:
 
-- official vectors/captures, key-chain/signature failures, stale material,
-  rollover, time-model conflict, replay, and authenticated-but-delayed tests.
+- exhaustive upstream-state mapping, unknown future states, delayed
+  authentication, false-precision attempts, and serialization round trips.
 
 Exit criteria:
 
-- OSNMA authentication is never collapsed into an accuracy guarantee;
+- no upstream security state is collapsed into a trusted boolean;
 - `v0.85.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.86.0 - BeiDou GLONASS QZSS NavIC And SBAS Timing
+### v0.86.0 - GNSS Event Lifecycle And Withdrawal
 
 Status: planned.
 
-Goal: implement remaining major constellation timing in focused crates.
+Goal: make Navheim invalidation and discontinuity authoritative downstream.
 
 Deliverables:
 
-- native scales, epochs, rollovers, UTC models, health, parity/CRC, and
-  uncertainty for each constellation;
-- constellation-specific provenance and cross-system corrections;
-- explicit excluded navigation fields.
+- artifact/generation/sequence identity and explicit source withdrawal;
+- stale-model, receiver-reset, outage, backward-step, security-transition, and
+  replacement handling;
+- bounded backpressure that cannot silently drop invalidation.
 
 Verification:
 
-- official vectors per constellation, era/leap boundaries, health/fault,
-  correction age, cross-scale comparison, and captured data.
+- reorder, duplication, omission, queue saturation, delayed invalidation,
+  restart, replacement, and stale-consumer adversarial schedules.
 
 Exit criteria:
 
-- each constellation keeps its native time semantics and crate boundary;
+- formerly accepted GNSS evidence cannot remain usable after Navheim withdraws
+  it;
 - `v0.86.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.87.0 - RTCM And RINEX Timing
+### v0.87.0 - Generic PPS To Navheim Correlation Bridge
 
 Status: planned.
 
-Goal: implement only time-related RTCM messages and RINEX records.
+Goal: combine Mundilfari physical PPS capture with Navheim GNSS semantics.
 
 Deliverables:
 
-- exact licensed/public revision timing fields, epochs, station/source
-  identity, and checksums;
-- surrounding navigation/correction data preserved or rejected by scope;
-- file/stream resource bounds.
+- capture-domain/generation, edge, sequence, device error, and capture
+  uncertainty handoff;
+- mapping of Navheim's represented instant, receiver time mark, convention,
+  calibrated delay, and correlation uncertainty;
+- pulse-without-time and time-without-pulse states.
 
 Verification:
 
-- official vectors, mixed versions, week/day rollover, malformed length/CRC,
-  huge file limits, and reference tool comparison.
+- reorder/loss/duplication, receiver reset, edge polarity, leap/rollover,
+  cable delay, quantization, Linux PPS hardware, and logic-analyzer fixtures.
 
 Exit criteria:
 
-- RTCM/RINEX support cannot be mistaken for RTK or positioning;
+- Mundilfari captures edges but only Navheim assigns their GNSS meaning;
 - `v0.87.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.88.0 - CGGTTS TWSTFT And gpsd Timing
+### v0.88.0 - Navheim Frequency And Time-Transfer Evidence
 
 Status: planned.
 
-Goal: implement laboratory/satellite exchange formats and gpsd timing adapter.
+Goal: map receiver frequency outputs and GNSS time-transfer evidence.
 
 Deliverables:
 
-- CGGTTS and legitimately available TWSTFT timing records;
-- gpsd time/PPS/quality integration without navigation ownership;
-- station, equipment, path, calibration, and uncertainty provenance.
+- nominal frequency, lock, receiver error, correction, delay, uncertainty, and
+  provenance mapping without capture or steering ownership;
+- Navheim common-view/all-in-view result mapping;
+- generic counter and oscillator interfaces remain Mundilfari-owned.
 
 Verification:
 
-- official/lab files, malformed records, calibration changes, day rollover,
-  gpsd replay/capture, PPS mismatch, and reference tool comparison.
+- lock loss, discontinuity, calibration changes, correlated uncertainty,
+  missing evidence, replay, and independent laboratory comparison.
 
 Exit criteria:
 
-- laboratory timing evidence retains calibration and source context;
+- receiver frequency evidence never grants oscillator-control authority;
 - `v0.88.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.89.0 - Vendor Receiver Timing
+### v0.89.0 - Generic External Satellite Observation Contract
 
 Status: planned.
 
-Goal: add timing-only adapters for documented receiver protocols.
+Goal: accept non-Navheim validated satellite-time providers without claiming
+GNSS decoding conformance.
 
 Deliverables:
 
-- separately reviewed UBX, TSIP, SiRF, NovAtel, and Garmin timing subsets where
-  vendor specifications permit;
-- time pulse, quality, spoof/jam, UTC model, and receiver identity;
-- opaque preservation of unrelated navigation fields.
+- protocol-neutral source builder for appliances, vendor SDKs, embedded
+  receivers, and recorded laboratory observations;
+- mandatory scale, uncertainty, capture, freshness, health, integrity,
+  authentication, and provenance policy;
+- explicit provider and conformance non-claims.
 
 Verification:
 
-- vendor vectors/captures, firmware variants, malformed streams, message loss,
-  pulse mismatch, and hardware receiver matrix.
+- missing/contradictory evidence, stale provider, unknown scale, malicious
+  uncertainty, source replacement, and custom no_std provider fixtures.
 
 Exit criteria:
 
-- undocumented vendor behavior is marked blocked rather than guessed;
+- Navheim is preferred for full GNSS interpretation but not mandatory for
+  already validated generic observations;
 - `v0.89.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.90.0 - GNSS PPS Correlation
+### v0.90.0 - Navheim Interoperability And Security Gate
 
 Status: planned.
 
-Goal: correlate civil receiver messages with physical PPS edges.
+Goal: approve the complete companion boundary before GNSS may influence a
+clock.
 
 Deliverables:
 
-- sequence/time-message association, serial latency, edge polarity, cable and
-  receiver delay, missed pulse, and uncertainty models;
-- receiver lock/holdover transitions;
-- multi-receiver comparison.
+- full stable Navheim event coverage and version-compatibility report;
+- independent scale/leap model disagreement evidence;
+- resolved critical/high conversion, invalidation, PPS, downgrade, and
+  dependency-direction findings.
 
 Verification:
 
-- synthetic reorder/loss/delay, logic-analyzer fixtures, Linux PPS hardware,
-  receiver restarts, midnight/leap, and long jitter measurements.
+- Navheim replay/simulator/receiver matrix, all companion fuzz/property
+  suites, no_std/MSRV/feature graphs, long-duration timing, hardware PPS, and
+  focused pentest.
 
 Exit criteria:
 
-- a PPS edge never receives a guessed second label;
+- GNSS clock use is evidence-backed without any duplicated GNSS decoder;
 - `v0.90.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.90.1 - TWSTFT
+
+Status: planned.
+
+Goal: implement two-way communication-satellite time and frequency transfer
+as a non-GNSS Mundilfari protocol.
+
+Deliverables:
+
+- legitimately available TWSTFT records, sessions, station/equipment/path
+  identities, calibration, delay, and uncertainty provenance;
+- explicit separation from Navheim GNSS common-view/all-in-view evidence;
+- bounded file/stream and state behavior.
+
+Verification:
+
+- official/laboratory files, malformed records, path and calibration changes,
+  day rollover, asymmetric delay, replay, and reference-tool comparison.
+
+Exit criteria:
+
+- communication-satellite transfer is supported without importing GNSS
+  navigation semantics;
+- `v0.90.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.90.2 - CGGTTS Interchange
+
+Status: planned.
+
+Goal: implement CGGTTS exchange records over already validated GNSS
+time-transfer evidence.
+
+Deliverables:
+
+- exact selected CGGTTS revision, station/equipment identifiers, tracks,
+  calibration, delays, uncertainty, and provenance;
+- input boundary accepting Navheim common-view/all-in-view results or
+  equivalently validated generic evidence;
+- no satellite solution, receiver-message, week-resolution, or health
+  interpretation.
+
+Verification:
+
+- official/laboratory records, malformed and oversized files, revision
+  differences, day rollover, calibration changes, precision retention, and
+  independent-tool comparison.
+
+Exit criteria:
+
+- Mundilfari owns only CGGTTS interchange while Navheim owns the GNSS solution
+  behind it;
+- `v0.90.2 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.91.0 - IRIG
 
@@ -2241,45 +2321,50 @@ Exit criteria:
 
 Status: planned.
 
-Goal: compare GNSS, PPS, IRIG, radio, and local oscillators securely.
+Goal: compare Navheim-provided GNSS evidence, PPS, IRIG, radio, and local
+oscillators securely.
 
 Deliverables:
 
 - inconsistency, propagation, delay, health, authentication, and common-mode
   source models;
-- jamming/spoof/meaconing warnings;
+- preserved Navheim jamming/spoof/meaconing evidence and invalidations;
 - no automatic trust solely from physical origin.
 
 Verification:
 
 - mixed simulator/hardware attacks, common antenna/reference, delayed
-  authenticated GNSS, radio spoof, oscillator fault, and split-brain cases.
+  authenticated Navheim evidence, radio spoof, oscillator fault, and
+  split-brain cases.
 
 Exit criteria:
 
 - physical source authentication and path-delay risk remain separate;
 - `v0.96.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.97.0 - GNSS And Physical Timing Security Gate
+### v0.97.0 - Navheim Adapter And Physical Timing Security Gate
 
 Status: planned.
 
-Goal: complete timing-only scope, conformance, hardware, and security review.
+Goal: complete companion-adapter, physical timing, conformance, hardware, and
+security review.
 
 Deliverables:
 
-- exact GNSS/non-navigation API audit;
-- hardware-lab evidence for PPS, IRIG, receivers, and radio corpora;
-- resolved critical/high parser, spoof, correlation, and quality findings.
+- exact `mundilfari-navheim` ownership and dependency audit;
+- hardware-lab evidence for PPS, Navheim receivers, IRIG, and radio corpora;
+- resolved critical/high adapter, invalidation, spoof-evidence preservation,
+  correlation, and quality findings.
 
 Verification:
 
-- full corpus/fuzz/simulator runs, receiver and generator matrix, no_std/MSRV,
-  long-duration timing measurements, and focused pentest.
+- full corpus/fuzz/simulator runs, Navheim version/receiver and generator
+  matrix, no_std/MSRV, long-duration timing measurements, and focused pentest.
 
 Exit criteria:
 
-- GNSS/physical timing claims are evidence-backed and navigation-free;
+- Navheim-derived and physical timing claims are evidence-backed with no
+  duplicated GNSS implementation;
 - `v0.97.0 implementation stop reached. Run pentest for this exact commit.`
 
 ## Phase 8: PTP gPTP Profiles And White Rabbit
@@ -3247,8 +3332,9 @@ Deliverables:
 
 Verification:
 
-- NTP/NTS/Roughtime/PTP/GNSS/radio mixed simulations, Byzantine coalitions,
-  common upstreams, partitions, stale sources, and interval properties.
+- NTP/NTS/Roughtime/PTP/Navheim-derived/radio mixed simulations, Byzantine
+  coalitions, common upstreams, partitions, stale sources, and interval
+  properties.
 
 Exit criteria:
 
@@ -3399,7 +3485,7 @@ Deliverables:
 
 - const capacities, caller buffers, deterministic resource reports, and
   compile-time/runtime capacity errors;
-- representative SNTP/NTP/PTP/GNSS/IRIG examples;
+- representative SNTP/NTP/PTP/Navheim-adapter/IRIG examples;
 - embedded transport integration guide.
 
 Verification:
@@ -3627,7 +3713,8 @@ Goal: complete the independent implementation matrix.
 
 Deliverables:
 
-- NTP/NTS/PTP/GNSS/timestamp/domain peer versions and exact scenarios;
+- NTP/NTS/PTP/Navheim-adapter/timestamp/domain peer versions and exact
+  scenarios;
 - packet/result comparison and divergence classification;
 - remediated security-relevant divergence.
 
@@ -3716,7 +3803,7 @@ Goal: validate weeks-long operation, holdover, faults, and accuracy claims.
 Deliverables:
 
 - long-run source/servo/daemon/rotation/restart results;
-- hardware lab for PTP/White Rabbit/GNSS/PPS/IRIG/oscillators;
+- hardware lab for PTP/White Rabbit/Navheim-derived GNSS/PPS/IRIG/oscillators;
 - documented measured accuracy envelopes and failures.
 
 Verification:

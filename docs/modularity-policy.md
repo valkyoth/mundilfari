@@ -9,11 +9,17 @@ Rules:
 - Consensus, servo, and holdover live in `mundilfari-engine`.
 - OS, transport, timestamp, PHC, PPS, and FFI live in
   `mundilfari-platform`.
+- GNSS interpretation lives in Navheim, never in a Mundilfari core, protocol,
+  platform, engine, or facade crate.
+- Only the optional `mundilfari-navheim` companion may depend on Navheim.
+- Generic PPS capture remains platform-owned; GNSS pulse semantics arrive from
+  Navheim through the companion.
 - Every independently useful protocol or tightly coupled family receives a
   focused crate.
 - Wire parsing, validation, I/O, source policy, and clock discipline remain
   separate modules and dependency layers.
 - Core and protocol wire crates do not depend on platform crates.
+- Navheim never depends on Mundilfari, preventing an integration cycle.
 - Stable crates do not expose experimental-draft types.
 - Non-generated Rust files may not exceed 500 lines.
 - Review for a split begins near 300 lines.

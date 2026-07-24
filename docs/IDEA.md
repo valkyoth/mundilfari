@@ -1,5 +1,10 @@
 crate name: Mundilfari
 
+> Historical design discussion. All earlier proposals for Mundilfari-owned
+> GNSS/NMEA/receiver decoding are superseded by the final Navheim ownership
+> addendum at the bottom of this document and
+> [NAVHEIM_INTEGRATION.md](NAVHEIM_INTEGRATION.md).
+
 I want you to make a extremely indepth technical architecture guide for a time protocol that will support every time protocol that exists in extreme depth. first make sure we really have every protocol that exists. second it must be the ultimate crate so it should have very easy to use apis that support everything you can do with a time protocol. Someone might want to make a clock, a linux app, a deamon, use it in their code, use it in their site whatever is possible do a good thinking pass on what someone would want to do with a time crate.
 
 then make sure security is extremely important and that we always follow the official rfc standard if exist or documentation.
@@ -3418,3 +3423,61 @@ Add an inexpensive receiver that exposes serial data and PPS.
 Later add a proper timing-grade receiver for accuracy, holdover, spoofing, and hardware timestamp testing.
 
 Navheim can reuse the same receiver equipment later, but Mundilfari only consumes its timing outputs, never its coordinate solution.
+
+## Final ownership addendum — Navheim determines GNSS time
+
+The earlier timing-only split still duplicated GNSS behavior. Even a
+"timing-only" GPS implementation would have required Mundilfari to decode
+navigation or receiver messages, resolve truncated weeks, interpret
+satellite-transmitted UTC and leap models, apply receiver clock corrections,
+evaluate health, verify OSNMA/QZNMA, and correlate receiver time marks with
+PPS. Navheim already plans to implement those operations as part of one
+complete GNSS/PNT system.
+
+The final boundary is:
+
+**Navheim determines time from GNSS. Mundilfari determines what to do with
+that validated time as one source among NTP, NTS, PTP, radio, generic PPS,
+hardware clocks, and local oscillators.**
+
+Navheim owns all GNSS-specific timing meaning:
+
+- constellation navigation frames and receiver protocols;
+- NMEA, RTCM, RINEX, gpsd, and documented vendor formats;
+- native epochs, week/day/era resolution, and transmitted UTC/leap models;
+- satellite and receiver clock models and time-only solutions;
+- health, OSNMA/QZNMA, spoofing, jamming, replay, integrity, and provenance;
+- receiver time-mark, PPS, frequency-output, delay, and uncertainty semantics.
+
+Mundilfari keeps:
+
+- generic continuous/atomic/civil time and named GNSS scale identifiers;
+- independent leap/scale models for fail-closed cross-checking;
+- generic physical PPS and frequency capture;
+- protocol-neutral observations and source traits;
+- cross-family comparison, consensus, servos, holdover, and clock discipline.
+
+There will be no `mundilfari-gps-time`, `mundilfari-galileo-time`,
+`mundilfari-glonass-time`, `mundilfari-beidou-time`,
+`mundilfari-nmea0183-time`, `mundilfari-nmea2000-time`,
+`mundilfari-rtcm-time`, or Mundilfari vendor-receiver crate.
+
+After Navheim is built first and publishes a reviewed stable GNSS timing
+observation/event API, one optional crates.io companion,
+`mundilfari-navheim`, will depend on both projects. Navheim never depends on
+Mundilfari, and Mundilfari's default graph never depends on Navheim.
+
+The adapter maps exact instants, uncertainty, capture-domain identity, health,
+authentication, integrity, freshness, provenance, and invalidation without
+reinterpreting GNSS. Mundilfari's generic source API continues to accept
+already validated observations from appliances, SDKs, custom receivers, or
+recorded laboratories without claiming GNSS decoding conformance.
+
+Generic PPS capture remains Mundilfari-owned. Navheim owns which GNSS instant
+a receiver says that pulse represents. The companion preserves both halves and
+never guesses the association.
+
+TWSTFT and other communication-satellite time-transfer protocols remain
+Mundilfari work because they are time protocols rather than GNSS navigation
+interpretation. Mundilfari may encode/decode CGGTTS interchange records, but
+the GNSS common-view/all-in-view solution evidence comes from Navheim.

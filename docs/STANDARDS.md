@@ -19,8 +19,14 @@ The machine-readable standards registry planned after `v0.1.0` records:
 
 ## Licensed Documents
 
-IEEE, ISO, IEC, ITU-T, SMPTE, NMEA, AUTOSAR, SAE, and similar documents may
+IEEE, ISO, IEC, ITU-T, SMPTE, AUTOSAR, SAE, and similar documents may
 restrict redistribution. Do not commit unauthorized copies.
+
+NMEA, RTCM, GNSS interface specifications, receiver protocols, OSNMA/QZNMA,
+and other GNSS interpretation standards are tracked and implemented by
+Navheim. Mundilfari records only the exact admitted Navheim API/version and
+the standards needed to verify its adapter behavior; it does not reproduce
+Navheim's normative GNSS implementation.
 
 Private licensed documents belong under `standards/private/`, which is ignored.
 The public repository may retain identifiers, hashes, independently written
