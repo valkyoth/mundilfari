@@ -1924,13 +1924,1545 @@ Exit criteria:
 - secure network time is approved without false accuracy claims;
 - `v0.81.0 implementation stop reached. Run pentest for this exact commit.`
 
-## Phase 7: Navheim GNSS Integration PPS And Physical Timecodes
+## Phase 7: Physical Timecodes And Generic External Sources
 
-This phase starts only after Navheim has published and independently reviewed
-its complete stable GNSS timing observation/event API. Until then every entry
-through `v0.90.0` is blocked planning work, not a buildable integration claim.
+### v0.82.0 - Generic External Satellite Observation Contract
 
-### v0.82.0 - Navheim Upstream Admission
+Status: planned.
+
+Goal: accept non-Navheim validated satellite-time providers without claiming
+GNSS decoding conformance.
+
+Deliverables:
+
+- protocol-neutral source builder for appliances, vendor SDKs, embedded
+  receivers, and recorded laboratory observations;
+- mandatory scale, uncertainty, capture, freshness, health, integrity,
+  authentication, and provenance policy;
+- explicit provider and conformance non-claims.
+
+Verification:
+
+- missing/contradictory evidence, stale provider, unknown scale, malicious
+  uncertainty, source replacement, and custom no_std provider fixtures.
+
+Exit criteria:
+
+- Navheim is preferred for full GNSS interpretation but not mandatory for
+  already validated generic observations;
+- `v0.82.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.83.0 - TWSTFT
+
+Status: planned.
+
+Goal: implement two-way communication-satellite time and frequency transfer
+as a non-GNSS Mundilfari protocol.
+
+Deliverables:
+
+- legitimately available TWSTFT records, sessions, station/equipment/path
+  identities, calibration, delay, and uncertainty provenance;
+- explicit separation from Navheim GNSS common-view/all-in-view evidence;
+- bounded file/stream and state behavior.
+
+Verification:
+
+- official/laboratory files, malformed records, path and calibration changes,
+  day rollover, asymmetric delay, replay, and reference-tool comparison.
+
+Exit criteria:
+
+- communication-satellite transfer is supported without importing GNSS
+  navigation semantics;
+- `v0.83.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.84.0 - IRIG
+
+Status: planned.
+
+Goal: implement the complete selected licensed IRIG revision.
+
+Deliverables:
+
+- all assigned code rates/modulations/control functions, frame sync, BCD,
+  quality, year, leap, and straight-binary seconds;
+- edge/sample decoder and encoder;
+- profile/revision identity.
+
+Verification:
+
+- licensed vectors, every code/control layout, pulse tolerance boundaries,
+  missing/extra pulses, noise, year ambiguity, and hardware generator captures.
+
+Exit criteria:
+
+- support is not limited to one hardcoded IRIG-B example;
+- `v0.84.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.85.0 - IEEE 1344 And Power IRIG
+
+Status: planned.
+
+Goal: implement IEEE 1344 and power-system IRIG extensions.
+
+Deliverables:
+
+- extension/control fields, time quality, local offset, leap/DST indicators;
+- exact profile/revision validation;
+- compatibility/conflict handling with base IRIG.
+
+Verification:
+
+- licensed vectors, reserved/conflicting fields, parity, transition
+  announcements, malformed frames, and power equipment captures.
+
+Exit criteria:
+
+- extension meaning is profile-bound and never inferred from bit position alone;
+- `v0.85.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.86.0 - WWVB WWV WWVH And CHU
+
+Status: planned.
+
+Goal: implement North American national radio time observations.
+
+Deliverables:
+
+- published amplitude/phase/time codes, frame synchronization, parity/quality,
+  announcements, propagation metadata, and decoders;
+- acquisition separated from civil decode;
+- signal source provenance.
+
+Verification:
+
+- official vectors, recorded signals, noise/fading, wrong station, propagation
+  delay, leap/DST announcements, spoof scenarios, and hardware receiver tests.
+
+Exit criteria:
+
+- decoded radio time includes path uncertainty and spoofability;
+- `v0.86.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.87.0 - DCF77 MSF JJY And Other National Radio
+
+Status: planned.
+
+Goal: implement remaining registry national radio timecodes.
+
+Deliverables:
+
+- separate DCF77, MSF, JJY, BPC, ALS162, RWM, and BPM crates where official
+  specifications are accessible;
+- station-specific modulation, parity, announcements, and time zone/UTC rules;
+- unavailable entries retained as explicit non-claims.
+
+Verification:
+
+- official vectors/recordings per station, noise, propagation, parity,
+  transition, spoof, and cross-source comparisons.
+
+Exit criteria:
+
+- each claimed station has authoritative provenance and evidence;
+- `v0.87.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.88.0 - eLoran And Frequency References
+
+Status: planned.
+
+Goal: implement eLoran time observations and generic frequency references.
+
+Deliverables:
+
+- accessible eLoran timing fields/path/correction models;
+- frequency observation, calibration, stability, and traceability types;
+- no unsupported positioning claims.
+
+Verification:
+
+- official/lab vectors, propagation/correction faults, chain identity, signal
+  loss, oscillator measurements, and captured hardware.
+
+Exit criteria:
+
+- frequency and time-of-arrival observations retain calibration uncertainty;
+- `v0.88.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.89.0 - Physical Source Fusion And Spoof Monitoring
+
+Status: planned.
+
+Goal: compare generic externally validated observations, PPS, IRIG, radio, and
+local oscillators securely without requiring Navheim.
+
+Deliverables:
+
+- inconsistency, propagation, delay, health, authentication, and common-mode
+  source models;
+- preserved provider health, spoof/meaconing evidence, and invalidations;
+- no automatic trust solely from physical origin.
+
+Verification:
+
+- mixed simulator/hardware attacks, common antenna/reference, delayed
+  authenticated external evidence, radio spoof, oscillator fault, and
+  split-brain cases.
+
+Exit criteria:
+
+- physical source authentication and path-delay risk remain separate;
+- `v0.89.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.90.0 - Physical Timing Security Gate
+
+Status: planned.
+
+Goal: complete generic physical timing, conformance, hardware, and security
+review without a GNSS implementation dependency.
+
+Deliverables:
+
+- exact physical-source ownership and generic-provider API audit;
+- hardware-lab evidence for PPS, IRIG, frequency references, and radio corpora;
+- resolved critical/high capture, parser, spoof-evidence preservation,
+  invalidation, correlation, and quality findings.
+
+Verification:
+
+- full corpus/fuzz/simulator runs, source and generator matrix, no_std/MSRV,
+  long-duration timing measurements, and focused pentest.
+
+Exit criteria:
+
+- generic external and physical timing claims are evidence-backed without a
+  Navheim dependency;
+- `v0.90.0 implementation stop reached. Run pentest for this exact commit.`
+
+## Phase 8: PTP gPTP Profiles And White Rabbit
+
+### v0.91.0 - PTP Wire Formats
+
+Status: planned.
+
+Goal: implement IEEE 1588-2008/2019 wire formats and shared TLVs.
+
+Deliverables:
+
+- all event/general messages, headers, timestamp fields, correction, ports,
+  sequence, flags, and required TLVs;
+- unknown TLV preservation and exact revision identity;
+- borrowed decode/caller-owned encode.
+
+Verification:
+
+- licensed vectors, every message/TLV/truncation/alignment, reserved fields,
+  maximum correction, arbitrary input, and round trips.
+
+Exit criteria:
+
+- packet inspection is complete without claiming clock synchronization;
+- `v0.91.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.92.0 - PTPv1 Compatibility
+
+Status: planned.
+
+Goal: implement IEEE 1588-2002 compatibility separately.
+
+Deliverables:
+
+- exact v1 messages, datasets, state differences, and conversion boundaries;
+- no v1/v2 structure confusion;
+- explicit historical/compatibility policy.
+
+Verification:
+
+- licensed vectors/captures, version confusion, malformed fields, replay,
+  state transitions, and legacy implementation interop.
+
+Exit criteria:
+
+- PTPv1 remains isolated from modern default operation;
+- `v0.92.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.93.0 - PTP Datasets And BMCA
+
+Status: planned.
+
+Goal: implement PTP datasets and best-master selection.
+
+Deliverables:
+
+- default/current/parent/time-properties/port datasets;
+- foreign-master qualification, BMCA, tie-breaking, and identity;
+- bounded candidate storage.
+
+Verification:
+
+- licensed decision vectors, permutations/ties, duplicate identities, timeout,
+  malicious priorities, dataset changes, and model checking.
+
+Exit criteria:
+
+- master selection is deterministic and profile-aware;
+- `v0.93.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.94.0 - End-To-End Delay
+
+Status: planned.
+
+Goal: implement Sync/Follow_Up and Delay_Req/Delay_Resp operation.
+
+Deliverables:
+
+- one/two-step event association, residence/correction, delay, offset, and
+  timeout state;
+- software/hardware timestamp quality and sequence identity;
+- asymmetry/negative-delay warnings.
+
+Verification:
+
+- licensed examples, reorder/loss/duplicate, wrong sequence/source, correction
+  overflow, delayed transmit timestamp, asymmetry, and simulator runs.
+
+Exit criteria:
+
+- event timestamps cannot associate with the wrong exchange;
+- `v0.94.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.95.0 - Peer-To-Peer Delay
+
+Status: planned.
+
+Goal: implement Pdelay exchanges and neighbor rate ratio.
+
+Deliverables:
+
+- request/response/follow-up association, peer mean path delay, rate ratio;
+- neighbor identity, multiport state, and lost-response policy;
+- delay attack signals.
+
+Verification:
+
+- licensed vectors, reordered peers, source changes, asymmetry, loss, duplicate,
+  rate drift, transparent peers, and simulator traces.
+
+Exit criteria:
+
+- peer delay state is bounded and cannot cross port identities;
+- `v0.95.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.96.0 - Ordinary Clock State Machine
+
+Status: planned.
+
+Goal: implement complete ordinary-clock port behavior.
+
+Deliverables:
+
+- all required states, timers, qualification, announce timeout, role changes;
+- E2E/P2P and one/two-step integration;
+- state transition evidence and fault recovery.
+
+Verification:
+
+- transition coverage, timer boundaries, grandmaster change, port fault,
+  message mutation, and independent PTP implementation interop.
+
+Exit criteria:
+
+- ordinary-clock behavior satisfies the selected revision clause map;
+- `v0.96.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.97.0 - Boundary Clock
+
+Status: planned.
+
+Goal: implement bounded multiport boundary-clock behavior.
+
+Deliverables:
+
+- per-port datasets/state, one selected parent, downstream master behavior;
+- topology loop and domain protection;
+- cross-port timestamp/servo coordination.
+
+Verification:
+
+- multiport simulator, topology changes, loops, simultaneous masters, port
+  failure, source quality changes, and linuxptp interop.
+
+Exit criteria:
+
+- state cannot leak across domains or ports incorrectly;
+- `v0.97.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.98.0 - Transparent Clocks
+
+Status: planned.
+
+Goal: implement E2E and P2P transparent-clock correction behavior.
+
+Deliverables:
+
+- ingress/egress residence time, correction updates, peer delay, forwarding;
+- one/two-step handling and overflow policy;
+- monitor-only mode.
+
+Verification:
+
+- hardware/simulator residence paths, correction overflow, negative/late
+  timestamps, duplicates, multi-hop composition, and independent switch interop.
+
+Exit criteria:
+
+- correction evidence remains traceable through each clock;
+- `v0.98.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.99.0 - PTP Transports
+
+Status: planned.
+
+Goal: implement raw Ethernet, UDPv4, and UDPv6 PTP mappings.
+
+Deliverables:
+
+- multicast/unicast addresses, ports, EtherType, domain/interface policy;
+- event/general socket separation and timestamp metadata;
+- VLAN/link metadata hooks where specified.
+
+Verification:
+
+- packet captures, IPv4/IPv6/raw interop, multicast membership, interface
+  changes, wrong domain/port, MTU, and timestamp association.
+
+Exit criteria:
+
+- transport choice does not alter base PTP semantic validation;
+- `v0.99.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.100.0 - Signaling Management And YANG
+
+Status: planned.
+
+Goal: implement PTP signaling, management, and management mappings.
+
+Deliverables:
+
+- complete accessible actions/TLVs, target identities, errors, and response;
+- bounded management datasets and YANG mapping;
+- remote mutation authorization disabled by default.
+
+Verification:
+
+- licensed vectors, unknown/critical TLVs, targeting, fragmentation, access
+  denial, amplification/work limits, and management interop.
+
+Exit criteria:
+
+- unauthenticated management cannot alter live clock state;
+- `v0.100.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.101.0 - PTP Hardware And Servo Integration
+
+Status: planned.
+
+Goal: integrate hardware timestamps, PHC, and PTP-oriented servo/holdover.
+
+Deliverables:
+
+- timestamp quality admission, PHC/system target choice, cross timestamps;
+- bounded phase/frequency servo and holdover uncertainty;
+- calibration and asymmetry inputs.
+
+Verification:
+
+- hardware NIC/PHC lab, timestamp loss/reorder, oscillator drift, grandmaster
+  changes, cable asymmetry, long holdover, and fault injection.
+
+Exit criteria:
+
+- accuracy reports derive from measured paths rather than packet decode;
+- `v0.101.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.102.0 - gPTP
+
+Status: planned.
+
+Goal: implement IEEE 802.1AS-2011 and 802.1AS-2020 profiles.
+
+Deliverables:
+
+- profile-specific datasets, BMCA differences, domains, intervals, roles,
+  transport, time-aware system, and quality;
+- revision isolation and legacy interoperability;
+- TSN clock correlation outputs.
+
+Verification:
+
+- licensed vectors, conformance suite where available, multi-hop TSN
+  simulation, automotive/media peers, revision mismatch, and hardware interop.
+
+Exit criteria:
+
+- gPTP local/network time is not labeled UTC without correlation;
+- `v0.102.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.103.0 - Enterprise And Telecom Profiles
+
+Status: planned.
+
+Goal: implement IETF Enterprise and ITU-T telecom PTP profiles.
+
+Deliverables:
+
+- RFC 9760 and licensed G.8265.1/G.8275.1/G.8275.2 parameters;
+- profile-specific BMCA, transport, unicast, timing, quality, and topology;
+- profile negotiation/config validation.
+
+Verification:
+
+- RFC/licensed vectors, telecom lab/simulator, wrong profile/domain, source
+  quality transitions, holdover, and vendor interop.
+
+Exit criteria:
+
+- profile rules remain outside and cannot weaken the base engine;
+- `v0.103.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.104.0 - Power Media And Fronthaul Profiles
+
+Status: planned.
+
+Goal: implement power, broadcast/media, AES67, and fronthaul timing profiles.
+
+Deliverables:
+
+- IEEE C37.238, IEC/IEEE 61850-9-3, SMPTE ST 2059-2, AES67, 802.1CM, and
+  applicable O-RAN timing;
+- exact licensed parameters, identities, TLVs, intervals, and quality;
+- no media or power-control functionality outside timing.
+
+Verification:
+
+- licensed vectors/conformance, equipment interoperability, wrong profile,
+  domain collision, topology, grandmaster switch, and long soak.
+
+Exit criteria:
+
+- every profile claim names its exact revision and evidence;
+- `v0.104.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.105.0 - Synchronous Ethernet
+
+Status: planned.
+
+Goal: implement SyncE timing messaging and quality-level integration.
+
+Deliverables:
+
+- accessible ESMC/SSM messages, quality levels, selection, failure, and
+  frequency-source provenance;
+- frequency transfer distinct from phase/time;
+- PTP profile integration hooks.
+
+Verification:
+
+- licensed vectors, quality transitions, loops, source loss, mismatched
+  frequency/time sources, and lab equipment interop.
+
+Exit criteria:
+
+- frequency lock never implies phase or UTC synchronization;
+- `v0.105.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.106.0 - White Rabbit
+
+Status: planned.
+
+Goal: implement White Rabbit/high-accuracy software and hardware boundaries.
+
+Deliverables:
+
+- compatible PTP high-accuracy profile, WR TLVs/state, frequency/phase, link
+  delay, calibration, fixed-delay compensation, and hardware capability;
+- monitor/codec operation without compatible hardware;
+- explicit accuracy non-claims.
+
+Verification:
+
+- legitimate specification vectors, WR hardware lab, fiber/link changes,
+  calibration corruption, asymmetric delay, holdover, and multi-device interop.
+
+Exit criteria:
+
+- White Rabbit accuracy is claimed only for measured compatible hardware;
+- `v0.106.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.107.0 - Experimental NTS4PTP
+
+Status: planned.
+
+Goal: implement the exact pinned NTS-for-PTP draft experimentally.
+
+Deliverables:
+
+- revision-specific messages/state/security associations;
+- integration with NTS provider boundaries and PTP identities;
+- no stable profile leakage or silent activation.
+
+Verification:
+
+- draft vectors, revision mismatch, replay, key rotation, delay attack
+  residuals, malformed security TLVs, and available interop.
+
+Exit criteria:
+
+- experimental authentication never implies delay-attack immunity;
+- `v0.107.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.108.0 - PTP Family Security And Hardware Gate
+
+Status: planned.
+
+Goal: complete PTP profile conformance, hardware evidence, and security review.
+
+Deliverables:
+
+- revision/profile clause maps and support matrix;
+- delay/topology/threat and accuracy evidence report;
+- resolved critical/high parser, state, FFI, timestamp, servo, and profile issues.
+
+Verification:
+
+- linuxptp/vendor matrix, official suites, multi-NIC/grandmaster/switch lab,
+  fuzz/simulator/soak, target matrix, and focused pentest.
+
+Exit criteria:
+
+- precision claims are bounded by actual measured configurations;
+- `v0.108.0 implementation stop reached. Run pentest for this exact commit.`
+
+## Phase 9: Industrial Automotive Wireless Media And Space
+
+### v0.109.0 - BACnet And DNP3 Time
+
+Status: planned.
+
+Goal: implement timing services of BACnet and DNP3.
+
+Deliverables:
+
+- time/date, synchronization, delay, and timestamped-event objects assigned by
+  licensed revisions;
+- surrounding transport/application traits;
+- no complete BACnet/DNP3 stack claim.
+
+Verification:
+
+- licensed vectors, malformed objects, sequence/delay, rollover, event order,
+  simulator and independent stack interop.
+
+Exit criteria:
+
+- both crates expose timing only and preserve application context;
+- `v0.109.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.110.0 - IEC Power Time
+
+Status: planned.
+
+Goal: implement IEC 60870 and IEC 61850 time mappings.
+
+Deliverables:
+
+- relevant timestamp formats, quality flags, sync/control timing, and event
+  semantics;
+- power profile correlation with PTP where specified;
+- exact licensed scope.
+
+Verification:
+
+- licensed vectors, invalid/reserved quality, leap/DST, rollover, stale event,
+  device interop, and fault simulations.
+
+Exit criteria:
+
+- time quality flags are never discarded during normalization;
+- `v0.110.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.111.0 - CANopen And J1939 Time
+
+Status: planned.
+
+Goal: implement CANopen and J1939 time services.
+
+Deliverables:
+
+- time/date messages, epoch/rollover, node/source identity, and CAN transport
+  boundary;
+- bus load/resource policy;
+- no general vehicle/fieldbus stack.
+
+Verification:
+
+- licensed vectors/captures, arbitration reorder, duplicate source, rollover,
+  malformed frames, bus saturation, and device interop.
+
+Exit criteria:
+
+- CAN timing state is source-bound and bounded;
+- `v0.111.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.112.0 - Industrial Ethernet Timing
+
+Status: planned.
+
+Goal: implement EtherCAT, PROFINET, CIP Sync, Sercos, and POWERLINK timing.
+
+Deliverables:
+
+- separately scoped licensed distributed-clock/time services;
+- cycle/frequency/time-of-day correlation and quality;
+- integration with PTP/gPTP only where normative.
+
+Verification:
+
+- licensed vectors, industrial simulators/equipment, cycle wrap, source loss,
+  jitter, wrong profile, and topology changes.
+
+Exit criteria:
+
+- no crate claims surrounding motion/control protocol completeness;
+- `v0.112.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.113.0 - KNX And OPC UA Time
+
+Status: planned.
+
+Goal: implement KNX and OPC UA time-related services.
+
+Deliverables:
+
+- exact date/time/zone/status/timestamp mappings;
+- surrounding application/transport boundary and trust provenance;
+- local/UTC ambiguity handling.
+
+Verification:
+
+- licensed vectors, invalid civil values, zone/DST, stale server, malformed
+  payload, and independent stack interop.
+
+Exit criteria:
+
+- formatted application time is not treated as synchronized automatically;
+- `v0.113.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.114.0 - AUTOSAR Time
+
+Status: planned.
+
+Goal: implement AUTOSAR Ethernet, CAN, and FlexRay time synchronization.
+
+Deliverables:
+
+- separate transport profiles, message/state/sequence/CRC, domains, rate
+  correction, gateway behavior, and quality;
+- exact licensed revisions;
+- automotive safety non-claims.
+
+Verification:
+
+- licensed vectors, sequence/replay, gateway paths, bus loss, rate drift,
+  malformed messages, and automotive simulator interop.
+
+Exit criteria:
+
+- each AUTOSAR transport retains profile-specific semantics;
+- `v0.114.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.115.0 - FlexRay And TTEthernet
+
+Status: planned.
+
+Goal: implement native FlexRay and SAE AS6802/TTEthernet timing.
+
+Deliverables:
+
+- cycle/macrotick timing, fault-tolerant synchronization, clique/fault state,
+  and network-time correlation;
+- transport traits and exact licensed scope;
+- no general bus scheduler.
+
+Verification:
+
+- licensed vectors, clique split, malicious clocks, cycle rollover, frame
+  loss, rate fault, and deterministic network simulation.
+
+Exit criteria:
+
+- fault-tolerant claims match the exact modeled assumptions;
+- `v0.115.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.116.0 - Bluetooth Time
+
+Status: planned.
+
+Goal: implement Bluetooth time services and Mesh Time.
+
+Deliverables:
+
+- Current Time, Reference Time Update, Device Time, Time Profile, Elapsed Time,
+  and Mesh timing assigned by accessible specifications;
+- GATT/mesh transport traits, authority, zone/DST, accuracy, and update state;
+- permission and bonding policy hooks.
+
+Verification:
+
+- licensed vectors, malformed characteristics, replay, unauthorized update,
+  zone/leap transitions, mesh propagation, and device interop.
+
+Exit criteria:
+
+- local wireless time cannot silently authorize system-clock changes;
+- `v0.116.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.117.0 - Zigbee Matter And LoRaWAN Time
+
+Status: planned.
+
+Goal: implement timing services for Zigbee, Matter, and LoRaWAN.
+
+Deliverables:
+
+- exact time clusters/services and LoRaWAN DeviceTime request/answer;
+- GPS/UTC scale identity, precision, network authority, replay, and transport
+  boundary;
+- no complete IoT stack.
+
+Verification:
+
+- licensed vectors, replay/counter, rollover, unauthorized writer, network
+  delay, sleep/rejoin, malformed payload, and ecosystem interop.
+
+Exit criteria:
+
+- low-power network time retains scale and security provenance;
+- `v0.117.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.118.0 - Wi-Fi TSF FTM TSCH And 6TiSCH
+
+Status: planned.
+
+Goal: implement wireless clock synchronization and ranging-time correlations.
+
+Deliverables:
+
+- TSF/FTM timing fields and 802.15.4 TSCH/6TiSCH timing services;
+- local clock domain/correlation types, rollover, slot identity, and quality;
+- no ranging/position calculation.
+
+Verification:
+
+- licensed vectors, counter wrap, AP/coordinator changes, delayed frames,
+  slot drift, malicious time source, and simulator/device captures.
+
+Exit criteria:
+
+- local wireless clocks are not mislabeled civil UTC;
+- `v0.118.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.119.0 - WirelessHART ISA100 And Thread Time
+
+Status: planned.
+
+Goal: implement timing portions of WirelessHART, ISA100, and Thread.
+
+Deliverables:
+
+- network time, slots, synchronization updates, source/quality, and loss state;
+- accessible licensed profiles and transport boundaries;
+- no general mesh stack.
+
+Verification:
+
+- licensed vectors, coordinator loss, slot/counter wrap, delayed/replayed
+  updates, partition/merge, malformed frames, and simulator interop.
+
+Exit criteria:
+
+- deterministic network timing retains partition and authority state;
+- `v0.119.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.120.0 - Cellular NITZ And 5G Time
+
+Status: planned.
+
+Goal: implement cellular network time and 5G reference-time mappings.
+
+Deliverables:
+
+- NITZ civil/zone fields and applicable 5G timing/reference information;
+- source/network identity, uncertainty, replay/age, and correction policy;
+- no modem or radio-access stack.
+
+Verification:
+
+- licensed/public vectors, zone/DST, stale network, roaming, replay, malformed
+  fields, leap/scales, and modem captures.
+
+Exit criteria:
+
+- unauthenticated network civil time remains visibly low trust;
+- `v0.120.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.121.0 - SMPTE MIDI AES And Broadcast Time
+
+Status: planned.
+
+Goal: implement SMPTE/MIDI/AES time and RDS/DVB/ATSC/ISDB timing.
+
+Deliverables:
+
+- frame/drop-frame, sample, broadcast civil time, offsets, quality, and
+  clock-correlation types;
+- exact licensed revisions and transport boundaries;
+- wall time distinct from media counters.
+
+Verification:
+
+- licensed vectors, frame-rate/drop-frame boundaries, discontinuities,
+  wraparound, signal loss, malformed fields, and equipment/file interop.
+
+Exit criteria:
+
+- frame and sample positions never become UTC without correlation;
+- `v0.121.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.122.0 - RTP MPEG DASH HLS And SCTE Timing
+
+Status: planned.
+
+Goal: implement packet/media/web presentation timing and wall-clock correlation.
+
+Deliverables:
+
+- RTP/RTCP correlation, MPEG PTS/DTS/PCR, DASH/HLS/SCTE timing constructs;
+- wrap/discontinuity, clock identity, capture, and synchronization metadata;
+- no media codec/player implementation.
+
+Verification:
+
+- RFC/licensed vectors, counter wrap, discontinuity, jitter/reorder, wrong
+  sender mapping, manifest extremes, and reference tool interop.
+
+Exit criteria:
+
+- media timeline and civil timeline stay type-distinct;
+- `v0.122.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.123.0 - CCSDS Time
+
+Status: planned.
+
+Goal: implement selected complete CCSDS time-code families.
+
+Deliverables:
+
+- unsegmented, day-segmented, calendar-segmented, ASCII, P-field, fine-time,
+  agency epoch, and mission registry support;
+- exact Blue Book revision and legal vector provenance;
+- mission epoch context.
+
+Verification:
+
+- official vectors, P-field combinations, epoch ambiguity, fine-time extremes,
+  truncation, malformed codes, and reference tool comparison.
+
+Exit criteria:
+
+- CCSDS support is complete for the claimed revision/families;
+- `v0.123.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.124.0 - SpaceWire SpaceFibre And ECSS Time
+
+Status: planned.
+
+Goal: implement space link timecodes and ECSS timing profiles.
+
+Deliverables:
+
+- accessible SpaceWire/SpaceFibre time distribution and ECSS mappings;
+- control/data correlation, mission epoch, quality, and loss state;
+- no complete spacecraft bus stack.
+
+Verification:
+
+- licensed vectors, counter wrap, lost/reordered codes, link reset, epoch
+  mismatch, malformed controls, and hardware/simulator interop.
+
+Exit criteria:
+
+- link-local and mission civil time remain explicitly correlated;
+- `v0.124.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.125.0 - Domain Protocol Security Gate
+
+Status: planned.
+
+Goal: audit industrial, automotive, wireless, media, and space timing.
+
+Deliverables:
+
+- exact licensed revision/clause/completeness matrix;
+- timing-only and no-surrounding-stack API audit;
+- resolved critical/high parser, state, replay, resource, and trust findings.
+
+Verification:
+
+- all official vectors, cross-domain fuzzing, simulators/equipment subsets,
+  target/MSRV matrix, and focused pentest.
+
+Exit criteria:
+
+- every domain claim is narrow, source-bound, and evidence-backed;
+- `v0.125.0 implementation stop reached. Run pentest for this exact commit.`
+
+## Phase 10: Trusted Timestamp Evidence
+
+### v0.126.0 - RFC 3161 Codec And Client
+
+Status: planned.
+
+Goal: implement bounded Time-Stamp Protocol requests/responses and client state.
+
+Deliverables:
+
+- message imprint, algorithms, policy, nonce, certificates, status, token, and
+  transport boundary;
+- strict ASN.1/DER through reviewed generic or first-party bounded components;
+- evidence distinct from current-time observation.
+
+Verification:
+
+- RFC vectors, malformed DER, algorithm/policy mismatch, nonce replay, imprint
+  mismatch, huge chains, client/server captures, and independent TSA interop.
+
+Exit criteria:
+
+- a token cannot verify for the wrong data, policy, nonce, or authority;
+- `v0.126.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.127.0 - RFC 3161 TSA Server And RFC 5816
+
+Status: planned.
+
+Goal: implement a bounded TSA server and updated algorithm behavior.
+
+Deliverables:
+
+- request admission, clock/evidence source policy, serials, signing provider,
+  certificates, failure statuses, and RFC 5816 updates;
+- rate/work limits and audited issuance records;
+- no claim beyond configured authority/time source.
+
+Verification:
+
+- independent clients, algorithm transitions, duplicate nonce, clock fault,
+  signing failure, floods, malformed requests, and token verification.
+
+Exit criteria:
+
+- issuance fails closed when trusted time or signing authority is unavailable;
+- `v0.127.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.128.0 - Evidence Record Syntax
+
+Status: planned.
+
+Goal: implement ERS and XMLERS archival evidence.
+
+Deliverables:
+
+- hash trees, timestamps, chains, renewal, algorithms, policies, and XML
+  canonicalization boundary;
+- bounded depth/count/work and original-byte signature semantics;
+- versioned validation report.
+
+Verification:
+
+- RFC/standard vectors, tree/path substitution, renewal order, algorithm
+  migration, malformed ASN.1/XML, canonicalization attacks, and huge records.
+
+Exit criteria:
+
+- archival evidence renewal is complete for the claimed revisions;
+- `v0.128.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.129.0 - Timestamped Data COSE And ETSI
+
+Status: planned.
+
+Goal: implement timestamped-data bindings, COSE headers, and applicable ETSI profiles.
+
+Deliverables:
+
+- binding/coverage semantics, protected/unprotected header policy, token chains;
+- exact licensed ETSI scope and algorithm policy;
+- unknown critical field handling.
+
+Verification:
+
+- RFC/licensed vectors, coverage substitution, duplicate headers, wrong
+  countersignature, malformed chains, algorithm downgrade, and interop.
+
+Exit criteria:
+
+- evidence is cryptographically bound to the intended object and context;
+- `v0.129.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.130.0 - X9.95 Authenticode And OpenTimestamps
+
+Status: planned.
+
+Goal: implement remaining registry timestamp evidence families.
+
+Deliverables:
+
+- legitimately licensed ANSI X9.95 profile;
+- Authenticode timestamp compatibility;
+- OpenTimestamps generation/verification and calendar proof handling.
+
+Verification:
+
+- licensed/public vectors, cross-protocol confusion, digest/nonce/policy
+  mismatch, calendar equivocation, malformed proofs, and ecosystem interop.
+
+Exit criteria:
+
+- each evidence family retains its own trust and renewal semantics;
+- `v0.130.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.131.0 - Evidence Chain Policy
+
+Status: planned.
+
+Goal: unify verification and archival-renewal policy without erasing formats.
+
+Deliverables:
+
+- authority/time/algorithm/revocation/renewal policy;
+- evidence interval, provenance, validation level, and non-forgeable result;
+- mixed-chain and long-term algorithm migration.
+
+Verification:
+
+- mixed authorities/formats, expired/revoked chains, weak algorithm cutoffs,
+  renewal gaps, conflicting tokens, and deterministic reports.
+
+Exit criteria:
+
+- “valid evidence” always names policy, time interval, and trust basis;
+- `v0.131.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.132.0 - Timestamp Evidence Security Gate
+
+Status: planned.
+
+Goal: audit timestamp authorities, evidence chains, dependencies, and formats.
+
+Deliverables:
+
+- complete clause/conformance matrix and algorithm inventory;
+- signature/DER/XML/resource/renewal security review;
+- resolved critical/high findings and interoperability report.
+
+Verification:
+
+- official vectors, independent TSAs/tools, fuzzing, adversarial chains,
+  cargo evidence, and focused pentest.
+
+Exit criteria:
+
+- trusted evidence is production-candidate quality independently of clock sync;
+- `v0.132.0 implementation stop reached. Run pentest for this exact commit.`
+
+## Phase 11: Consensus Servos Facade And Applications
+
+### v0.133.0 - Generic Source Consensus
+
+Status: planned.
+
+Goal: combine validated observations from different protocol families.
+
+Deliverables:
+
+- normalization, uncertainty expansion, correlated groups, supported interval,
+  authentication/diversity policy, split-brain, and evidence;
+- bounded sources and stable result ordering;
+- no clock change authority.
+
+Verification:
+
+- NTP/NTS/Roughtime/PTP/generic-external/radio mixed simulations, Byzantine
+  coalitions, common upstreams, partitions, stale sources, and interval
+  properties. Navheim is represented only by protocol-neutral fixtures here.
+
+Exit criteria:
+
+- cross-protocol consensus reports synchronized, rough, split, insufficient,
+  or unsafe explicitly;
+- `v0.133.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.134.0 - PLL FLL And Hybrid Servo
+
+Status: planned.
+
+Goal: implement bounded fixed-point software clock servos.
+
+Deliverables:
+
+- step-only test, slew, PLL, FLL, and hybrid control;
+- phase/frequency limits, panic thresholds, startup/recovery policy;
+- explicit measurement uncertainty and target capability.
+
+Verification:
+
+- analytical traces, drift/noise/step/loss simulations, saturation, numerical
+  stability, reference implementation comparison, and property tests.
+
+Exit criteria:
+
+- servos cannot issue out-of-policy adjustments;
+- `v0.134.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.135.0 - PTP And Kalman-Style Servo
+
+Status: planned.
+
+Goal: implement high-rate phase/frequency estimation for precision clocks.
+
+Deliverables:
+
+- PTP-oriented servo and bounded fixed-point Kalman-style estimator;
+- covariance/uncertainty, outlier, delay/asymmetry, and reset behavior;
+- no floating-point requirement in no_std core.
+
+Verification:
+
+- recorded PHC traces, simulated oscillator/noise models, numerical extremes,
+  convergence, malicious delay, and independent estimator comparison.
+
+Exit criteria:
+
+- estimator uncertainty grows honestly when assumptions fail;
+- `v0.135.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.136.0 - Holdover Models
+
+Status: planned.
+
+Goal: implement oscillator holdover and uncertainty growth.
+
+Deliverables:
+
+- age/frequency/stability/temperature observation model;
+- configurable oscillator classes and conservative fallback;
+- source loss/recovery state and persisted calibration provenance.
+
+Verification:
+
+- long synthetic/hardware traces, temperature ramps, restart, stale model,
+  source recovery, underreported stability attacks, and saturation.
+
+Exit criteria:
+
+- holdover never reports frozen uncertainty or hidden source loss;
+- `v0.136.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.0 - Trusted Virtual Clock
+
+Status: planned.
+
+Goal: provide a monotonic application clock with civil correlation.
+
+Deliverables:
+
+- synchronized/rough/holdover/faulted states;
+- monotonic nonrollback reads, uncertainty, UTC/POSIX conversion policy;
+- persistence and restart bootstrap boundary.
+
+Verification:
+
+- concurrent reads, clock rollback, system step, suspend/restart, leap/smear,
+  holdover, split-brain, and monotonicity properties.
+
+Exit criteria:
+
+- applications can read trusted time without a network request per event;
+- `v0.137.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.138.0 - Easy Blocking APIs
+
+Status: planned.
+
+Goal: expose safe one-shot application APIs.
+
+Deliverables:
+
+- local clock, SNTP, NTP, NTS, Roughtime, TIME, and selected source builders;
+- explicit protocol/security defaults, timeout, endpoint, and report;
+- no silent fallback or automatic system-clock change.
+
+Verification:
+
+- compile examples, error ergonomics, feature combinations, local simulators,
+  public interop, timeout/cancel, and misuse compile tests.
+
+Exit criteria:
+
+- common tasks are easy while trust and uncertainty remain visible;
+- `v0.138.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.139.0 - Poll Future And Async Adapters
+
+Status: planned.
+
+Goal: support runtime-neutral asynchronous use.
+
+Deliverables:
+
+- canonical poll APIs, `core::future` adapters, cancellation, deadlines, and
+  user-executor integration;
+- optional owned buffers under `alloc`;
+- no Tokio or runtime dependency.
+
+Verification:
+
+- custom executor, embedded-style polling, Tokio adapter example outside the
+  graph, cancellation races, wake discipline, and feature matrix.
+
+Exit criteria:
+
+- async use does not make an executor part of protocol semantics;
+- `v0.139.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.140.0 - Fixed-Storage Builders
+
+Status: planned.
+
+Goal: complete allocation-free user-facing client/server construction.
+
+Deliverables:
+
+- const capacities, caller buffers, deterministic resource reports, and
+  compile-time/runtime capacity errors;
+- representative SNTP/NTP/PTP/generic-external/IRIG examples;
+- embedded transport integration guide.
+
+Verification:
+
+- zero/minimum/maximum capacity, stack-size reports, no allocator link,
+  embedded targets, examples, and compile-fail overflow cases.
+
+Exit criteria:
+
+- Level A protocol use is practical and documented;
+- `v0.140.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.141.0 - Multi-Protocol Server Framework
+
+Status: planned.
+
+Goal: provide bounded shared server orchestration.
+
+Deliverables:
+
+- listener/source/quality/rate/work policy across applicable protocols;
+- per-protocol amplification and authentication controls;
+- coordinated shutdown and audit events.
+
+Verification:
+
+- mixed-client simulation, global/per-source quotas, slow clients, flood,
+  source fault, shutdown/restart, and protocol-isolation tests.
+
+Exit criteria:
+
+- one overloaded protocol cannot starve or weaken another silently;
+- `v0.141.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.142.0 - Privilege-Separated Daemon
+
+Status: planned.
+
+Goal: implement `mundilfarid` with least-privilege clock discipline.
+
+Deliverables:
+
+- unprivileged workers/consensus, typed authenticated local IPC, minimal helper;
+- bounded slew/step/leap/PHC commands, startup-only step policy, audit records;
+- Linux reference plus supported platform service designs.
+
+Verification:
+
+- IPC fuzzing, command authorization, compromised-worker simulation, socket/file
+  permissions, restart, downgrade, service sandbox, VM clock tests, and soak.
+
+Exit criteria:
+
+- daemon compromise outside the helper cannot issue arbitrary privileged calls;
+- `v0.142.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.143.0 - CLI
+
+Status: planned.
+
+Goal: deliver query, inspect, compare, decode, convert, serve, and monitor tools.
+
+Deliverables:
+
+- bounded stdin/file/network inputs and machine/human output;
+- explicit trust labels, secret redaction, exit codes, and offline modes;
+- no clock discipline without an explicit privileged command/policy.
+
+Verification:
+
+- command snapshots, hostile files/terminals, output redaction, pipe failures,
+  every protocol sample, platform behavior, and shell completion.
+
+Exit criteria:
+
+- CLI output cannot imply trust or precision absent from the reading;
+- `v0.143.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.144.0 - C ABI
+
+Status: planned.
+
+Goal: expose stable bounded C interfaces for selected core/protocol APIs.
+
+Deliverables:
+
+- versioned opaque handles, caller buffers, error codes, ownership, threading,
+  and panic containment;
+- generated header and ABI compatibility policy;
+- no unbounded allocation or Rust layout exposure.
+
+Verification:
+
+- C/C++ consumers on Linux/Windows/macOS, null/length/alias misuse, ABI layout,
+  symbol version, sanitizer, and fuzz tests.
+
+Exit criteria:
+
+- invalid foreign input cannot unwind across or corrupt the ABI;
+- `v0.144.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.145.0 - WASM And Browser-Safe APIs
+
+Status: planned.
+
+Goal: expose safe browser-compatible time parsing and evidence verification.
+
+Deliverables:
+
+- core conversions, RFC 3339/IXDTF/TZif, packet inspection, Roughtime and
+  timestamp-evidence verification;
+- caller-provided JavaScript transport hooks;
+- explicit lack of UDP/raw/hardware/clock-control browser capabilities.
+
+Verification:
+
+- wasm32 build, browser/node tests, hostile buffers, JS exception/cancel,
+  feature size, and no native dependency leakage.
+
+Exit criteria:
+
+- no proprietary web time protocol is invented for convenience;
+- `v0.145.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.146.0 - Metrics Health And Audit Records
+
+Status: planned.
+
+Goal: provide bounded operational observability without leaking secrets.
+
+Deliverables:
+
+- source/consensus/servo/holdover/daemon health;
+- bounded labels, cardinality, audit schema, redaction, retention, and export
+  traits;
+- accuracy/authentication/traceability fields kept separate.
+
+Verification:
+
+- cardinality attacks, secret/cookie/certificate redaction, malformed exporter,
+  backpressure, schema compatibility, and incident replay.
+
+Exit criteria:
+
+- observability cannot alter protocol validity or exhaust core state;
+- `v0.146.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.147.0 - Configuration And Policy Language
+
+Status: planned.
+
+Goal: implement explicit, validated deployment policy.
+
+Deliverables:
+
+- bounded configuration for sources, trust, diversity, protocols, clocks,
+  steps/slew, holdover, resources, platform privileges, and logging;
+- secure defaults, unknown-field rejection, versioning, and dry-run;
+- no generic deserialization dependency in protocol cores.
+
+Verification:
+
+- valid/invalid fixtures, unknown/duplicate/conflicting fields, resource
+  extremes, downgrade attempts, migration, and property fuzzing.
+
+Exit criteria:
+
+- deployed behavior is reviewable before the daemon changes a clock;
+- `v0.147.0 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.148.0 - Navheim-Independent Product Security Gate
+
+Status: planned.
+
+Goal: audit all generic and non-Navheim consensus, servo, facade, daemon,
+interface, and operational behavior.
+
+Deliverables:
+
+- API/feature/capability truth review;
+- privilege, IPC, config, C/WASM, observability, and cross-protocol threat
+  reports;
+- resolved critical/high product findings.
+
+Verification:
+
+- full system simulation, platform VM matrix, live sources/hardware subset,
+  long holdover/restart/fault tests, and focused pentest.
+
+Exit criteria:
+
+- every Navheim-independent feature is complete and the frozen generic source
+  boundary is ready for the final companion phase;
+- `v0.148.0 implementation stop reached. Run pentest for this exact commit.`
+
+## Phase 12: Navheim Integration As Final Feature Work
+
+This is the last feature phase. It starts only after Navheim has published and
+independently reviewed its complete stable GNSS timing observation/event API.
+All generic clocks, source traits, consensus, servos, applications, and
+non-Navheim protocols are already implemented before this dependency enters
+the workspace.
+
+### v0.149.0 - Navheim Upstream Admission
 
 Status: planned; blocked until Navheim's stable timing release.
 
@@ -1955,11 +3487,11 @@ Exit criteria:
 
 - one reviewed Navheim release is approved as the sole GNSS interpretation
   upstream;
-- `v0.82.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.149.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.83.0 - mundilfari-navheim Crate Boundary
+### v0.150.0 - mundilfari-navheim Crate Boundary
 
-Status: planned; blocked on `v0.82.0`.
+Status: planned; blocked on `v0.149.0`.
 
 Goal: establish the optional companion crate and enforce dependency direction.
 
@@ -1978,9 +3510,9 @@ Verification:
 Exit criteria:
 
 - users not selecting GNSS carry no Navheim code or transitive dependency;
-- `v0.83.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.150.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.84.0 - Exact GNSS Instant And Scale Mapping
+### v0.151.0 - Exact GNSS Instant And Scale Mapping
 
 Status: planned.
 
@@ -2002,9 +3534,9 @@ Exit criteria:
 
 - the adapter never decodes or resolves a GNSS week and never invents a UTC
   mapping;
-- `v0.84.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.151.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.85.0 - GNSS Evidence And Observation Mapping
+### v0.152.0 - GNSS Evidence And Observation Mapping
 
 Status: planned.
 
@@ -2027,9 +3559,9 @@ Verification:
 Exit criteria:
 
 - no upstream security state is collapsed into a trusted boolean;
-- `v0.85.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.152.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.86.0 - GNSS Event Lifecycle And Withdrawal
+### v0.153.0 - GNSS Event Lifecycle And Withdrawal
 
 Status: planned.
 
@@ -2051,9 +3583,9 @@ Exit criteria:
 
 - formerly accepted GNSS evidence cannot remain usable after Navheim withdraws
   it;
-- `v0.86.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.153.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.87.0 - Generic PPS To Navheim Correlation Bridge
+### v0.154.0 - Generic PPS To Navheim Correlation Bridge
 
 Status: planned.
 
@@ -2075,9 +3607,9 @@ Verification:
 Exit criteria:
 
 - Mundilfari captures edges but only Navheim assigns their GNSS meaning;
-- `v0.87.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.154.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.88.0 - Navheim Frequency And Time-Transfer Evidence
+### v0.155.0 - Navheim Frequency And Time-Transfer Evidence
 
 Status: planned.
 
@@ -2098,35 +3630,9 @@ Verification:
 Exit criteria:
 
 - receiver frequency evidence never grants oscillator-control authority;
-- `v0.88.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.155.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.89.0 - Generic External Satellite Observation Contract
-
-Status: planned.
-
-Goal: accept non-Navheim validated satellite-time providers without claiming
-GNSS decoding conformance.
-
-Deliverables:
-
-- protocol-neutral source builder for appliances, vendor SDKs, embedded
-  receivers, and recorded laboratory observations;
-- mandatory scale, uncertainty, capture, freshness, health, integrity,
-  authentication, and provenance policy;
-- explicit provider and conformance non-claims.
-
-Verification:
-
-- missing/contradictory evidence, stale provider, unknown scale, malicious
-  uncertainty, source replacement, and custom no_std provider fixtures.
-
-Exit criteria:
-
-- Navheim is preferred for full GNSS interpretation but not mandatory for
-  already validated generic observations;
-- `v0.89.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.90.0 - Navheim Interoperability And Security Gate
+### v0.156.0 - Navheim Interoperability And Security Gate
 
 Status: planned.
 
@@ -2149,34 +3655,9 @@ Verification:
 Exit criteria:
 
 - GNSS clock use is evidence-backed without any duplicated GNSS decoder;
-- `v0.90.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.156.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.90.1 - TWSTFT
-
-Status: planned.
-
-Goal: implement two-way communication-satellite time and frequency transfer
-as a non-GNSS Mundilfari protocol.
-
-Deliverables:
-
-- legitimately available TWSTFT records, sessions, station/equipment/path
-  identities, calibration, delay, and uncertainty provenance;
-- explicit separation from Navheim GNSS common-view/all-in-view evidence;
-- bounded file/stream and state behavior.
-
-Verification:
-
-- official/laboratory files, malformed records, path and calibration changes,
-  day rollover, asymmetric delay, replay, and reference-tool comparison.
-
-Exit criteria:
-
-- communication-satellite transfer is supported without importing GNSS
-  navigation semantics;
-- `v0.90.1 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.90.2 - CGGTTS Interchange
+### v0.157.0 - CGGTTS Interchange
 
 Status: planned.
 
@@ -2202,1489 +3683,14 @@ Exit criteria:
 
 - Mundilfari owns only CGGTTS interchange while Navheim owns the GNSS solution
   behind it;
-- `v0.90.2 implementation stop reached. Run pentest for this exact commit.`
+- `v0.157.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.91.0 - IRIG
+## Phase 13: Final Conformance Hardening And Production Admission
 
-Status: planned.
+No new feature or protocol scope is introduced after `v0.157.0`. Newly
+discovered missing stable-baseline work is inserted before this phase.
 
-Goal: implement the complete selected licensed IRIG revision.
-
-Deliverables:
-
-- all assigned code rates/modulations/control functions, frame sync, BCD,
-  quality, year, leap, and straight-binary seconds;
-- edge/sample decoder and encoder;
-- profile/revision identity.
-
-Verification:
-
-- licensed vectors, every code/control layout, pulse tolerance boundaries,
-  missing/extra pulses, noise, year ambiguity, and hardware generator captures.
-
-Exit criteria:
-
-- support is not limited to one hardcoded IRIG-B example;
-- `v0.91.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.92.0 - IEEE 1344 And Power IRIG
-
-Status: planned.
-
-Goal: implement IEEE 1344 and power-system IRIG extensions.
-
-Deliverables:
-
-- extension/control fields, time quality, local offset, leap/DST indicators;
-- exact profile/revision validation;
-- compatibility/conflict handling with base IRIG.
-
-Verification:
-
-- licensed vectors, reserved/conflicting fields, parity, transition
-  announcements, malformed frames, and power equipment captures.
-
-Exit criteria:
-
-- extension meaning is profile-bound and never inferred from bit position alone;
-- `v0.92.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.93.0 - WWVB WWV WWVH And CHU
-
-Status: planned.
-
-Goal: implement North American national radio time observations.
-
-Deliverables:
-
-- published amplitude/phase/time codes, frame synchronization, parity/quality,
-  announcements, propagation metadata, and decoders;
-- acquisition separated from civil decode;
-- signal source provenance.
-
-Verification:
-
-- official vectors, recorded signals, noise/fading, wrong station, propagation
-  delay, leap/DST announcements, spoof scenarios, and hardware receiver tests.
-
-Exit criteria:
-
-- decoded radio time includes path uncertainty and spoofability;
-- `v0.93.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.94.0 - DCF77 MSF JJY And Other National Radio
-
-Status: planned.
-
-Goal: implement remaining registry national radio timecodes.
-
-Deliverables:
-
-- separate DCF77, MSF, JJY, BPC, ALS162, RWM, and BPM crates where official
-  specifications are accessible;
-- station-specific modulation, parity, announcements, and time zone/UTC rules;
-- unavailable entries retained as explicit non-claims.
-
-Verification:
-
-- official vectors/recordings per station, noise, propagation, parity,
-  transition, spoof, and cross-source comparisons.
-
-Exit criteria:
-
-- each claimed station has authoritative provenance and evidence;
-- `v0.94.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.95.0 - eLoran And Frequency References
-
-Status: planned.
-
-Goal: implement eLoran time observations and generic frequency references.
-
-Deliverables:
-
-- accessible eLoran timing fields/path/correction models;
-- frequency observation, calibration, stability, and traceability types;
-- no unsupported positioning claims.
-
-Verification:
-
-- official/lab vectors, propagation/correction faults, chain identity, signal
-  loss, oscillator measurements, and captured hardware.
-
-Exit criteria:
-
-- frequency and time-of-arrival observations retain calibration uncertainty;
-- `v0.95.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.96.0 - Physical Source Fusion And Spoof Monitoring
-
-Status: planned.
-
-Goal: compare Navheim-provided GNSS evidence, PPS, IRIG, radio, and local
-oscillators securely.
-
-Deliverables:
-
-- inconsistency, propagation, delay, health, authentication, and common-mode
-  source models;
-- preserved Navheim jamming/spoof/meaconing evidence and invalidations;
-- no automatic trust solely from physical origin.
-
-Verification:
-
-- mixed simulator/hardware attacks, common antenna/reference, delayed
-  authenticated Navheim evidence, radio spoof, oscillator fault, and
-  split-brain cases.
-
-Exit criteria:
-
-- physical source authentication and path-delay risk remain separate;
-- `v0.96.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.97.0 - Navheim Adapter And Physical Timing Security Gate
-
-Status: planned.
-
-Goal: complete companion-adapter, physical timing, conformance, hardware, and
-security review.
-
-Deliverables:
-
-- exact `mundilfari-navheim` ownership and dependency audit;
-- hardware-lab evidence for PPS, Navheim receivers, IRIG, and radio corpora;
-- resolved critical/high adapter, invalidation, spoof-evidence preservation,
-  correlation, and quality findings.
-
-Verification:
-
-- full corpus/fuzz/simulator runs, Navheim version/receiver and generator
-  matrix, no_std/MSRV, long-duration timing measurements, and focused pentest.
-
-Exit criteria:
-
-- Navheim-derived and physical timing claims are evidence-backed with no
-  duplicated GNSS implementation;
-- `v0.97.0 implementation stop reached. Run pentest for this exact commit.`
-
-## Phase 8: PTP gPTP Profiles And White Rabbit
-
-### v0.98.0 - PTP Wire Formats
-
-Status: planned.
-
-Goal: implement IEEE 1588-2008/2019 wire formats and shared TLVs.
-
-Deliverables:
-
-- all event/general messages, headers, timestamp fields, correction, ports,
-  sequence, flags, and required TLVs;
-- unknown TLV preservation and exact revision identity;
-- borrowed decode/caller-owned encode.
-
-Verification:
-
-- licensed vectors, every message/TLV/truncation/alignment, reserved fields,
-  maximum correction, arbitrary input, and round trips.
-
-Exit criteria:
-
-- packet inspection is complete without claiming clock synchronization;
-- `v0.98.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.99.0 - PTPv1 Compatibility
-
-Status: planned.
-
-Goal: implement IEEE 1588-2002 compatibility separately.
-
-Deliverables:
-
-- exact v1 messages, datasets, state differences, and conversion boundaries;
-- no v1/v2 structure confusion;
-- explicit historical/compatibility policy.
-
-Verification:
-
-- licensed vectors/captures, version confusion, malformed fields, replay,
-  state transitions, and legacy implementation interop.
-
-Exit criteria:
-
-- PTPv1 remains isolated from modern default operation;
-- `v0.99.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.100.0 - PTP Datasets And BMCA
-
-Status: planned.
-
-Goal: implement PTP datasets and best-master selection.
-
-Deliverables:
-
-- default/current/parent/time-properties/port datasets;
-- foreign-master qualification, BMCA, tie-breaking, and identity;
-- bounded candidate storage.
-
-Verification:
-
-- licensed decision vectors, permutations/ties, duplicate identities, timeout,
-  malicious priorities, dataset changes, and model checking.
-
-Exit criteria:
-
-- master selection is deterministic and profile-aware;
-- `v0.100.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.101.0 - End-To-End Delay
-
-Status: planned.
-
-Goal: implement Sync/Follow_Up and Delay_Req/Delay_Resp operation.
-
-Deliverables:
-
-- one/two-step event association, residence/correction, delay, offset, and
-  timeout state;
-- software/hardware timestamp quality and sequence identity;
-- asymmetry/negative-delay warnings.
-
-Verification:
-
-- licensed examples, reorder/loss/duplicate, wrong sequence/source, correction
-  overflow, delayed transmit timestamp, asymmetry, and simulator runs.
-
-Exit criteria:
-
-- event timestamps cannot associate with the wrong exchange;
-- `v0.101.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.102.0 - Peer-To-Peer Delay
-
-Status: planned.
-
-Goal: implement Pdelay exchanges and neighbor rate ratio.
-
-Deliverables:
-
-- request/response/follow-up association, peer mean path delay, rate ratio;
-- neighbor identity, multiport state, and lost-response policy;
-- delay attack signals.
-
-Verification:
-
-- licensed vectors, reordered peers, source changes, asymmetry, loss, duplicate,
-  rate drift, transparent peers, and simulator traces.
-
-Exit criteria:
-
-- peer delay state is bounded and cannot cross port identities;
-- `v0.102.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.103.0 - Ordinary Clock State Machine
-
-Status: planned.
-
-Goal: implement complete ordinary-clock port behavior.
-
-Deliverables:
-
-- all required states, timers, qualification, announce timeout, role changes;
-- E2E/P2P and one/two-step integration;
-- state transition evidence and fault recovery.
-
-Verification:
-
-- transition coverage, timer boundaries, grandmaster change, port fault,
-  message mutation, and independent PTP implementation interop.
-
-Exit criteria:
-
-- ordinary-clock behavior satisfies the selected revision clause map;
-- `v0.103.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.104.0 - Boundary Clock
-
-Status: planned.
-
-Goal: implement bounded multiport boundary-clock behavior.
-
-Deliverables:
-
-- per-port datasets/state, one selected parent, downstream master behavior;
-- topology loop and domain protection;
-- cross-port timestamp/servo coordination.
-
-Verification:
-
-- multiport simulator, topology changes, loops, simultaneous masters, port
-  failure, source quality changes, and linuxptp interop.
-
-Exit criteria:
-
-- state cannot leak across domains or ports incorrectly;
-- `v0.104.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.105.0 - Transparent Clocks
-
-Status: planned.
-
-Goal: implement E2E and P2P transparent-clock correction behavior.
-
-Deliverables:
-
-- ingress/egress residence time, correction updates, peer delay, forwarding;
-- one/two-step handling and overflow policy;
-- monitor-only mode.
-
-Verification:
-
-- hardware/simulator residence paths, correction overflow, negative/late
-  timestamps, duplicates, multi-hop composition, and independent switch interop.
-
-Exit criteria:
-
-- correction evidence remains traceable through each clock;
-- `v0.105.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.106.0 - PTP Transports
-
-Status: planned.
-
-Goal: implement raw Ethernet, UDPv4, and UDPv6 PTP mappings.
-
-Deliverables:
-
-- multicast/unicast addresses, ports, EtherType, domain/interface policy;
-- event/general socket separation and timestamp metadata;
-- VLAN/link metadata hooks where specified.
-
-Verification:
-
-- packet captures, IPv4/IPv6/raw interop, multicast membership, interface
-  changes, wrong domain/port, MTU, and timestamp association.
-
-Exit criteria:
-
-- transport choice does not alter base PTP semantic validation;
-- `v0.106.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.107.0 - Signaling Management And YANG
-
-Status: planned.
-
-Goal: implement PTP signaling, management, and management mappings.
-
-Deliverables:
-
-- complete accessible actions/TLVs, target identities, errors, and response;
-- bounded management datasets and YANG mapping;
-- remote mutation authorization disabled by default.
-
-Verification:
-
-- licensed vectors, unknown/critical TLVs, targeting, fragmentation, access
-  denial, amplification/work limits, and management interop.
-
-Exit criteria:
-
-- unauthenticated management cannot alter live clock state;
-- `v0.107.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.108.0 - PTP Hardware And Servo Integration
-
-Status: planned.
-
-Goal: integrate hardware timestamps, PHC, and PTP-oriented servo/holdover.
-
-Deliverables:
-
-- timestamp quality admission, PHC/system target choice, cross timestamps;
-- bounded phase/frequency servo and holdover uncertainty;
-- calibration and asymmetry inputs.
-
-Verification:
-
-- hardware NIC/PHC lab, timestamp loss/reorder, oscillator drift, grandmaster
-  changes, cable asymmetry, long holdover, and fault injection.
-
-Exit criteria:
-
-- accuracy reports derive from measured paths rather than packet decode;
-- `v0.108.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.109.0 - gPTP
-
-Status: planned.
-
-Goal: implement IEEE 802.1AS-2011 and 802.1AS-2020 profiles.
-
-Deliverables:
-
-- profile-specific datasets, BMCA differences, domains, intervals, roles,
-  transport, time-aware system, and quality;
-- revision isolation and legacy interoperability;
-- TSN clock correlation outputs.
-
-Verification:
-
-- licensed vectors, conformance suite where available, multi-hop TSN
-  simulation, automotive/media peers, revision mismatch, and hardware interop.
-
-Exit criteria:
-
-- gPTP local/network time is not labeled UTC without correlation;
-- `v0.109.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.110.0 - Enterprise And Telecom Profiles
-
-Status: planned.
-
-Goal: implement IETF Enterprise and ITU-T telecom PTP profiles.
-
-Deliverables:
-
-- RFC 9760 and licensed G.8265.1/G.8275.1/G.8275.2 parameters;
-- profile-specific BMCA, transport, unicast, timing, quality, and topology;
-- profile negotiation/config validation.
-
-Verification:
-
-- RFC/licensed vectors, telecom lab/simulator, wrong profile/domain, source
-  quality transitions, holdover, and vendor interop.
-
-Exit criteria:
-
-- profile rules remain outside and cannot weaken the base engine;
-- `v0.110.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.111.0 - Power Media And Fronthaul Profiles
-
-Status: planned.
-
-Goal: implement power, broadcast/media, AES67, and fronthaul timing profiles.
-
-Deliverables:
-
-- IEEE C37.238, IEC/IEEE 61850-9-3, SMPTE ST 2059-2, AES67, 802.1CM, and
-  applicable O-RAN timing;
-- exact licensed parameters, identities, TLVs, intervals, and quality;
-- no media or power-control functionality outside timing.
-
-Verification:
-
-- licensed vectors/conformance, equipment interoperability, wrong profile,
-  domain collision, topology, grandmaster switch, and long soak.
-
-Exit criteria:
-
-- every profile claim names its exact revision and evidence;
-- `v0.111.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.112.0 - Synchronous Ethernet
-
-Status: planned.
-
-Goal: implement SyncE timing messaging and quality-level integration.
-
-Deliverables:
-
-- accessible ESMC/SSM messages, quality levels, selection, failure, and
-  frequency-source provenance;
-- frequency transfer distinct from phase/time;
-- PTP profile integration hooks.
-
-Verification:
-
-- licensed vectors, quality transitions, loops, source loss, mismatched
-  frequency/time sources, and lab equipment interop.
-
-Exit criteria:
-
-- frequency lock never implies phase or UTC synchronization;
-- `v0.112.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.113.0 - White Rabbit
-
-Status: planned.
-
-Goal: implement White Rabbit/high-accuracy software and hardware boundaries.
-
-Deliverables:
-
-- compatible PTP high-accuracy profile, WR TLVs/state, frequency/phase, link
-  delay, calibration, fixed-delay compensation, and hardware capability;
-- monitor/codec operation without compatible hardware;
-- explicit accuracy non-claims.
-
-Verification:
-
-- legitimate specification vectors, WR hardware lab, fiber/link changes,
-  calibration corruption, asymmetric delay, holdover, and multi-device interop.
-
-Exit criteria:
-
-- White Rabbit accuracy is claimed only for measured compatible hardware;
-- `v0.113.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.114.0 - Experimental NTS4PTP
-
-Status: planned.
-
-Goal: implement the exact pinned NTS-for-PTP draft experimentally.
-
-Deliverables:
-
-- revision-specific messages/state/security associations;
-- integration with NTS provider boundaries and PTP identities;
-- no stable profile leakage or silent activation.
-
-Verification:
-
-- draft vectors, revision mismatch, replay, key rotation, delay attack
-  residuals, malformed security TLVs, and available interop.
-
-Exit criteria:
-
-- experimental authentication never implies delay-attack immunity;
-- `v0.114.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.115.0 - PTP Family Security And Hardware Gate
-
-Status: planned.
-
-Goal: complete PTP profile conformance, hardware evidence, and security review.
-
-Deliverables:
-
-- revision/profile clause maps and support matrix;
-- delay/topology/threat and accuracy evidence report;
-- resolved critical/high parser, state, FFI, timestamp, servo, and profile issues.
-
-Verification:
-
-- linuxptp/vendor matrix, official suites, multi-NIC/grandmaster/switch lab,
-  fuzz/simulator/soak, target matrix, and focused pentest.
-
-Exit criteria:
-
-- precision claims are bounded by actual measured configurations;
-- `v0.115.0 implementation stop reached. Run pentest for this exact commit.`
-
-## Phase 9: Industrial Automotive Wireless Media And Space
-
-### v0.116.0 - BACnet And DNP3 Time
-
-Status: planned.
-
-Goal: implement timing services of BACnet and DNP3.
-
-Deliverables:
-
-- time/date, synchronization, delay, and timestamped-event objects assigned by
-  licensed revisions;
-- surrounding transport/application traits;
-- no complete BACnet/DNP3 stack claim.
-
-Verification:
-
-- licensed vectors, malformed objects, sequence/delay, rollover, event order,
-  simulator and independent stack interop.
-
-Exit criteria:
-
-- both crates expose timing only and preserve application context;
-- `v0.116.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.117.0 - IEC Power Time
-
-Status: planned.
-
-Goal: implement IEC 60870 and IEC 61850 time mappings.
-
-Deliverables:
-
-- relevant timestamp formats, quality flags, sync/control timing, and event
-  semantics;
-- power profile correlation with PTP where specified;
-- exact licensed scope.
-
-Verification:
-
-- licensed vectors, invalid/reserved quality, leap/DST, rollover, stale event,
-  device interop, and fault simulations.
-
-Exit criteria:
-
-- time quality flags are never discarded during normalization;
-- `v0.117.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.118.0 - CANopen And J1939 Time
-
-Status: planned.
-
-Goal: implement CANopen and J1939 time services.
-
-Deliverables:
-
-- time/date messages, epoch/rollover, node/source identity, and CAN transport
-  boundary;
-- bus load/resource policy;
-- no general vehicle/fieldbus stack.
-
-Verification:
-
-- licensed vectors/captures, arbitration reorder, duplicate source, rollover,
-  malformed frames, bus saturation, and device interop.
-
-Exit criteria:
-
-- CAN timing state is source-bound and bounded;
-- `v0.118.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.119.0 - Industrial Ethernet Timing
-
-Status: planned.
-
-Goal: implement EtherCAT, PROFINET, CIP Sync, Sercos, and POWERLINK timing.
-
-Deliverables:
-
-- separately scoped licensed distributed-clock/time services;
-- cycle/frequency/time-of-day correlation and quality;
-- integration with PTP/gPTP only where normative.
-
-Verification:
-
-- licensed vectors, industrial simulators/equipment, cycle wrap, source loss,
-  jitter, wrong profile, and topology changes.
-
-Exit criteria:
-
-- no crate claims surrounding motion/control protocol completeness;
-- `v0.119.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.120.0 - KNX And OPC UA Time
-
-Status: planned.
-
-Goal: implement KNX and OPC UA time-related services.
-
-Deliverables:
-
-- exact date/time/zone/status/timestamp mappings;
-- surrounding application/transport boundary and trust provenance;
-- local/UTC ambiguity handling.
-
-Verification:
-
-- licensed vectors, invalid civil values, zone/DST, stale server, malformed
-  payload, and independent stack interop.
-
-Exit criteria:
-
-- formatted application time is not treated as synchronized automatically;
-- `v0.120.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.121.0 - AUTOSAR Time
-
-Status: planned.
-
-Goal: implement AUTOSAR Ethernet, CAN, and FlexRay time synchronization.
-
-Deliverables:
-
-- separate transport profiles, message/state/sequence/CRC, domains, rate
-  correction, gateway behavior, and quality;
-- exact licensed revisions;
-- automotive safety non-claims.
-
-Verification:
-
-- licensed vectors, sequence/replay, gateway paths, bus loss, rate drift,
-  malformed messages, and automotive simulator interop.
-
-Exit criteria:
-
-- each AUTOSAR transport retains profile-specific semantics;
-- `v0.121.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.122.0 - FlexRay And TTEthernet
-
-Status: planned.
-
-Goal: implement native FlexRay and SAE AS6802/TTEthernet timing.
-
-Deliverables:
-
-- cycle/macrotick timing, fault-tolerant synchronization, clique/fault state,
-  and network-time correlation;
-- transport traits and exact licensed scope;
-- no general bus scheduler.
-
-Verification:
-
-- licensed vectors, clique split, malicious clocks, cycle rollover, frame
-  loss, rate fault, and deterministic network simulation.
-
-Exit criteria:
-
-- fault-tolerant claims match the exact modeled assumptions;
-- `v0.122.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.123.0 - Bluetooth Time
-
-Status: planned.
-
-Goal: implement Bluetooth time services and Mesh Time.
-
-Deliverables:
-
-- Current Time, Reference Time Update, Device Time, Time Profile, Elapsed Time,
-  and Mesh timing assigned by accessible specifications;
-- GATT/mesh transport traits, authority, zone/DST, accuracy, and update state;
-- permission and bonding policy hooks.
-
-Verification:
-
-- licensed vectors, malformed characteristics, replay, unauthorized update,
-  zone/leap transitions, mesh propagation, and device interop.
-
-Exit criteria:
-
-- local wireless time cannot silently authorize system-clock changes;
-- `v0.123.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.124.0 - Zigbee Matter And LoRaWAN Time
-
-Status: planned.
-
-Goal: implement timing services for Zigbee, Matter, and LoRaWAN.
-
-Deliverables:
-
-- exact time clusters/services and LoRaWAN DeviceTime request/answer;
-- GPS/UTC scale identity, precision, network authority, replay, and transport
-  boundary;
-- no complete IoT stack.
-
-Verification:
-
-- licensed vectors, replay/counter, rollover, unauthorized writer, network
-  delay, sleep/rejoin, malformed payload, and ecosystem interop.
-
-Exit criteria:
-
-- low-power network time retains scale and security provenance;
-- `v0.124.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.125.0 - Wi-Fi TSF FTM TSCH And 6TiSCH
-
-Status: planned.
-
-Goal: implement wireless clock synchronization and ranging-time correlations.
-
-Deliverables:
-
-- TSF/FTM timing fields and 802.15.4 TSCH/6TiSCH timing services;
-- local clock domain/correlation types, rollover, slot identity, and quality;
-- no ranging/position calculation.
-
-Verification:
-
-- licensed vectors, counter wrap, AP/coordinator changes, delayed frames,
-  slot drift, malicious time source, and simulator/device captures.
-
-Exit criteria:
-
-- local wireless clocks are not mislabeled civil UTC;
-- `v0.125.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.126.0 - WirelessHART ISA100 And Thread Time
-
-Status: planned.
-
-Goal: implement timing portions of WirelessHART, ISA100, and Thread.
-
-Deliverables:
-
-- network time, slots, synchronization updates, source/quality, and loss state;
-- accessible licensed profiles and transport boundaries;
-- no general mesh stack.
-
-Verification:
-
-- licensed vectors, coordinator loss, slot/counter wrap, delayed/replayed
-  updates, partition/merge, malformed frames, and simulator interop.
-
-Exit criteria:
-
-- deterministic network timing retains partition and authority state;
-- `v0.126.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.127.0 - Cellular NITZ And 5G Time
-
-Status: planned.
-
-Goal: implement cellular network time and 5G reference-time mappings.
-
-Deliverables:
-
-- NITZ civil/zone fields and applicable 5G timing/reference information;
-- source/network identity, uncertainty, replay/age, and correction policy;
-- no modem or radio-access stack.
-
-Verification:
-
-- licensed/public vectors, zone/DST, stale network, roaming, replay, malformed
-  fields, leap/scales, and modem captures.
-
-Exit criteria:
-
-- unauthenticated network civil time remains visibly low trust;
-- `v0.127.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.128.0 - SMPTE MIDI AES And Broadcast Time
-
-Status: planned.
-
-Goal: implement SMPTE/MIDI/AES time and RDS/DVB/ATSC/ISDB timing.
-
-Deliverables:
-
-- frame/drop-frame, sample, broadcast civil time, offsets, quality, and
-  clock-correlation types;
-- exact licensed revisions and transport boundaries;
-- wall time distinct from media counters.
-
-Verification:
-
-- licensed vectors, frame-rate/drop-frame boundaries, discontinuities,
-  wraparound, signal loss, malformed fields, and equipment/file interop.
-
-Exit criteria:
-
-- frame and sample positions never become UTC without correlation;
-- `v0.128.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.129.0 - RTP MPEG DASH HLS And SCTE Timing
-
-Status: planned.
-
-Goal: implement packet/media/web presentation timing and wall-clock correlation.
-
-Deliverables:
-
-- RTP/RTCP correlation, MPEG PTS/DTS/PCR, DASH/HLS/SCTE timing constructs;
-- wrap/discontinuity, clock identity, capture, and synchronization metadata;
-- no media codec/player implementation.
-
-Verification:
-
-- RFC/licensed vectors, counter wrap, discontinuity, jitter/reorder, wrong
-  sender mapping, manifest extremes, and reference tool interop.
-
-Exit criteria:
-
-- media timeline and civil timeline stay type-distinct;
-- `v0.129.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.130.0 - CCSDS Time
-
-Status: planned.
-
-Goal: implement selected complete CCSDS time-code families.
-
-Deliverables:
-
-- unsegmented, day-segmented, calendar-segmented, ASCII, P-field, fine-time,
-  agency epoch, and mission registry support;
-- exact Blue Book revision and legal vector provenance;
-- mission epoch context.
-
-Verification:
-
-- official vectors, P-field combinations, epoch ambiguity, fine-time extremes,
-  truncation, malformed codes, and reference tool comparison.
-
-Exit criteria:
-
-- CCSDS support is complete for the claimed revision/families;
-- `v0.130.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.131.0 - SpaceWire SpaceFibre And ECSS Time
-
-Status: planned.
-
-Goal: implement space link timecodes and ECSS timing profiles.
-
-Deliverables:
-
-- accessible SpaceWire/SpaceFibre time distribution and ECSS mappings;
-- control/data correlation, mission epoch, quality, and loss state;
-- no complete spacecraft bus stack.
-
-Verification:
-
-- licensed vectors, counter wrap, lost/reordered codes, link reset, epoch
-  mismatch, malformed controls, and hardware/simulator interop.
-
-Exit criteria:
-
-- link-local and mission civil time remain explicitly correlated;
-- `v0.131.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.132.0 - Domain Protocol Security Gate
-
-Status: planned.
-
-Goal: audit industrial, automotive, wireless, media, and space timing.
-
-Deliverables:
-
-- exact licensed revision/clause/completeness matrix;
-- timing-only and no-surrounding-stack API audit;
-- resolved critical/high parser, state, replay, resource, and trust findings.
-
-Verification:
-
-- all official vectors, cross-domain fuzzing, simulators/equipment subsets,
-  target/MSRV matrix, and focused pentest.
-
-Exit criteria:
-
-- every domain claim is narrow, source-bound, and evidence-backed;
-- `v0.132.0 implementation stop reached. Run pentest for this exact commit.`
-
-## Phase 10: Trusted Timestamp Evidence
-
-### v0.133.0 - RFC 3161 Codec And Client
-
-Status: planned.
-
-Goal: implement bounded Time-Stamp Protocol requests/responses and client state.
-
-Deliverables:
-
-- message imprint, algorithms, policy, nonce, certificates, status, token, and
-  transport boundary;
-- strict ASN.1/DER through reviewed generic or first-party bounded components;
-- evidence distinct from current-time observation.
-
-Verification:
-
-- RFC vectors, malformed DER, algorithm/policy mismatch, nonce replay, imprint
-  mismatch, huge chains, client/server captures, and independent TSA interop.
-
-Exit criteria:
-
-- a token cannot verify for the wrong data, policy, nonce, or authority;
-- `v0.133.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.134.0 - RFC 3161 TSA Server And RFC 5816
-
-Status: planned.
-
-Goal: implement a bounded TSA server and updated algorithm behavior.
-
-Deliverables:
-
-- request admission, clock/evidence source policy, serials, signing provider,
-  certificates, failure statuses, and RFC 5816 updates;
-- rate/work limits and audited issuance records;
-- no claim beyond configured authority/time source.
-
-Verification:
-
-- independent clients, algorithm transitions, duplicate nonce, clock fault,
-  signing failure, floods, malformed requests, and token verification.
-
-Exit criteria:
-
-- issuance fails closed when trusted time or signing authority is unavailable;
-- `v0.134.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.135.0 - Evidence Record Syntax
-
-Status: planned.
-
-Goal: implement ERS and XMLERS archival evidence.
-
-Deliverables:
-
-- hash trees, timestamps, chains, renewal, algorithms, policies, and XML
-  canonicalization boundary;
-- bounded depth/count/work and original-byte signature semantics;
-- versioned validation report.
-
-Verification:
-
-- RFC/standard vectors, tree/path substitution, renewal order, algorithm
-  migration, malformed ASN.1/XML, canonicalization attacks, and huge records.
-
-Exit criteria:
-
-- archival evidence renewal is complete for the claimed revisions;
-- `v0.135.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.136.0 - Timestamped Data COSE And ETSI
-
-Status: planned.
-
-Goal: implement timestamped-data bindings, COSE headers, and applicable ETSI profiles.
-
-Deliverables:
-
-- binding/coverage semantics, protected/unprotected header policy, token chains;
-- exact licensed ETSI scope and algorithm policy;
-- unknown critical field handling.
-
-Verification:
-
-- RFC/licensed vectors, coverage substitution, duplicate headers, wrong
-  countersignature, malformed chains, algorithm downgrade, and interop.
-
-Exit criteria:
-
-- evidence is cryptographically bound to the intended object and context;
-- `v0.136.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.137.0 - X9.95 Authenticode And OpenTimestamps
-
-Status: planned.
-
-Goal: implement remaining registry timestamp evidence families.
-
-Deliverables:
-
-- legitimately licensed ANSI X9.95 profile;
-- Authenticode timestamp compatibility;
-- OpenTimestamps generation/verification and calendar proof handling.
-
-Verification:
-
-- licensed/public vectors, cross-protocol confusion, digest/nonce/policy
-  mismatch, calendar equivocation, malformed proofs, and ecosystem interop.
-
-Exit criteria:
-
-- each evidence family retains its own trust and renewal semantics;
-- `v0.137.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.138.0 - Evidence Chain Policy
-
-Status: planned.
-
-Goal: unify verification and archival-renewal policy without erasing formats.
-
-Deliverables:
-
-- authority/time/algorithm/revocation/renewal policy;
-- evidence interval, provenance, validation level, and non-forgeable result;
-- mixed-chain and long-term algorithm migration.
-
-Verification:
-
-- mixed authorities/formats, expired/revoked chains, weak algorithm cutoffs,
-  renewal gaps, conflicting tokens, and deterministic reports.
-
-Exit criteria:
-
-- “valid evidence” always names policy, time interval, and trust basis;
-- `v0.138.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.139.0 - Timestamp Evidence Security Gate
-
-Status: planned.
-
-Goal: audit timestamp authorities, evidence chains, dependencies, and formats.
-
-Deliverables:
-
-- complete clause/conformance matrix and algorithm inventory;
-- signature/DER/XML/resource/renewal security review;
-- resolved critical/high findings and interoperability report.
-
-Verification:
-
-- official vectors, independent TSAs/tools, fuzzing, adversarial chains,
-  cargo evidence, and focused pentest.
-
-Exit criteria:
-
-- trusted evidence is production-candidate quality independently of clock sync;
-- `v0.139.0 implementation stop reached. Run pentest for this exact commit.`
-
-## Phase 11: Consensus Servos Facade And Applications
-
-### v0.140.0 - Generic Source Consensus
-
-Status: planned.
-
-Goal: combine validated observations from different protocol families.
-
-Deliverables:
-
-- normalization, uncertainty expansion, correlated groups, supported interval,
-  authentication/diversity policy, split-brain, and evidence;
-- bounded sources and stable result ordering;
-- no clock change authority.
-
-Verification:
-
-- NTP/NTS/Roughtime/PTP/Navheim-derived/radio mixed simulations, Byzantine
-  coalitions, common upstreams, partitions, stale sources, and interval
-  properties.
-
-Exit criteria:
-
-- cross-protocol consensus reports synchronized, rough, split, insufficient,
-  or unsafe explicitly;
-- `v0.140.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.141.0 - PLL FLL And Hybrid Servo
-
-Status: planned.
-
-Goal: implement bounded fixed-point software clock servos.
-
-Deliverables:
-
-- step-only test, slew, PLL, FLL, and hybrid control;
-- phase/frequency limits, panic thresholds, startup/recovery policy;
-- explicit measurement uncertainty and target capability.
-
-Verification:
-
-- analytical traces, drift/noise/step/loss simulations, saturation, numerical
-  stability, reference implementation comparison, and property tests.
-
-Exit criteria:
-
-- servos cannot issue out-of-policy adjustments;
-- `v0.141.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.142.0 - PTP And Kalman-Style Servo
-
-Status: planned.
-
-Goal: implement high-rate phase/frequency estimation for precision clocks.
-
-Deliverables:
-
-- PTP-oriented servo and bounded fixed-point Kalman-style estimator;
-- covariance/uncertainty, outlier, delay/asymmetry, and reset behavior;
-- no floating-point requirement in no_std core.
-
-Verification:
-
-- recorded PHC traces, simulated oscillator/noise models, numerical extremes,
-  convergence, malicious delay, and independent estimator comparison.
-
-Exit criteria:
-
-- estimator uncertainty grows honestly when assumptions fail;
-- `v0.142.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.143.0 - Holdover Models
-
-Status: planned.
-
-Goal: implement oscillator holdover and uncertainty growth.
-
-Deliverables:
-
-- age/frequency/stability/temperature observation model;
-- configurable oscillator classes and conservative fallback;
-- source loss/recovery state and persisted calibration provenance.
-
-Verification:
-
-- long synthetic/hardware traces, temperature ramps, restart, stale model,
-  source recovery, underreported stability attacks, and saturation.
-
-Exit criteria:
-
-- holdover never reports frozen uncertainty or hidden source loss;
-- `v0.143.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.144.0 - Trusted Virtual Clock
-
-Status: planned.
-
-Goal: provide a monotonic application clock with civil correlation.
-
-Deliverables:
-
-- synchronized/rough/holdover/faulted states;
-- monotonic nonrollback reads, uncertainty, UTC/POSIX conversion policy;
-- persistence and restart bootstrap boundary.
-
-Verification:
-
-- concurrent reads, clock rollback, system step, suspend/restart, leap/smear,
-  holdover, split-brain, and monotonicity properties.
-
-Exit criteria:
-
-- applications can read trusted time without a network request per event;
-- `v0.144.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.145.0 - Easy Blocking APIs
-
-Status: planned.
-
-Goal: expose safe one-shot application APIs.
-
-Deliverables:
-
-- local clock, SNTP, NTP, NTS, Roughtime, TIME, and selected source builders;
-- explicit protocol/security defaults, timeout, endpoint, and report;
-- no silent fallback or automatic system-clock change.
-
-Verification:
-
-- compile examples, error ergonomics, feature combinations, local simulators,
-  public interop, timeout/cancel, and misuse compile tests.
-
-Exit criteria:
-
-- common tasks are easy while trust and uncertainty remain visible;
-- `v0.145.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.146.0 - Poll Future And Async Adapters
-
-Status: planned.
-
-Goal: support runtime-neutral asynchronous use.
-
-Deliverables:
-
-- canonical poll APIs, `core::future` adapters, cancellation, deadlines, and
-  user-executor integration;
-- optional owned buffers under `alloc`;
-- no Tokio or runtime dependency.
-
-Verification:
-
-- custom executor, embedded-style polling, Tokio adapter example outside the
-  graph, cancellation races, wake discipline, and feature matrix.
-
-Exit criteria:
-
-- async use does not make an executor part of protocol semantics;
-- `v0.146.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.147.0 - Fixed-Storage Builders
-
-Status: planned.
-
-Goal: complete allocation-free user-facing client/server construction.
-
-Deliverables:
-
-- const capacities, caller buffers, deterministic resource reports, and
-  compile-time/runtime capacity errors;
-- representative SNTP/NTP/PTP/Navheim-adapter/IRIG examples;
-- embedded transport integration guide.
-
-Verification:
-
-- zero/minimum/maximum capacity, stack-size reports, no allocator link,
-  embedded targets, examples, and compile-fail overflow cases.
-
-Exit criteria:
-
-- Level A protocol use is practical and documented;
-- `v0.147.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.148.0 - Multi-Protocol Server Framework
-
-Status: planned.
-
-Goal: provide bounded shared server orchestration.
-
-Deliverables:
-
-- listener/source/quality/rate/work policy across applicable protocols;
-- per-protocol amplification and authentication controls;
-- coordinated shutdown and audit events.
-
-Verification:
-
-- mixed-client simulation, global/per-source quotas, slow clients, flood,
-  source fault, shutdown/restart, and protocol-isolation tests.
-
-Exit criteria:
-
-- one overloaded protocol cannot starve or weaken another silently;
-- `v0.148.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.149.0 - Privilege-Separated Daemon
-
-Status: planned.
-
-Goal: implement `mundilfarid` with least-privilege clock discipline.
-
-Deliverables:
-
-- unprivileged workers/consensus, typed authenticated local IPC, minimal helper;
-- bounded slew/step/leap/PHC commands, startup-only step policy, audit records;
-- Linux reference plus supported platform service designs.
-
-Verification:
-
-- IPC fuzzing, command authorization, compromised-worker simulation, socket/file
-  permissions, restart, downgrade, service sandbox, VM clock tests, and soak.
-
-Exit criteria:
-
-- daemon compromise outside the helper cannot issue arbitrary privileged calls;
-- `v0.149.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.150.0 - CLI
-
-Status: planned.
-
-Goal: deliver query, inspect, compare, decode, convert, serve, and monitor tools.
-
-Deliverables:
-
-- bounded stdin/file/network inputs and machine/human output;
-- explicit trust labels, secret redaction, exit codes, and offline modes;
-- no clock discipline without an explicit privileged command/policy.
-
-Verification:
-
-- command snapshots, hostile files/terminals, output redaction, pipe failures,
-  every protocol sample, platform behavior, and shell completion.
-
-Exit criteria:
-
-- CLI output cannot imply trust or precision absent from the reading;
-- `v0.150.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.151.0 - C ABI
-
-Status: planned.
-
-Goal: expose stable bounded C interfaces for selected core/protocol APIs.
-
-Deliverables:
-
-- versioned opaque handles, caller buffers, error codes, ownership, threading,
-  and panic containment;
-- generated header and ABI compatibility policy;
-- no unbounded allocation or Rust layout exposure.
-
-Verification:
-
-- C/C++ consumers on Linux/Windows/macOS, null/length/alias misuse, ABI layout,
-  symbol version, sanitizer, and fuzz tests.
-
-Exit criteria:
-
-- invalid foreign input cannot unwind across or corrupt the ABI;
-- `v0.151.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.152.0 - WASM And Browser-Safe APIs
-
-Status: planned.
-
-Goal: expose safe browser-compatible time parsing and evidence verification.
-
-Deliverables:
-
-- core conversions, RFC 3339/IXDTF/TZif, packet inspection, Roughtime and
-  timestamp-evidence verification;
-- caller-provided JavaScript transport hooks;
-- explicit lack of UDP/raw/hardware/clock-control browser capabilities.
-
-Verification:
-
-- wasm32 build, browser/node tests, hostile buffers, JS exception/cancel,
-  feature size, and no native dependency leakage.
-
-Exit criteria:
-
-- no proprietary web time protocol is invented for convenience;
-- `v0.152.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.153.0 - Metrics Health And Audit Records
-
-Status: planned.
-
-Goal: provide bounded operational observability without leaking secrets.
-
-Deliverables:
-
-- source/consensus/servo/holdover/daemon health;
-- bounded labels, cardinality, audit schema, redaction, retention, and export
-  traits;
-- accuracy/authentication/traceability fields kept separate.
-
-Verification:
-
-- cardinality attacks, secret/cookie/certificate redaction, malformed exporter,
-  backpressure, schema compatibility, and incident replay.
-
-Exit criteria:
-
-- observability cannot alter protocol validity or exhaust core state;
-- `v0.153.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.154.0 - Configuration And Policy Language
-
-Status: planned.
-
-Goal: implement explicit, validated deployment policy.
-
-Deliverables:
-
-- bounded configuration for sources, trust, diversity, protocols, clocks,
-  steps/slew, holdover, resources, platform privileges, and logging;
-- secure defaults, unknown-field rejection, versioning, and dry-run;
-- no generic deserialization dependency in protocol cores.
-
-Verification:
-
-- valid/invalid fixtures, unknown/duplicate/conflicting fields, resource
-  extremes, downgrade attempts, migration, and property fuzzing.
-
-Exit criteria:
-
-- deployed behavior is reviewable before the daemon changes a clock;
-- `v0.154.0 implementation stop reached. Run pentest for this exact commit.`
-
-### v0.155.0 - Product Integration Security Gate
-
-Status: planned.
-
-Goal: audit consensus, servos, facade, daemon, interfaces, and operations.
-
-Deliverables:
-
-- API/feature/capability truth review;
-- privilege, IPC, config, C/WASM, observability, and cross-protocol threat
-  reports;
-- resolved critical/high product findings.
-
-Verification:
-
-- full system simulation, platform VM matrix, live sources/hardware subset,
-  long holdover/restart/fault tests, and focused pentest.
-
-Exit criteria:
-
-- all planned functionality exists; stabilization may begin;
-- `v0.155.0 implementation stop reached. Run pentest for this exact commit.`
-
-## Phase 12: Final Conformance Hardening And Production Admission
-
-No new protocol scope is introduced after `v0.155.0`. Newly discovered missing
-stable-baseline work is inserted before this phase.
-
-### v0.156.0 - Official Vector Closure
+### v0.158.0 - Official Vector Closure
 
 Status: planned.
 
@@ -3703,9 +3709,9 @@ Verification:
 Exit criteria:
 
 - every implemented stable protocol has vector evidence;
-- `v0.156.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.158.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.157.0 - Differential Interoperability Closure
+### v0.159.0 - Differential Interoperability Closure
 
 Status: planned.
 
@@ -3725,9 +3731,9 @@ Verification:
 Exit criteria:
 
 - no unexplained stable-protocol interoperability divergence remains;
-- `v0.157.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.159.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.158.0 - Parser And Resource Exhaustion Review
+### v0.160.0 - Parser And Resource Exhaustion Review
 
 Status: planned.
 
@@ -3747,9 +3753,9 @@ Verification:
 Exit criteria:
 
 - no known attacker-controlled unbounded work or memory remains;
-- `v0.158.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.160.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.159.0 - Unsafe FFI And Platform Review
+### v0.161.0 - Unsafe FFI And Platform Review
 
 Status: planned.
 
@@ -3769,9 +3775,9 @@ Verification:
 Exit criteria:
 
 - no undocumented unsafe or unchecked privileged boundary remains;
-- `v0.159.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.161.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.160.0 - Crypto TLS And Side-Channel Review
+### v0.162.0 - Crypto TLS And Side-Channel Review
 
 Status: planned.
 
@@ -3792,9 +3798,9 @@ Verification:
 Exit criteria:
 
 - all security primitives are current, bounded, and correctly composed;
-- `v0.160.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.162.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.161.0 - Fault Long-Run And Hardware Review
+### v0.163.0 - Fault Long-Run And Hardware Review
 
 Status: planned.
 
@@ -3814,9 +3820,9 @@ Verification:
 Exit criteria:
 
 - every precision/holdover claim has reproducible evidence;
-- `v0.161.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.163.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.162.0 - Supported Target And no_std Closure
+### v0.164.0 - Supported Target And no_std Closure
 
 Status: planned.
 
@@ -3837,9 +3843,9 @@ Verification:
 Exit criteria:
 
 - every advertised target/capability has build evidence or an explicit non-claim;
-- `v0.162.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.164.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.163.0 - Standards Registry Closure
+### v0.165.0 - Standards Registry Closure
 
 Status: planned.
 
@@ -3859,9 +3865,9 @@ Verification:
 Exit criteria:
 
 - no known accessible stable-baseline protocol is silently omitted;
-- `v0.163.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.165.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.164.0 - API Documentation And Semver Freeze
+### v0.166.0 - API Documentation And Semver Freeze
 
 Status: planned.
 
@@ -3881,9 +3887,9 @@ Verification:
 Exit criteria:
 
 - APIs distinguish raw, parsed, validated, authenticated, and discipline-ready;
-- `v0.164.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.166.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.165.0 - Independent Full-Workspace Audit
+### v0.167.0 - Independent Full-Workspace Audit
 
 Status: planned.
 
@@ -3904,9 +3910,9 @@ Verification:
 Exit criteria:
 
 - independent reviewers approve progression to beta;
-- `v0.165.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.167.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.166.0 - Beta 1
+### v0.168.0 - Beta 1
 
 Status: planned.
 
@@ -3926,9 +3932,9 @@ Verification:
 Exit criteria:
 
 - beta artifacts are reproducible and no critical/high finding is open;
-- `v0.166.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.168.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.167.0 - Beta 2 Remediation
+### v0.169.0 - Beta 2 Remediation
 
 Status: planned.
 
@@ -3947,9 +3953,9 @@ Verification:
 Exit criteria:
 
 - known beta blockers are closed;
-- `v0.167.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.169.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.168.0 - Release Candidate Tooling Rehearsal
+### v0.170.0 - Release Candidate Tooling Rehearsal
 
 Status: planned.
 
@@ -3969,7 +3975,7 @@ Verification:
 Exit criteria:
 
 - tooling can reproduce and validate the exact candidate artifacts;
-- `v0.168.0 implementation stop reached. Run pentest for this exact commit.`
+- `v0.170.0 implementation stop reached. Run pentest for this exact commit.`
 
 ### v1.0.0-rc.1 - Exact Production Candidate
 

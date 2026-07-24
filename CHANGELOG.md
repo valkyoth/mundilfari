@@ -12,6 +12,9 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   semantic interpretation to the planned Navheim project.
 - Replaced direct GNSS protocol crates with one future optional
   `mundilfari-navheim` companion adapter.
+- Reordered the pre-1.0 roadmap so every Navheim-independent feature is
+  implemented first and Navheim integration plus CGGTTS form the final feature
+  phase.
 
 ## [0.1.0] - Unreleased
 

@@ -64,6 +64,12 @@ Navheim is planned and will be completed first. The companion crate is not
 implemented or buildable in `v0.1.0`; its work starts only after Navheim
 publishes a reviewed stable GNSS timing API.
 
+The roadmap keeps that dependency at the end of feature development. Every
+Navheim-independent protocol, generic source boundary, engine, servo, and
+application milestone is completed first. The Navheim companion and CGGTTS
+then form the final feature phase, followed only by whole-system hardening,
+conformance closure, release candidates, and `1.0.0`.
+
 ## Planned Uses
 
 - dependency-light `no_std` codecs and state machines;

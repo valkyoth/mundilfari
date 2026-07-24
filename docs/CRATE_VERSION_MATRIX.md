@@ -21,4 +21,5 @@ optional crates.io crate only after Navheim publishes its reviewed stable GNSS
 timing API. Its initial version and exact Navheim compatibility range remain
 unset until upstream admission. It must retain the published-library Rust
 1.90.0 floor unless a separately reviewed compatibility decision says
-otherwise.
+otherwise. It is introduced only in the final feature phase, after every
+Navheim-independent protocol, engine, servo, and application milestone.

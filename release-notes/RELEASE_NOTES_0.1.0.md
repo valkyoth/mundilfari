@@ -26,6 +26,9 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   validated GNSS evidence participates in a larger clock system.
 - Planned optional `mundilfari-navheim` companion crate, blocked until Navheim
   publishes its independently reviewed stable timing API.
+- Dependency-last roadmap ordering: all Navheim-independent protocols,
+  engines, servos, and applications precede the final Navheim integration and
+  CGGTTS feature phase.
 - `no_std`, dependency layering, 500-line, unsafe, standards, supply-chain,
   threat-model, and secret-handling policies.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, pull request, and manual

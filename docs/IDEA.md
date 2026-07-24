@@ -3481,3 +3481,9 @@ TWSTFT and other communication-satellite time-transfer protocols remain
 Mundilfari work because they are time protocols rather than GNSS navigation
 interpretation. Mundilfari may encode/decode CGGTTS interchange records, but
 the GNSS common-view/all-in-view solution evidence comes from Navheim.
+
+The implementation roadmap therefore completes all Navheim-independent work
+first. Generic satellite observations and TWSTFT do not require Navheim and
+remain earlier work. The optional companion, its complete evidence mapping,
+GNSS/PPS semantic bridge, and CGGTTS are the final feature phase. Only
+whole-system conformance, audits, release candidates, and `1.0.0` follow it.

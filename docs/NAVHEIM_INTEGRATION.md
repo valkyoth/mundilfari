@@ -16,6 +16,19 @@ reviewed its stable GNSS timing observation/event API. No speculative Navheim
 dependency, compatibility shim, or copied provisional type is added to the
 current workspace.
 
+## Roadmap Placement
+
+Navheim integration is the final feature phase, `v0.149.0` through
+`v0.157.0`. All generic time work, non-Navheim protocols, physical capture,
+source consensus, servos, applications, and their product-security gate are
+completed first. The phase admits Navheim, adds the optional companion,
+preserves its complete timing evidence, correlates generic PPS capture, and
+ends with CGGTTS over validated common-view/all-in-view results.
+
+Only full-system conformance, audits, release candidates, and `1.0.0` follow.
+If Navheim is not ready, Mundilfari can progress through `v0.148.0` without
+substituting a provisional GNSS implementation.
+
 ## Ownership
 
 Navheim owns:

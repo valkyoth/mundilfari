@@ -47,6 +47,27 @@ def main() -> None:
         for error in checker.validate(VALID.replace("this exact commit", "some commit"))
     )
 
+    roadmap = f"""{checker.NAVHEIM_PHASE}
+### v0.149.0 - Navheim Upstream Admission
+### v0.150.0 - mundilfari-navheim Crate Boundary
+### v0.151.0 - Exact GNSS Instant And Scale Mapping
+### v0.152.0 - GNSS Evidence And Observation Mapping
+### v0.153.0 - GNSS Event Lifecycle And Withdrawal
+### v0.154.0 - Generic PPS To Navheim Correlation Bridge
+### v0.155.0 - Navheim Frequency And Time-Transfer Evidence
+### v0.156.0 - Navheim Interoperability And Security Gate
+### v0.157.0 - CGGTTS Interchange
+{checker.HARDENING_PHASE}
+No new feature or protocol scope is introduced after `v0.157.0`.
+"""
+    assert checker.validate_navheim_order(roadmap) == []
+    assert any(
+        "CGGTTS" in error
+        for error in checker.validate_navheim_order(
+            "### v0.10.0 - CGGTTS Interchange\n" + roadmap
+        )
+    )
+
 
 if __name__ == "__main__":
     main()

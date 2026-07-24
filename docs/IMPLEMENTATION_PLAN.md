@@ -54,6 +54,12 @@ timing event API into Mundilfari observations. It is implemented only after
 Navheim is built and publishes a reviewed stable boundary. The detailed
 contract is [NAVHEIM_INTEGRATION.md](NAVHEIM_INTEGRATION.md).
 
+This dependency is intentionally introduced in the final feature phase.
+Mundilfari completes every generic and non-Navheim protocol, source-engine,
+servo, application, and product-security milestone first. Only conformance
+closure, system-wide audits, release candidates, and `1.0.0` follow the
+companion phase.
+
 ### 2.2 First-party time semantics
 
 Mundilfari implements itself:
@@ -172,7 +178,8 @@ mundilfari-ptp-wire
 
 ### 3.3 Navheim companion crate
 
-After Navheim's serious stable timing release:
+After Navheim's serious stable timing release and after all
+Navheim-independent Mundilfari feature work:
 
 ```text
 navheim                 mundilfari-core
@@ -191,6 +198,11 @@ on Navheim.
 The companion maps observations, model changes, ambiguity, gaps,
 discontinuities, invalidations, and security transitions. It cannot decode or
 reinterpret GNSS. Navheim is absent from every default feature graph.
+
+This is the final feature-bearing crate phase. CGGTTS follows the adapter
+evidence mapping within that same phase because its GNSS common-view and
+all-in-view inputs are supplied by Navheim. No later milestone adds protocol
+scope.
 
 ### 3.4 Repository-only packages
 
