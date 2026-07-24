@@ -8,6 +8,16 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
 
 ### Changed
 
+- Completed a full internal release-plan audit after external gap closure. No
+  new protocol, security-boundary, platform, no_std, Navheim-ordering, or
+  pre-1.0 production-admission requirement was missing.
+- Split the oversized engine milestone into `v0.60.1`–`v0.60.7` and concurrent
+  publication into `v0.137.1`–`v0.137.5`, with the existing no_std and
+  ahead-recovery work moved to `v0.137.6`–`v0.137.7`. Every subdivision has its
+  own goal, verification, exit criteria, and exact-commit pentest stop.
+- Added a tested roadmap-size guard: no milestone may exceed 16 top-level
+  deliverable groups or 180 lines, and security/integration gates receive no
+  exemption.
 - Clarified that refresh-guard cleanup cannot exhaust: each preallocated
   reservation slot transitions in place to its tombstone state using a bounded,
   allocation-free, callback-free, nonblocking, non-panicking path; superseded
@@ -93,7 +103,7 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   generation-bound leap admission handoff with atomic precommit revalidation;
   separated leap truth from smear presentation; stabilized credential identity
   around policy generations and immutable whole-chain validation evidence; and
-  deferred all-component concurrent time-data publication to `v0.137.1`.
+  deferred all-component concurrent time-data publication to `v0.137.3`.
 - Integrated the next dependency and retention review with a new `v0.7.1`
   interval/type-separation foundation before era, fraction, and EOP consumers;
   a new `v0.52.3` opaque admission boundary for EOP/scale-offset data; exact
@@ -121,23 +131,26 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   corrected `v0.52.3` so `ArtifactIntegrityEvidence` remains independent from
   configured source role/authority while non-cryptographic OS trust uses
   distinct `ConfiguredPlatformTrustEvidence`.
-- Added `v0.60.1` to separate canonical conditional bounds from current runtime
-  evidence assessment and engine policy acceptance. Opaque
+- Added `v0.60.1`–`v0.60.7` to separate canonical conditional bounds from
+  runtime assessment, correlation admission, proof ownership, batch
+  verification, refresh, engine policy acceptance, and their integration gate.
+  Opaque
   `PolicyAcceptedHardBound` generations now gate consensus, leap admission,
   servo/estimator/holdover state, discipline proposals, synchronized
   publication, and strict facade results; conditional diagnostics retain the
   condition, assessment, deadline, reasons, assurance, and non-claims without
   a trusted boolean.
-- Strengthened `v0.60.1` so policy acceptance additionally requires an
-  engine-verified exact claim derivation, atom assessments preserve structured
-  support basis, and assessment plus optional acceptance are issued from one
-  generation-consistent transaction. Strengthened `v0.137.0`–`v0.137.1` so
+- Strengthened `v0.60.1`, `v0.60.3`, and `v0.60.6` so policy acceptance
+  additionally requires an engine-verified exact claim derivation, atom
+  assessments preserve structured support basis, and assessment plus optional
+  acceptance are issued from one generation-consistent transaction.
+  Strengthened `v0.137.0`–`v0.137.5` so
   strict reads enforce the exact monotonic-domain deadline even without a
   writer or timer.
 - Moved derivation-material preservation forward across `v0.7.1`–`v0.15.0`
   with bounded non-authoritative recipes and explicit unverified serialized/
   persisted type-state. Refined support basis into independent origin,
-  integrity, authority, and transitive-lineage axes, and made `v0.60.1`/
+  integrity, authority, and transitive-lineage axes, and made `v0.60.6`/
   `v0.137.x` deadline decisions use conservative monotonic-read upper edges
   including resolution, latency, and rate uncertainty.
 - Added `v0.6.1` for one domain-separated canonical identity profile; made
@@ -158,7 +171,7 @@ The format follows Keep a Changelog and this project uses Semantic Versioning.
   multi-root shared-DAG promotion plus explicit
   ownership into returned clocks, `'static` async tasks, builders, schemas, and
   C/JNI/Swift context destruction.
-- Closed the multi-root engine partial-failure ambiguity in `v0.60.1`:
+- Closed the multi-root engine partial-failure ambiguity in `v0.60.4`:
   verification now has canonical member order, one bounded snapshot, shared-
   node failure fan-out, root-local evidence isolation, complete accounting,
   and typed complete-versus-aborted outcomes. Global cancellation, exhaustion,

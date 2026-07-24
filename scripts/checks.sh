@@ -10,6 +10,8 @@ scripts/verify-standard-sources.py
 python3 scripts/test-standard-sources.py
 python3 scripts/check_release_plan.py
 python3 scripts/test-release-plan.py
+python3 scripts/check-release-plan-size.py
+python3 scripts/test-release-plan-size.py
 python3 scripts/check-implementation-evidence.py
 python3 scripts/test-implementation-evidence.py
 scripts/test-check-latest-tools.sh

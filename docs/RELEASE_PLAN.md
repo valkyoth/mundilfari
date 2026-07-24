@@ -12,6 +12,13 @@ work exceeds one safe review pass. Every stable-baseline registry entry must be
 implemented or carry a documented impossible/unavailable status before
 `1.0.0`.
 
+The machine-enforced review ceiling is 16 top-level deliverable groups and 180
+lines from one milestone heading to the next. These are hard ceilings, not
+targets: a smaller milestone is still split when it contains independently
+reviewable state machines, trust boundaries, or conformance decisions.
+Integration and audit gates may spend their budget primarily on verification,
+but receive no numerical exemption.
+
 Tags use:
 
 ```text
@@ -726,11 +733,11 @@ Deliverables:
   bounded arena and canonical promotion, so an `OwnedHardBoundClaim` never
   observes mutable backing content. Clone/share, drop, and last-owner
   destruction semantics are explicit and preserve bounded resource reports;
-- the ownership contract reserves engine promotion: at `v0.60.1`, successful
-  verification produces source-arena-independent engine
-  `VerifiedBoundDerivation<T>` and `PolicyAcceptedHardBound<T>` values carrying
-  the required canonical identities and lifecycle/generation dependencies,
-  never a borrow or handle into the unverified source arena;
+- the ownership contract reserves engine promotion: `v0.60.3` verification
+  produces source-arena-independent `VerifiedBoundDerivation<T>`, and
+  `v0.60.6` policy admission produces `PolicyAcceptedHardBound<T>` carrying the
+  required canonical identities and lifecycle/generation dependencies, never a
+  borrow or handle into the unverified source arena;
 - “source-arena-independent” is exact: hosted forms own all bounded engine
   state; no_std forms either contain it inline or use the one checked storage
   reference `EngineProofHandle<'engine, K, T>`, where sealed `K` distinguishes
@@ -2415,7 +2422,7 @@ Deliverables:
   resolution verifies exact canonical content or the immutable registry
   generation; persistence integrity never upgrades an assumption reference;
 - persisted `ConditionAssessment` or `PolicyAcceptedHardBound` data is
-  historical evidence only after restore and must pass fresh `v0.60.1`
+  historical evidence only after restore and must pass fresh `v0.60.6`
   lifecycle/policy/evidence/deadline revalidation before regaining authority;
 - serialized or persisted derivation material decodes only as
   `UnverifiedBoundDerivationRecord`; the opaque `VerifiedBoundDerivation<T>`
@@ -2423,7 +2430,7 @@ Deliverables:
   Persistence exports the complete bounded reachable canonical DAG and never a
   process-local derivation handle, arena address, store identity, or generation.
   Restoration must resolve the complete bounded recipe and the later
-  `v0.60.1` engine must reverify it against current input claims/observations,
+  `v0.60.3` engine must reverify it against current input claims/observations,
   proof-rule registry, conversion models, source/provider generations, and
   lifecycle state before constructing new authority;
 - crash-consistent atomic replacement, partial/torn-write detection, explicit
@@ -2865,7 +2872,7 @@ Deliverables:
   boundaries; the update guard rejects or serializes competing writers;
 - caller-owned commit is indivisible but provides no concurrent-reader or
   `TrustedClock` publication guarantee before
-  `v0.137.1`;
+  `v0.137.3`;
 - failed refresh leaves the current caller-owned snapshot untouched and reports
   stale/expired/degraded/faulted state; withdrawal and rollback invalidate
   dependent conversions;
@@ -2915,7 +2922,7 @@ Deliverables:
 - offline/manual and OS-managed ingestion use the identical bounded
   verify → stage → compare → commit caller-owned snapshot pipeline and cannot
   bypass artifact identity/provenance checks; concurrent publication remains
-  deferred to `v0.137.1`;
+  deferred to `v0.137.3`;
 - the early milestone accepts caller-supplied authenticated fetch evidence;
   no built-in production TLS claim exists before `v0.72.0`/`v0.75.1`.
 
@@ -3001,7 +3008,7 @@ Deliverables:
   the default facade;
 - no leap authority duplication: leap evidence still requires the engine-owned
   `AdmittedLeapCandidate` at `v0.61.1`; concurrent publication of every
-  admitted component remains deferred to `v0.137.1`.
+  admitted component remains deferred to `v0.137.3`.
 
 Verification:
 
@@ -3270,12 +3277,12 @@ Exit criteria:
   protocol crate owns a copy of the quorum algorithm;
 - `v0.60.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.60.1 - Runtime Bound-Condition Assessment And Policy Admission
+### v0.60.1 - Runtime Bound-Condition Assessment
 
 Status: planned.
 
-Goal: distinguish a canonical conditional hard-bound claim from a hard bound
-whose assumptions are currently supported and accepted by engine policy.
+Goal: assess whether the assumptions of a canonical conditional hard-bound
+claim are currently supported without yet granting policy acceptance.
 
 Deliverables:
 
@@ -3311,6 +3318,29 @@ Deliverables:
   source, calibration, oscillator/model, freshness/path-delay, authority,
   diversity/correlation, policy, membership, and lifecycle generations;
   provider callbacks return structured evidence, not `is_true`;
+
+Verification:
+
+- unknown, contradicted, indeterminate, expired, withdrawn, and restored atoms;
+  exhaustive `Atom`/`All`/`Any`/threshold/fault-rule tables; structured support-
+  axis preservation, transitive-leaf retention, configured-assumption honesty,
+  callback re-entry, generation change, and bounded assessment exhaustion.
+
+Exit criteria:
+
+- canonical condition structure and current runtime support are distinct typed
+  states, and no assessment alone grants a hard bound;
+- `v0.60.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.2 - Proof-Bearing Monotonic Correlation Admission
+
+Status: planned.
+
+Goal: admit directed monotonic-domain correlations only from current,
+non-circular numerical proofs and independently valid endpoint domains.
+
+Deliverables:
+
 - engine is the sole owner of
   `AdmittedMonotonicDomainCorrelation` construction. Admission verifies the
   complete `v0.16.0` untrusted candidate, but provider registration is only an
@@ -3356,6 +3386,30 @@ Deliverables:
   scope/migration change, expiry, withdrawal, or generation change invalidates
   the admitted correlation through reserved lifecycle propagation and every
   dependent admission/consensus/publication state before later strict use;
+
+Verification:
+
+- candidate/admitted confusion, provider registration without evidence, forged
+  offset/rate/drift bounds or anchors, missing/substituted proof material,
+  assumption withdrawal, independent endpoint expiry/reset, circular validity,
+  A→B/B→A and longer proof-support cycles, replacement generations, historical
+  restore references, outward rounding, and lifecycle invalidation.
+
+Exit criteria:
+
+- only engine-issued, proof-bearing, acyclic-by-construction directed
+  correlations can translate monotonic values;
+- `v0.60.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.3 - Verified Bound Derivation And Engine Proof Ownership
+
+Status: planned.
+
+Goal: verify complete hard-bound derivations into source-arena-independent,
+non-forgeable engine proof state.
+
+Deliverables:
+
 - a non-forgeable `VerifiedBoundDerivation<T>` proves that the exact claimed
   endpoints follow from admitted inputs before policy can accept the bound. It
   is created only by engine verification of the complete `v0.7.1`–`v0.15.0`
@@ -3389,6 +3443,30 @@ Deliverables:
   foreign/cross-domain handles and geometry-only intervals fail closed. Import
   from persistence/IPC must first atomically reintern the complete unverified
   record into a bounded current arena;
+
+Verification:
+
+- root and derived recomputation, adversarial narrowing, every operation/model/
+  endpoint/rounding substitution, missing/truncated/over-budget DAGs, stale or
+  foreign handles, eviction/import races, source-arena drop before/during/after
+  promotion, no_std engine-store generation faults, and proof identity
+  equivalence.
+
+Exit criteria:
+
+- verified engine proofs are complete, bounded, source-arena-independent, and
+  impossible to construct from geometry, digests, or unresolved records alone;
+- `v0.60.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.4 - Atomic Multi-Root Batch Verification
+
+Status: planned.
+
+Goal: verify several policy-visible roots under one bounded generation snapshot
+without order-selected authority or a successful prefix on global abort.
+
+Deliverables:
+
 - one owned multi-root set may supply several verification inputs through
   independent root views while sharing immutable source DAG storage. A bounded
   admission list maps each policy-visible `BatchMemberId` to a canonical root
@@ -3452,6 +3530,30 @@ Deliverables:
   A caller-side filtered result list, duplicate-root optimization, or failed
   refresh cannot mutate the membership embodied by
   `CompleteBatchVerification`;
+
+Verification:
+
+- canonical root/member permutations, shared DAGs, duplicate roots, shared-node
+  failure fan-out, root-specific evidence isolation, cancellation and global
+  exhaustion after every node/root, snapshot invalidation after every prefix,
+  complete versus aborted type-state, full accounting, original-`n`
+  preservation, and compile-fail `Unprocessed`/complete-witness mixing.
+
+Exit criteria:
+
+- global abort mints no proof/token prefix, and only a fully processed
+  complete-membership witness can leave batch verification;
+- `v0.60.4 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.5 - Batch Admission Validity And Refresh Transactions
+
+Status: planned.
+
+Goal: install non-authoritative admitted membership and report prior-state
+refresh outcomes with fenced, bounded, linearizable transactions.
+
+Deliverables:
+
 - `CompleteBatchVerification` is processed membership/verification state. A
   separate `BatchAdmissionState<T>` binds the exact witness identity/
   generation, every currently accepted member on which that admission-state
@@ -3580,9 +3682,34 @@ Deliverables:
   new complete batch and retiring the prior batch occur at one documented
   engine linearization point after both the new and prior generation vectors
   are rechecked; `PriorStateObservation.stamp` identifies which coverage
-  profile applies. `v0.137.1` implements the
+  profile applies. `v0.137.2` implements the
   corresponding concurrent publication transition and fills its publication
   subject/generation without changing these engine semantics;
+
+Verification:
+
+- admission/batch/consensus identity separation, same- and mixed-domain
+  validity, retained/invalidated/absent observations, exact expiry and
+  unavailable sampling, abort and genuine invalidation, unbounded post-sample
+  preemption, every watermark dependency, in-place non-failing cleanup,
+  supersession, restart, slot/fence/reclamation exhaustion, reader bounds, and
+  `CommitCoveredRefresh` margin edges.
+
+Exit criteria:
+
+- batch admission remains non-authoritative, refresh failure cannot create or
+  extend authority, and guard cleanup cannot fail or permit a stale install;
+- `v0.60.5 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.6 - Policy-Accepted Hard Bounds And Lifecycle
+
+Status: planned.
+
+Goal: construct policy-accepted hard bounds from verified proofs and current
+assessments, then invalidate every downstream consumer when support changes.
+
+Deliverables:
+
 - engine construction either recomputes a root/derived claim or verifies the
   complete bounded derivation with reviewed operation-specific rules and work
   limits; a condition assessment, caller-supplied digest, geometrically
@@ -3650,6 +3777,37 @@ Deliverables:
 - `v0.137.1` later linearizes assessment revalidation with concurrent
   publication; this milestone owns engine assessment/admission but no clock
   publication or discipline authority.
+
+Verification:
+
+- snapshot changes at every capture/evaluate/recheck/issue boundary, upper-edge
+  expiry, callback re-entry, supported-but-policy-rejected inputs, forged/stale/
+  cross-condition tokens, accepted-token cache non-substitution, source-arena
+  independence, verification work crossing expiry, and proof that no mixed or
+  partial assessment/token can issue; withdrawal propagates through consensus,
+  leap, servo, estimator, holdover, proposal, publication, and synchronized
+  status.
+
+Exit criteria:
+
+- only an opaque engine token binding the exact verified derivation, current
+  assessment, policy, support, generations, and deadline can represent an
+  accepted hard bound;
+- `v0.60.6 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.60.7 - Engine Admission And Refresh Security Gate
+
+Status: planned.
+
+Goal: integrate and adversarially verify runtime assessment, proof ownership,
+batch verification, correlation admission, policy acceptance, and refresh
+transactions before clustering consumes them.
+
+Deliverables:
+
+- one bounded integration surface covering `v0.60.1` through `v0.60.6`,
+  preserving every type-state, identity, dependency, resource, concurrency,
+  and invalidation boundary without a convenience bypass.
 
 Verification:
 
@@ -3802,7 +3960,7 @@ Exit criteria:
   one another; pre-consensus admission state has no time authority, aggregate
   deadlines are conservative in one domain, and no unavailable observation can
   retain or mint state;
-- `v0.60.1 implementation stop reached. Run pentest for this exact commit.`
+- `v0.60.7 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.61.0 - Generic Clustering Combining And Diversity
 
@@ -3817,7 +3975,7 @@ Deliverables:
   output over generic observations, preserving the exact canonical condition
   and reviewed derivation report from `v0.60.0`;
 - trusted survivor/combined hard-bound paths consume only current
-  `v0.60.1` `PolicyAcceptedHardBound` values and propagate the accepted
+  `v0.60.6` `PolicyAcceptedHardBound` values and propagate the accepted
   derivation identity, condition/assessment generation, and support-basis
   report; conditional claims remain available only through explicit diagnostic
   results;
@@ -3922,12 +4080,12 @@ Deliverables:
   identifier/hash, exact evidence set or digest, authority, policy and
   membership generations, evidence and decision generations, the exact
   `v0.7.2` canonical condition/`BoundAssumptionsId` and derivation report,
-  current `v0.60.1` verified-bound-derivation, condition-assessment, and
-  accepted-bound identities and generations, support-basis report, non-claims,
-  expiry, and the expiry's full `MonotonicClockId`;
+  current `v0.60.1` condition-assessment, `v0.60.3` verified-bound-derivation,
+  and `v0.60.6` accepted-bound identities and generations, support-basis report,
+  non-claims, expiry, and the expiry's full `MonotonicClockId`;
 - the handoff exposes bounded activation revalidation but no raw constructor;
   no model installation or concurrent publication occurs here, and
-  `v0.137.1` is the only default-clock consumer.
+  `v0.137.3` is the only default-clock consumer.
 
 Verification:
 
@@ -6639,7 +6797,7 @@ Deliverables:
 
 - normalization and uncertainty expansion feeding the existing
   `v0.60.0`–`v0.61.0` engine quorum/condition-assessment/clustering/combining
-  primitives, including `v0.60.1` policy acceptance, with no second
+  primitives, including `v0.60.6` policy acceptance, with no second
   intersection, assessment/admission, falseticker, clustering, or combining
   implementation;
 - cross-protocol correlation groups, supported interval,
@@ -6670,7 +6828,7 @@ Deliverables:
   replace used contributors with unused survivors or recompute only a deadline
   while retaining the old authority identity;
 - multi-root orchestration claiming one admitted source set consumes the exact
-  `v0.60.1` `CompleteBatchVerification` membership witness. Aborted batches,
+  `v0.60.4` `CompleteBatchVerification` membership witness. Aborted batches,
   successful prefixes, and caller-filtered result iterators cannot silently
   shrink `n`, remove a failed member, or enter consensus as a complete set.
   Only current accepted-bound members contribute intervals/votes; all other
@@ -6733,7 +6891,7 @@ Deliverables:
 - PLL phase/frequency state and proposal output;
 - interval-valued input, saturating anti-windup control, phase/frequency
   limits, panic thresholds, startup/recovery, and generation-aware reset;
-- hard-bound servo input requires the current `v0.60.1`
+- hard-bound servo input requires the current `v0.60.6`
   `PolicyAcceptedHardBound`; verified-derivation or assessment
   loss/expiry/withdrawal invalidates the input and resets or faults accumulated
   state before another proposal;
@@ -6950,7 +7108,7 @@ Goal: provide a monotonic application clock with civil correlation.
 Deliverables:
 
 - synchronized/rough/holdover/ahead/frozen/catching-down/faulted state model,
-  with detailed ahead recovery completed at `v0.137.3`;
+  with detailed ahead recovery completed at `v0.137.7`;
 - `TimeEstimate` with earliest/latest, optional policy-approved preferred
   estimate, scale/realization, resolution, uncertainty, monotonic correlation,
   freshness/holdover age, separate authentication/integrity/traceability,
@@ -6992,7 +7150,7 @@ Deliverables:
 - common secure persistence and restart bootstrap boundary;
 - one logically consistent instant/uncertainty/scale-model/source-set/
   generation snapshot contract, with the concurrent publication mechanism
-  completed in `v0.137.1`.
+  completed in `v0.137.5`.
 
 Verification:
 
@@ -7006,19 +7164,19 @@ Verification:
   receipt without a false through-return claim, unavailable/expired/violated
   WCET capability, completion-margin boundaries, monotonic read failure/reset/
   domain mismatch, and fail-closed diagnostics;
-  multi-reader publication/interleavings remain `v0.137.1`.
+  multi-reader publication/interleavings remain `v0.137.5`.
 
 Exit criteria:
 
 - applications can read trusted time without a network request per event;
 - `v0.137.0 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.137.1 - Concurrent Snapshot Publication
+### v0.137.1 - Trusted Snapshot Identity And Atomic Publication
 
 Status: planned.
 
-Goal: publish TrustedClock estimates and observation lifecycle changes without
-torn logical snapshots or unbounded reader latency.
+Goal: define the immutable trusted-snapshot identity and atomic publication
+preconditions before adding concurrent refresh machinery.
 
 Deliverables:
 
@@ -7051,6 +7209,29 @@ Deliverables:
   support leaf transitively backed by an admitted or historical correlation,
   including a reference restored after replacement. Otherwise publication
   fails typed; raw cross-domain comparison is forbidden;
+
+Verification:
+
+- accepted/raw type confusion, snapshot/consensus/batch identity substitution,
+  proof-support replacement, same- and mixed-domain validity, exact earliest-
+  edge translation, correlation proof/condition/anchor/endpoint substitution,
+  and atomic precommit generation/deadline recheck.
+
+Exit criteria:
+
+- one immutable published snapshot binds a complete current authority and
+  cannot mix fields or dependencies from distinct logical generations;
+- `v0.137.1 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.2 - Concurrent Refresh Publication Linearization
+
+Status: planned.
+
+Goal: publish complete refresh replacements with bounded readers and fenced
+writers under arbitrary post-sample preemption.
+
+Deliverables:
+
 - concurrent batch refresh publishes a new `CompleteBatchVerification` and
   retires the prior batch/snapshot at one linearization point after rechecking
   both generation vectors. A non-invalidating cancellation, capacity, or
@@ -7065,7 +7246,7 @@ Deliverables:
   invalidation generation/reason, engine generation, and this commit's
   publication generation. A batch or consensus subject cannot substitute for
   the published subject;
-- concurrent publication implements both `v0.60.1` refresh profiles.
+- concurrent publication implements both `v0.60.5` refresh profiles.
   `LinearizationRefresh` is required on general hosted platforms: a versioned
   reservation hides the in-progress generation, the exact-domain monotonic
   sample is the logical publication point, and arbitrary post-sample
@@ -7112,11 +7293,35 @@ Deliverables:
   failure returns expired/diagnostic state without waiting for a writer.
   The documented read linearization/order prevents a cached pre-expiry label
   from surviving expiry or being paired with another publication generation;
+
+Verification:
+
+- retained/invalidated/absent replacement interleavings, every watermark
+  mutation, arbitrary post-sample preemption, in-place guard cleanup and fault
+  fallback, supersession/restart/reclamation/fence exhaustion, bounded reader
+  retry, exact deadline straddling, and `CommitCoveredRefresh` capability and
+  margin edges.
+
+Exit criteria:
+
+- readers see current, in-progress, or typed-fault state within a bound, and no
+  delayed or failed writer can overwrite a newer publication or invalidation;
+- `v0.137.2 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.3 - Multi-Component Admitted State Publication
+
+Status: planned.
+
+Goal: atomically publish leap, EOP, scale-offset, conversion-context, and clock
+state only from their matching current engine admission proofs.
+
+Deliverables:
+
 - concurrent publication consumes only an engine-issued
   `AdmittedLeapCandidate`; immediately before commit it atomically rechecks
   candidate/evidence/authority/policy/membership/decision generations, expiry
   in its exact monotonic domain, replacement/withdrawal state, and its bound
-  condition's current `v0.60.1` policy acceptance;
+  condition's current `v0.60.6` policy acceptance;
 - EOP and external scale-offset publication accepts only the matching
   `v0.52.3` opaque `AdmittedEopSnapshot` or
   `AdmittedScaleOffsetSnapshot` proof and atomically rechecks every bound
@@ -7142,6 +7347,29 @@ Deliverables:
 - clarifies that `v0.12.1` atomicity was only a single-thread transactional
   generation replacement, while this milestone supplies concurrent-reader
   visibility and ordering;
+
+Verification:
+
+- old/new/raw/admitted leap, EOP, and scale-offset proofs; retrieval, integrity,
+  platform-trust, authority, policy, rollback, withdrawal, expiry, conversion-
+  context, and clock-snapshot substitutions at every precommit boundary; no
+  reader observes mixed component generations.
+
+Exit criteria:
+
+- concurrent publication cannot bypass an engine admission proof or expose a
+  partially replaced time-data and clock state;
+- `v0.137.3 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.4 - Hosted Publication Concurrency Engineering
+
+Status: planned.
+
+Goal: bound hosted publication synchronization, callbacks, queues, memory
+ordering, retries, placement assumptions, and reader latency.
+
+Deliverables:
+
 - explicit `Send`/`Sync` policy for every public engine/provider type;
 - bounded queues and cancellation/invalidation ordering with withdrawals
   reserved from silent loss;
@@ -7152,6 +7380,31 @@ Deliverables:
 - documented cache-line layout/false-sharing controls, bounded reader retry
   count and failure outcome, CPU migration assumptions/detection, and
   per-core/socket/NUMA placement conditions for every HFT-oriented claim.
+
+Verification:
+
+- Loom/Shuttle models for ordering, queue/cancellation/invalidation, callback
+  re-entry, bounded retry, migration, false sharing, contention, starvation,
+  and per-core/cross-core/cross-NUMA latency limits.
+
+Exit criteria:
+
+- hosted concurrency has explicit memory-ordering, callback, progress, and
+  latency contracts with bounded failure outcomes;
+- `v0.137.4 implementation stop reached. Run pentest for this exact commit.`
+
+### v0.137.5 - Concurrent Publication Security Gate
+
+Status: planned.
+
+Goal: integrate the trusted snapshot, refresh linearization, admitted component
+publication, and hosted concurrency contracts under adversarial schedules.
+
+Deliverables:
+
+- one bounded integration surface covering `v0.137.1` through `v0.137.4`
+  without weakening any identity, admission, validity, progress, or
+  invalidation rule.
 
 Verification:
 
@@ -7219,9 +7472,9 @@ Verification:
 Exit criteria:
 
 - no reader can observe fields from different logical clock generations;
-- `v0.137.1 implementation stop reached. Run pentest for this exact commit.`
+- `v0.137.5 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.137.2 - no_std Concurrency Profiles
+### v0.137.6 - no_std Concurrency Profiles
 
 Status: planned.
 
@@ -7270,9 +7523,9 @@ Exit criteria:
 
 - every `no_std` concurrency claim names its atomic/critical-section/ISR model
   and bounded timing behavior;
-- `v0.137.2 implementation stop reached. Run pentest for this exact commit.`
+- `v0.137.6 implementation stop reached. Run pentest for this exact commit.`
 
-### v0.137.3 - Honest Virtual Clock Ahead Recovery
+### v0.137.7 - Honest Virtual Clock Ahead Recovery
 
 Status: planned.
 
@@ -7310,7 +7563,7 @@ Exit criteria:
 
 - monotonic application behavior never forces the truth-seeking estimate or
   synchronization label to preserve a known-false future value;
-- `v0.137.3 implementation stop reached. Run pentest for this exact commit.`
+- `v0.137.7 implementation stop reached. Run pentest for this exact commit.`
 
 ### v0.138.0 - Easy Blocking APIs
 
@@ -7406,7 +7659,7 @@ Deliverables:
   derivation nodes are shared; queue/root count, retained unique bytes/nodes,
   and work remain explicit, and removal compacts only through the fallible new-
   owner operation;
-- cancelling a queued `v0.60.1` verification batch uses its global-abort
+- cancelling a queued `v0.60.4` verification batch uses its global-abort
   contract: no authoritative prefix escapes through an already-ready future or
   wake race, every member remains diagnosable as `Indeterminate` or
   `Unprocessed`, and only `CompleteBatchVerification` may enter
@@ -7577,7 +7830,7 @@ Deliverables:
   `UnverifiedBoundDerivationRecord`, while assessments/accepted-bound tokens
   decode as historical evidence or unresolved references only; receiving
   engines resolve and completely reverify recipes against current inputs,
-  rule registries, models, source/lifecycle generations, and exact `v0.60.1`
+  rule registries, models, source/lifecycle generations, and exact `v0.60.6`
   policy/evidence/generation/deadline state before granting authority.
   C/WASM/language bindings cannot construct verified derivations or accepted
   tokens, and the opaque verified type has no direct deserialize path;

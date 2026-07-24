@@ -1266,17 +1266,24 @@ leak into stable surfaces.
 The July 2026 gap reviews strengthen the existing roadmap without replacing
 its broader pre-1.0 completeness contract:
 
+The final internal audit after gap closure found no missing functional or
+security ownership. It did find two oversized implementation stops, now split
+into `v0.60.1`–`v0.60.7` and `v0.137.1`–`v0.137.7`. A repository check enforces
+the 16-deliverable/180-line ceiling for every milestone; the numerical ceiling
+never overrides the requirement to split independently reviewable work sooner.
+
 | Concern | Owning versions |
 | --- | --- |
+| Machine-enforced small implementation and pentest passes | every milestone; split engine admission `v0.60.1`–`v0.60.7`; split publication/no_std/recovery `v0.137.1`–`v0.137.7` |
 | TAI-origin atomic instants, wide math, rational residuals, TAI/UTC mapping | `v0.5.0`, `v0.7.0`, `v0.9.0`, `v0.12.0`, gate `v0.17.0` |
-| Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.1`, gate `v0.148.0` |
-| Typed monotonic domains, proof-bearing directed correlation candidates with immutable capture anchors, outward-rounded direct translation, independently checked endpoint validity, initial acyclic-by-construction rejection of every transitive admitted/historical-correlation proof dependency, platform measurement, opaque snapshot-consistent engine admission, and execution lifecycle generations | kernel `v0.16.0`; audit `v0.17.0`; lifecycle `v0.23.1`; traits/platform `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; admission `v0.60.1`; consumers `v0.61.0`, `v0.133.0`, `v0.137.1`; schema `v0.140.1`; final gates `v0.148.0`, `v0.160.0`–`v0.161.0`, `v0.163.0`, `v0.166.0` |
+| Layered leap representation/candidate/evidence/engine/publication admission | `v0.12.0`–`v0.12.1`, `v0.15.2`, `v0.61.1`, `v0.137.3`, gate `v0.148.0` |
+| Typed monotonic domains, proof-bearing directed correlation candidates with immutable capture anchors, outward-rounded direct translation, independently checked endpoint validity, initial acyclic-by-construction rejection of every transitive admitted/historical-correlation proof dependency, platform measurement, opaque snapshot-consistent engine admission, and execution lifecycle generations | kernel `v0.16.0`; audit `v0.17.0`; lifecycle `v0.23.1`; traits/platform `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; admission `v0.60.2`; consumers `v0.61.0`, `v0.133.0`, `v0.137.1`; schema `v0.140.1`; final gates `v0.148.0`, `v0.160.0`–`v0.161.0`, `v0.163.0`, `v0.166.0` |
 | Immutable scale contexts, split scale families, POSIX/smear | `v0.11.0`–`v0.13.0`, gate `v0.17.0` |
 | Canonical structural identity, lifetime-branded nonwrapping arena handles, single/multi-root borrowed-to-owned claim promotion, explicit geometry/claim/fallible-derivation equality, bounded non-authoritative claim recipes, logical hard-bound conditions, untrusted-reference/recipe resolution, source-arena-independent verified claim derivation with one explicit kind-safe engine-store handle/view model, disjoint complete-versus-aborted batch status type-state, non-authoritative batch admission versus consensus authority, original-membership versus exact proof-support quorum accounting, fenced RAII version-reserved linearization versus commit-covered prior-state refresh, structured support-basis axes, runtime assessment/policy admission, richer uncertainty, withdrawals | identity `v0.6.1`; claims/recipes/ownership `v0.7.1`–`v0.15.1`; foundation gate `v0.17.0`; lifecycle `v0.23.1`; schema/persistence/builders `v0.22.1`, `v0.39.1`, `v0.140.0`–`v0.140.1`; engine `v0.60.0`–`v0.61.0`; consumers/publication `v0.133.0`–`v0.144.0` |
 | no-alloc formatting and common error taxonomy | `v0.16.1`–`v0.16.2`, gate `v0.17.0` |
 | Type-state, bounded schema/tag registry, crypto kernels, work budgets | `v0.22.0`–`v0.25.0`, gate `v0.29.0` |
 | Runtime capability, discipline ownership/persistence/helper contracts | `v0.30.0`–`v0.40.0`, feedback `v0.134.4`, helper `v0.142.0`, final review `v0.161.0` |
-| Hosted time-data providers, serialized commit, independent trust, retrieval versus integrity/platform-trust evidence versus source authorization, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.1`, product gate `v0.148.0` |
+| Hosted time-data providers, serialized commit, independent trust, retrieval versus integrity/platform-trust evidence versus source authorization, typed admission, concurrent publication | `v0.52.0`–`v0.52.3`, publication `v0.137.3`, product gate `v0.148.0` |
 | Normative dependency closure and conformance vocabulary | `v0.2.0`, final review `v0.165.0` |
 | Per-source requirement and test evidence enforcement | `v0.3.0`, every common gate |
 | Documented non-GNSS vendor extensions | `v0.53.0`–`v0.53.1`, final review `v0.165.0` |
@@ -1286,7 +1293,7 @@ its broader pre-1.0 completeness contract:
 | PTP revision admission, stable security, trust boundary, measured accuracy | `v0.91.0`–`v0.108.0` |
 | Deterministic industrial/automotive safety non-claims | `v0.109.0`–`v0.125.0` |
 | Cross-family generations, split bounded servos, actuation feedback, holdover | `v0.133.0`–`v0.136.0` |
-| Conservative provider-owned monotonic-read intervals, WCET-free fenced/RAII version-reserved refresh linearization with explicit watermark/supersession/restart/reclamation, allocation-free non-panicking in-place tombstone cleanup that cannot exhaust, and async no-Pending rules versus optional commit-covered refresh, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; lifecycle `v0.23.1`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; issuance `v0.60.1`; reads/facades `v0.137.0`–`v0.145.0`; final gates `v0.148.0`, `v0.160.0`, `v0.163.0`, `v0.166.0` |
+| Conservative provider-owned monotonic-read intervals, WCET-free fenced/RAII version-reserved refresh linearization with explicit watermark/supersession/restart/reclamation, allocation-free non-panicking in-place tombstone cleanup that cannot exhaust, and async no-Pending rules versus optional commit-covered refresh, TrustedClock upper-edge deadline/domain enforcement, hosted/no_std concurrency, honest ahead recovery, schema/facade/bindings | primitive `v0.16.0`; lifecycle `v0.23.1`; traits/platforms `v0.24.0`, `v0.30.0`, `v0.37.0`–`v0.38.2`; engine refresh `v0.60.5`; reads/publication `v0.137.0`–`v0.137.7`; facades/bindings `v0.138.0`–`v0.145.0`; final gates `v0.148.0`, `v0.160.0`, `v0.163.0`, `v0.166.0` |
 | Frozen helper ceiling/audit types, daemon, config, observability | `v0.39.3`, `v0.142.0`, `v0.146.0`–`v0.148.0` |
 | Unsafe, targets, reproducibility, signed review closure | `v0.158.0`–`v1.0.0` |
 

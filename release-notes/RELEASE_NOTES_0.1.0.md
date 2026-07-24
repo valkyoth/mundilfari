@@ -46,6 +46,17 @@ clock servo, hardware timestamp, or privileged clock adjustment.
 - Dependency-last roadmap ordering: all Navheim-independent protocols,
   engines, servos, and applications precede the final Navheim integration and
   CGGTTS feature phase.
+- A final internal roadmap audit found no missing functional, security,
+  platform, no_std, documentation, Navheim-ordering, or pre-1.0 admission
+  requirement. It did identify two implementation stops that had accumulated
+  too much independently testable work.
+- The engine admission work is now `v0.60.1`–`v0.60.7`; concurrent publication
+  is `v0.137.1`–`v0.137.5`; no_std publication and ahead recovery follow as
+  `v0.137.6`–`v0.137.7`. Each version has its own verification and pentest exit.
+- A tested size validator now rejects milestones above 16 top-level
+  deliverables or 180 lines. The ceiling applies equally to integration,
+  security, and freeze gates and does not permit dense prose to hide separable
+  responsibilities.
 - Integrated architecture-review gaps into explicit existing versions without
   reducing the stable-protocol completeness contract, including rational
   conversion evidence, runtime capability truth, consensus fault assumptions,
@@ -108,18 +119,20 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   `ArtifactIntegrityEvidence` independent from configured source authorization,
   with separate `ConfiguredPlatformTrustEvidence` for non-cryptographic OS
   trust.
-- Runtime trust hardening added `v0.60.1`: canonical conditions remain
-  conditional until current evidence is assessed and accepted by engine policy.
+- Runtime trust hardening added `v0.60.1`–`v0.60.7`: canonical conditions
+  remain conditional until current evidence is assessed, derivations are
+  verified, and the bound is accepted by engine policy.
   An opaque `PolicyAcceptedHardBound` gates consensus, leap admission, servo/
   estimator/holdover state, proposals, synchronized publication, and strict
   facade operations, while diagnostics expose status, reasons, assurance,
   deadline, and non-claims without an `is_trusted` boolean.
-- The same milestone now requires an opaque engine-verified derivation binding
+- The `v0.60.3` and `v0.60.6` milestones require an opaque engine-verified
+  derivation binding
   exact claim endpoints to root observations or every derived operation,
   rounding rule, model generation, condition, and input digest. Atom assessment
   preserves structured support basis, and assessment/acceptance issuance uses
   one snapshot-consistent generation transaction.
-- `v0.137.0`–`v0.137.1` now require every strict virtual-clock read to enforce
+- `v0.137.0`–`v0.137.5` now require every strict virtual-clock read to enforce
   the accepted deadline in its exact monotonic domain, including idle expiry,
   timer starvation, suspend/resume, reset, and domain-failure cases.
 - Derivation inputs are now retained from their true owners: `v0.7.1` creates
@@ -150,7 +163,7 @@ clock servo, hardware timestamp, or privileged clock adjustment.
   storage remains explicit and checked. Returned clocks, `'static` tasks, and
   C/JNI/Swift contexts receive explicit non-self-referential ownership and
   destruction tests.
-- `v0.60.1` now defines deterministic multi-root verification rather than
+- `v0.60.4` now defines deterministic multi-root verification rather than
   leaving partial failure to implementations. Canonical member order, one
   bounded snapshot, shared-node failure fan-out, root-local evidence isolation,
   complete accounting, and a typed complete-membership witness prevent
